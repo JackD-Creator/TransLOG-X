@@ -41,27 +41,23 @@ watchEffect(() => { if (user.value) router.push('/dashboard') })
   <div class="min-h-screen flex">
 
     <!-- Left panel — branding -->
-    <div class="hidden lg:flex lg:w-1/2 bg-primary-600 dark:bg-primary-700 flex-col justify-between p-12 relative overflow-hidden">
-      <!-- Background pattern -->
-      <div class="absolute inset-0 opacity-10">
-        <div v-for="i in 6" :key="i"
-          class="absolute rounded-full border border-white"
-          :style="{
-            width: `${i * 120}px`, height: `${i * 120}px`,
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)'
-          }"
-        />
-      </div>
+    <div class="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden">
+      <!-- Background image -->
+      <div
+        class="absolute inset-0 bg-cover bg-center"
+        style="background-image: url('/bg-login.jpg')"
+      />
+      <!-- Dark overlay for text readability -->
+      <div class="absolute inset-0 bg-gradient-to-br from-gray-950/90 via-red-950/70 to-gray-900/85" />
 
       <!-- Logo -->
       <div class="relative z-10 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+        <div class="w-10 h-10 rounded-xl bg-red-600/80 flex items-center justify-center">
           <UIcon name="i-lucide-zap" class="text-white text-xl" />
         </div>
         <div>
           <p class="font-bold text-white text-lg leading-none">TransLOG-X</p>
-          <p class="text-primary-200 text-xs">AI E-Logistics Platform</p>
+          <p class="text-red-300 text-xs">AI E-Logistics Platform</p>
         </div>
       </div>
 
@@ -70,7 +66,7 @@ watchEffect(() => { if (user.value) router.push('/dashboard') })
         <h1 class="text-4xl font-bold text-white leading-tight">
           Platform Logistik<br>Rumah Sakit<br>Berbasis AI
         </h1>
-        <p class="text-primary-200 text-base leading-relaxed max-w-sm">
+        <p class="text-red-100/80 text-base leading-relaxed max-w-sm">
           Kelola pengadaan, inventori, keuangan, dan klaim BPJS dalam satu platform terintegrasi.
         </p>
 
@@ -80,7 +76,7 @@ watchEffect(() => { if (user.value) router.push('/dashboard') })
             { value: '17', label: 'Modul' },
             { value: '760+', label: 'Fitur' },
             { value: '94K+', label: 'Katalog KFA' }
-          ]" :key="stat.label" class="bg-white/10 rounded-xl p-3 text-center">
+          ]" :key="stat.label" class="bg-red-900/40 border border-red-700/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-white">{{ stat.value }}</p>
             <p class="text-xs text-primary-200 mt-0.5">{{ stat.label }}</p>
           </div>
@@ -89,11 +85,11 @@ watchEffect(() => { if (user.value) router.push('/dashboard') })
 
       <!-- Entities row -->
       <div class="relative z-10">
-        <p class="text-primary-300 text-xs mb-3 uppercase tracking-widest font-medium">Platform untuk</p>
+        <p class="text-red-300 text-xs mb-3 uppercase tracking-widest font-medium">Platform untuk</p>
         <div class="flex flex-wrap gap-2">
           <span v-for="e in ['Rumah Sakit', 'Mitra KSM', 'Supplier / PBF', 'Bank / Fintech', 'Distributor']"
             :key="e"
-            class="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-medium"
+            class="px-3 py-1 rounded-full bg-red-900/50 border border-red-700/40 text-white text-xs font-medium"
           >{{ e }}</span>
         </div>
       </div>
@@ -105,7 +101,7 @@ watchEffect(() => { if (user.value) router.push('/dashboard') })
 
         <!-- Mobile logo -->
         <div class="lg:hidden flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center">
+          <div class="w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center">
             <UIcon name="i-lucide-zap" class="text-white" />
           </div>
           <div>

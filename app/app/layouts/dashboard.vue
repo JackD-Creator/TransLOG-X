@@ -54,7 +54,7 @@ async function logout() {
 
       <!-- Logo -->
       <div class="flex items-center gap-2.5 px-5 py-4 border-b border-gray-200 dark:border-gray-800">
-        <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center flex-shrink-0">
+        <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center flex-shrink-0">
           <UIcon name="i-lucide-zap" class="text-white text-lg" />
         </div>
         <div class="min-w-0">
