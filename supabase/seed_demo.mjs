@@ -11,8 +11,12 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false }
 });
 
+// Ganti dengan email akun Supabase yang sudah ada
+// atau jalankan: node supabase/seed_demo.mjs your@email.com
+const DEMO_EMAIL_ARG = process.argv[2]
+
 const DEMO = {
-  email:    'demo@translogx.id',
+  email:    DEMO_EMAIL_ARG || 'demo@translogx.id',
   password: 'Demo1234!',
   tenant: {
     name:       'RS Umum Demo',
@@ -62,10 +66,9 @@ async function seed() {
 
   if (existing) {
     userId = existing.id;
-    // Update password in case it changed
-    await supabase.auth.admin.updateUserById(userId, { password: DEMO.password });
-    console.log('⏭️  Auth user already exists:', userId);
+    console.log('⏭️  Auth user found:', userId, `(${DEMO.email})`);
   } else {
+    // Buat user baru jika belum ada
     const { data: authUser, error: aErr } = await supabase.auth.admin.createUser({
       email: DEMO.email,
       password: DEMO.password,
