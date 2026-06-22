@@ -3,6 +3,7 @@
 .env.local
 .env.*.local
 *.env
+app/.env*
 
 # Dependencies
 node_modules/
