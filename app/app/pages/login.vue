@@ -5,21 +5,22 @@ const supabase = useSupabaseClient()
 const router   = useRouter()
 
 const form = reactive({ email: '', password: '' })
-const loading = ref(false)
-const error   = ref('')
+const loading  = ref(false)
+const errorMsg = ref('')
+const showPwd  = ref(false)
 
 async function login() {
-  error.value   = ''
-  loading.value = true
+  loading.value  = true
+  errorMsg.value = ''
   try {
-    const { error: err } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email:    form.email,
       password: form.password
     })
-    if (err) throw err
+    if (error) throw error
     await router.push('/dashboard')
   } catch (e: any) {
-    error.value = e.message === 'Invalid login credentials'
+    errorMsg.value = e.message === 'Invalid login credentials'
       ? 'Email atau password salah.'
       : e.message
   } finally {
@@ -32,170 +33,175 @@ function fillDemo() {
   form.password = 'Demo1234!'
 }
 
-// Redirect if already logged in
 const user = useSupabaseUser()
 watchEffect(() => { if (user.value) router.push('/dashboard') })
 </script>
 
 <template>
-  <div class="min-h-screen flex">
+  <div class="login-page min-h-screen flex items-center justify-center relative overflow-hidden">
 
-    <!-- Left panel — branding -->
-    <div class="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden">
-      <!-- Background image -->
-      <div
-        class="absolute inset-0 bg-cover bg-center"
-        style="background-image: url('/bg-login.jpg')"
-      />
-      <!-- Dark overlay for text readability -->
-      <div class="absolute inset-0 bg-gradient-to-br from-gray-950/90 via-red-950/70 to-gray-900/85" />
+    <!-- Hexagon SVG grid (same as TransCPR-X, stroke changed to dark red) -->
+    <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="hexgrid" x="0" y="0" width="70" height="120" patternUnits="userSpaceOnUse">
+          <polygon points="35,0 70,20 70,60 35,80 0,60 0,20"          fill="none" stroke="#4a1010" stroke-width="1"/>
+          <polygon points="0,60 35,80 35,120 0,140 -35,120 -35,80"    fill="none" stroke="#4a1010" stroke-width="1"/>
+          <polygon points="70,60 105,80 105,120 70,140 35,120 35,80"  fill="none" stroke="#4a1010" stroke-width="1"/>
+          <polygon points="0,-60 35,-40 35,0 0,20 -35,0 -35,-40"      fill="none" stroke="#4a1010" stroke-width="1"/>
+          <polygon points="70,-60 105,-40 105,0 70,20 35,0 35,-40"    fill="none" stroke="#4a1010" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#hexgrid)"/>
+    </svg>
 
-      <!-- Logo -->
-      <div class="relative z-10 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-red-600/80 flex items-center justify-center">
-          <UIcon name="i-lucide-zap" class="text-white text-xl" />
-        </div>
-        <div>
-          <p class="font-bold text-white text-lg leading-none">TransLOG-X</p>
-          <p class="text-red-300 text-xs">AI E-Logistics Platform</p>
-        </div>
-      </div>
+    <!-- Content -->
+    <div class="relative z-10 w-full max-w-5xl mx-auto px-8 flex items-center min-h-screen gap-16">
 
-      <!-- Hero text -->
-      <div class="relative z-10 space-y-6">
-        <h1 class="text-4xl font-bold text-white leading-tight">
-          Platform Logistik<br>Rumah Sakit<br>Berbasis AI
+      <!-- Left: Branding -->
+      <div class="flex-1 hidden md:block">
+        <h1 class="text-5xl font-bold tracking-wide mb-3">
+          <span class="text-white">Trans</span><span style="color:#f97316">LOG-X</span>
         </h1>
-        <p class="text-red-100/80 text-base leading-relaxed max-w-sm">
-          Kelola pengadaan, inventori, keuangan, dan klaim BPJS dalam satu platform terintegrasi.
+        <p class="text-xs font-semibold tracking-[0.3em] uppercase mb-5" style="color:#e53e3e">
+          AI-Driven E-Logistic Management Platform
         </p>
-
-        <!-- Stats -->
-        <div class="grid grid-cols-3 gap-4 pt-4">
-          <div v-for="stat in [
-            { value: '17', label: 'Modul' },
-            { value: '760+', label: 'Fitur' },
-            { value: '94K+', label: 'Katalog KFA' }
-          ]" :key="stat.label" class="bg-red-900/40 border border-red-700/30 rounded-xl p-3 text-center">
-            <p class="text-2xl font-bold text-white">{{ stat.value }}</p>
-            <p class="text-xs text-primary-200 mt-0.5">{{ stat.label }}</p>
-          </div>
-        </div>
+        <div style="width:48px; height:2px; background:#dc2626; margin-bottom:20px" />
+        <p style="color:rgba(220,180,180,0.65); font-size:0.9rem">
+          Medical &amp; Equipment Supply Chain Ecosystem
+        </p>
       </div>
 
-      <!-- Entities row -->
-      <div class="relative z-10">
-        <p class="text-red-300 text-xs mb-3 uppercase tracking-widest font-medium">Platform untuk</p>
-        <div class="flex flex-wrap gap-2">
-          <span v-for="e in ['Rumah Sakit', 'Mitra KSM', 'Supplier / PBF', 'Bank / Fintech', 'Distributor']"
-            :key="e"
-            class="px-3 py-1 rounded-full bg-red-900/50 border border-red-700/40 text-white text-xs font-medium"
-          >{{ e }}</span>
-        </div>
-      </div>
-    </div>
+      <!-- Right: Card -->
+      <div class="lc-card">
+        <h2 class="text-2xl font-bold mb-6">Login</h2>
 
-    <!-- Right panel — form -->
-    <div class="flex-1 flex items-center justify-center p-8 bg-white dark:bg-gray-950">
-      <div class="w-full max-w-sm space-y-8">
-
-        <!-- Mobile logo -->
-        <div class="lg:hidden flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center">
-            <UIcon name="i-lucide-zap" class="text-white" />
-          </div>
-          <div>
-            <p class="font-bold text-gray-900 dark:text-white">TransLOG-X</p>
-            <p class="text-xs text-gray-400">AI E-Logistics Platform</p>
-          </div>
-        </div>
-
-        <!-- Heading -->
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Masuk ke akun Anda</h2>
-          <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-            Belum punya akun?
-            <NuxtLink to="/register" class="text-primary-600 dark:text-primary-400 font-medium hover:underline">
-              Daftar sekarang
-            </NuxtLink>
-          </p>
-        </div>
-
-        <!-- Demo badge -->
-        <UAlert
-          color="info"
-          variant="soft"
-          icon="i-lucide-info"
-          title="Akun Demo Tersedia"
-          description="Gunakan akun demo untuk mencoba semua fitur platform."
-        >
-          <template #description>
-            <span class="text-xs">Gunakan akun demo untuk mencoba semua fitur platform.</span>
-            <UButton size="xs" variant="soft" color="info" class="mt-2 w-full" @click="fillDemo">
-              Isi otomatis akun demo
-            </UButton>
-          </template>
-        </UAlert>
-
-        <!-- Error -->
-        <UAlert
-          v-if="error"
-          color="error"
-          variant="soft"
-          icon="i-lucide-circle-alert"
-          :title="error"
-        />
-
-        <!-- Form -->
         <form class="space-y-5" @submit.prevent="login">
-          <UFormField label="Email" name="email">
-            <UInput
+          <div>
+            <label class="lc-label">Email</label>
+            <input
               v-model="form.email"
               type="email"
-              placeholder="nama@rumahsakit.id"
-              autocomplete="email"
-              size="lg"
-              class="w-full"
+              placeholder="admin@rumahsakit.id"
+              :disabled="loading"
+              class="lc-input"
               required
-            />
-          </UFormField>
-
-          <UFormField label="Password" name="password">
-            <UInput
-              v-model="form.password"
-              type="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              size="lg"
-              class="w-full"
-              required
-            />
-          </UFormField>
-
-          <div class="flex items-center justify-between">
-            <UCheckbox label="Ingat saya" name="remember" />
-            <NuxtLink to="/forgot-password" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
-              Lupa password?
-            </NuxtLink>
+            >
           </div>
 
-          <UButton
-            type="submit"
-            size="lg"
-            class="w-full justify-center"
-            :loading="loading"
-            :disabled="loading"
-          >
+          <div>
+            <label class="lc-label">Password</label>
+            <div class="relative">
+              <input
+                v-model="form.password"
+                :type="showPwd ? 'text' : 'password'"
+                placeholder="••••••••"
+                :disabled="loading"
+                class="lc-input pr-11"
+                required
+              >
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2"
+                style="color:rgba(220,150,150,0.5)"
+                @click="showPwd = !showPwd"
+              >
+                <UIcon :name="showPwd ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'" class="w-5 h-5" />
+              </button>
+            </div>
+            <div class="flex justify-end mt-1.5">
+              <NuxtLink to="/forgot-password" class="text-xs" style="color:#f97316">
+                Lupa Password?
+              </NuxtLink>
+            </div>
+          </div>
+
+          <p v-if="errorMsg" class="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+            {{ errorMsg }}
+          </p>
+
+          <button type="submit" :disabled="loading" class="lc-btn">
             {{ loading ? 'Memproses...' : 'Masuk' }}
-          </UButton>
+          </button>
         </form>
 
-        <!-- Footer -->
-        <p class="text-center text-xs text-gray-400 dark:text-gray-600">
-          © {{ new Date().getFullYear() }} TransLOG-X · Supabase Pro + Vercel Pro
+        <p class="text-center text-xs mt-6" style="color:rgba(220,150,150,0.4)">
+          Developed by <span style="color:rgba(220,150,150,0.7); font-weight:600">TRANSMEDIC</span>
         </p>
       </div>
-    </div>
 
+    </div>
   </div>
 </template>
+
+<style scoped>
+.login-page {
+  background-color: #0d0404;
+}
+
+.lc-card {
+  background: rgba(13, 4, 4, 0.92);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 12px;
+  padding: 32px;
+  width: 340px;
+  flex-shrink: 0;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.lc-card h2 { color: #f1f5f9; }
+
+.lc-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(220, 38, 38, 0.8);
+  margin-bottom: 6px;
+}
+
+.lc-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  appearance: none;
+}
+
+.lc-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+.lc-input:focus {
+  border-color: rgba(220, 38, 38, 0.5);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.lc-input:disabled { opacity: 0.5; }
+
+.lc-btn {
+  width: 100%;
+  padding: 13px;
+  background: #dc2626;
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.lc-btn:hover:not(:disabled) { background: #b91c1c; }
+.lc-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+@media (max-width: 768px) {
+  .lc-card { width: 100%; max-width: 400px; }
+}
+</style>
