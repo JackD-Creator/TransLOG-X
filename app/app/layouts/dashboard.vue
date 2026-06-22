@@ -155,8 +155,10 @@ async function logout() {
       </header>
 
       <!-- Page -->
-      <main class="flex-1 overflow-y-auto" style="background: #08020a">
-        <slot />
+      <main class="flex-1 overflow-y-auto bg-gray-50">
+        <div class="p-6">
+          <slot />
+        </div>
       </main>
     </div>
 
