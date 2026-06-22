@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TransLOG-X — Diagram Alur Kerja 17 Modul</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #07101f;
+  --blue:        #3b82f6;
+  --blue-bg:     #0e2040;
+  --blue-bd:     rgba(59,130,246,0.45);
+  --green:       #10b981;
+  --green-bg:    #0a2518;
+  --green-bd:    rgba(16,185,129,0.45);
+  --amber:       #f59e0b;
+  --amber-bg:    #271a06;
+  --amber-bd:    rgba(245,158,11,0.45);
+  --purple:      #a78bfa;
+  --purple-bg:   #160e30;
+  --purple-bd:   rgba(167,139,250,0.45);
+  --indigo:      #6366f1;
+  --indigo-bg:   #111230;
+  --indigo-bd:   rgba(99,102,241,0.45);
+  --cyan:        #22d3ee;
+  --cyan-bg:     #041820;
+  --cyan-bd:     rgba(34,211,238,0.45);
+  --muted:       #4b5563;
+  --dimmed:      rgba(255,255,255,0.52);
+}
+
+body {
+  background: var(--bg);
+  color: #e2e8f0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  padding: 14px 16px 20px;
+  min-width: 1240px;
+}
+
+/* ── Header ── */
+.hdr { text-align: center; margin-bottom: 14px; }
+.hdr h1 {
+  font-size: 22px; font-weight: 800; letter-spacing: .3px;
+  background: linear-gradient(120deg, #60a5fa 0%, #34d399 50%, #a78bfa 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hdr p { font-size: 11px; color: #4b5563; margin-top: 3px; }
+
+/* ── Layout ── */
+.canvas { max-width: 1420px; margin: 0 auto; display: flex; flex-direction: column; gap: 5px; }
+
+.row { display: flex; gap: 7px; align-items: stretch; }
+
+/* ── Layer title ── */
+.ltitle {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.8px; color: var(--muted);
+  text-align: center; padding: 2px 0;
+}
+
+/* ── Divider arrow ── */
+.div-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 1px 8px; color: #374151; font-size: 9px;
+}
+.div-line { flex: 1; height: 1px; background: linear-gradient(90deg,transparent,#1f2a3a,transparent); }
+
+/* ── Stakeholder actors ── */
+.actor {
+  flex: 1; background: #0c1628; border: 1px solid #1a2535;
+  border-radius: 8px; padding: 5px 6px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; text-align: center;
+}
+.actor-ico { font-size: 15px; line-height: 1; }
+.actor-lbl { font-size: 9.5px; font-weight: 600; color: #6b7280; line-height: 1.2; }
+
+/* ── Integration bar ── */
+.int-bar {
+  width: 100%; background: var(--cyan-bg); border: 1px solid var(--cyan-bd);
+  border-radius: 10px; padding: 8px 16px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.int-badge {
+  font-size: 9px; font-weight: 700; background: rgba(34,211,238,.18);
+  color: var(--cyan); border-radius: 4px; padding: 2px 8px; white-space: nowrap;
+}
+.int-title { font-size: 12px; font-weight: 700; color: var(--cyan); white-space: nowrap; }
+.int-apis { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+.int-api { font-size: 9px; color: var(--dimmed); white-space: nowrap; }
+
+/* ── Module box ── */
+.mod {
+  flex: 1; border-radius: 10px; padding: 9px 11px;
+  border: 1px solid; display: flex; flex-direction: column; gap: 4px; min-width: 0;
+}
+.mbadge {
+  font-size: 9px; font-weight: 700; border-radius: 4px;
+  padding: 2px 7px; display: inline-block; width: fit-content;
+}
+.mname { font-size: 11.5px; font-weight: 700; line-height: 1.25; }
+.mfeats { font-size: 9px; color: var(--dimmed); line-height: 1.55; }
+.mfeats span { display: block; padding-left: 10px; position: relative; }
+.mfeats span::before { content: '·'; position: absolute; left: 0; }
+
+/* Color themes */
+.c-blue  { background: var(--blue-bg);   border-color: var(--blue-bd); }
+.c-blue  .mbadge { background: rgba(59,130,246,.18);  color: var(--blue); }
+.c-green { background: var(--green-bg);  border-color: var(--green-bd); }
+.c-green .mbadge { background: rgba(16,185,129,.18);  color: var(--green); }
+.c-amber { background: var(--amber-bg);  border-color: var(--amber-bd); }
+.c-amber .mbadge { background: rgba(245,158,11,.18);  color: var(--amber); }
+.c-purple{ background: var(--purple-bg); border-color: var(--purple-bd); }
+.c-purple .mbadge{ background: rgba(167,139,250,.18); color: var(--purple); }
+.c-indigo{ background: var(--indigo-bg); border-color: var(--indigo-bd); }
+.c-indigo .mbadge{ background: rgba(99,102,241,.18);  color: var(--indigo); }
+
+/* ── Arrow connector between modules in a row ── */
+.arr {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; flex-shrink: 0; width: 36px;
+}
+.arr-lbl { font-size: 7.5px; color: #374151; text-align: center; line-height: 1.2; width: 36px; }
+.arr-sym { font-size: 17px; line-height: 1; }
+.arr-blue   .arr-sym { color: var(--blue); }
+.arr-green  .arr-sym { color: var(--green); }
+.arr-purple .arr-sym { color: var(--purple); }
+
+/* ── Flow hint row ── */
+.flow-hints {
+  display: flex; padding: 0 2px; gap: 7px; align-items: center;
+}
+.fh { font-size: 7.5px; color: #374151; text-align: center; }
+
+/* ── Legend ── */
+.legend {
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  padding-top: 10px; margin-top: 4px;
+  border-top: 1px solid #111d2e;
+}
+.lg-item { display: flex; align-items: center; gap: 6px; font-size: 9.5px; color: #4b5563; }
+.lg-dot { width: 10px; height: 10px; border-radius: 3px; border: 1px solid; flex-shrink: 0; }
+
+/* ── Feedback loop note ── */
+.loop-note {
+  font-size: 7.5px; color: #374151; text-align: center; padding: 0 4px;
+}
+
+/* Responsive note */
+@media (max-width:1240px) {
+  .mfeats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>⚡ TransLOG-X — Diagram Alur Kerja Platform</h1>
+  <p>AI Supported E-Logistic Platform &nbsp;·&nbsp; 17 Modul &nbsp;·&nbsp; v2.0 &nbsp;·&nbsp;
+     Supabase Pro · Vercel Pro · Vue + Nuxt 4 · Go Serverless · GitHub</p>
+</div>
+
+<div class="canvas">
+
+  <!-- ══════════════════════════════════════════════════════════
+       STAKEHOLDER EKSTERNAL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ltitle">🌐 Stakeholder Eksternal & Sistem Pemerintah</div>
+  <div class="row">
+    <div class="actor">
+      <div class="actor-ico">🏥</div><div class="actor-lbl">Rumah Sakit</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">🏢</div><div class="actor-lbl">Mitra KSM</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">🏭</div><div class="actor-lbl">Supplier / PBF</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">🏦</div><div class="actor-lbl">Bank Mitra</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">🎫</div><div class="actor-lbl">BPJS Kesehatan</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">🏛️</div><div class="actor-lbl">BPOM</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">⚖️</div><div class="actor-lbl">OJK / BI</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">🏛️</div><div class="actor-lbl">Kemenkes / LKPP</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">💰</div><div class="actor-lbl">DJP / Coretax</div>
+    </div>
+    <div class="actor">
+      <div class="actor-ico">🪪</div><div class="actor-lbl">Dukcapil</div>
+    </div>
+  </div>
+
+  <div class="div-row">
+    <div class="div-line"></div>
+    <span>↓ &nbsp;API, Data Exchange & eKYC &nbsp;↓</span>
+    <div class="div-line"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       M17 — INTEGRATION & PLATFORM
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ltitle">🔌 M17 — Integration & Platform</div>
+  <div class="row">
+    <div class="int-bar">
+      <div class="int-badge">M17</div>
+      <div class="int-title">Integration & Platform</div>
+      <div class="int-apis">
+        <span class="int-api">🔗 BPJS VClaim API</span>
+        <span class="int-api">🔗 BPOM TTAC Serialisasi</span>
+        <span class="int-api">🔗 SNAP Banking (BCA/Mandiri/BRI/BNI)</span>
+        <span class="int-api">🔗 SatuSehat / FHIR</span>
+        <span class="int-api">🔗 e-Katalog LKPP</span>
+        <span class="int-api">🔗 Coretax DJP</span>
+        <span class="int-api">🔗 Dukcapil eKYC</span>
+        <span class="int-api">🔗 PrivyID / Peruri e-Sign</span>
+        <span class="int-api">🔗 OJK SLIK</span>
+        <span class="int-api">🔗 IoT Sensor (Cold Chain)</span>
+        <span class="int-api">🔗 WhatsApp Business API</span>
+        <span class="int-api">🔗 HIS/SIMRS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="div-row">
+    <div class="div-line"></div>
+    <span>↓ &nbsp;Data, Trigger & Catalog &nbsp;↓</span>
+    <div class="div-line"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       CORE OPERATIONS  (M1 → M2 → M3 → M4)
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ltitle">⚙️ Core Operations — Alur Pengadaan End-to-End</div>
+  <div class="row">
+
+    <!-- M1 -->
+    <div class="mod c-blue" style="flex:1.05;">
+      <div class="mbadge">M1</div>
+      <div class="mname">📦 Inventory Management</div>
+      <div class="mfeats">
+        <span>Real-time stock multi-lokasi</span>
+        <span>FEFO + expiry tracking</span>
+        <span>Lot/batch traceability</span>
+        <span>Recall management</span>
+        <span>Auto-reorder point</span>
+        <span>Formulary management</span>
+        <span>Demand forecast AI</span>
+      </div>
+    </div>
+
+    <div class="arr arr-blue">
+      <div class="arr-lbl">⚡ stok<br>menipis</div>
+      <div class="arr-sym">→</div>
+    </div>
+
+    <!-- M2 -->
+    <div class="mod c-blue" style="flex:1.05;">
+      <div class="mbadge">M2</div>
+      <div class="mname">🛒 Procurement & Sourcing</div>
+      <div class="mfeats">
+        <span>RFQ / RFP / e-Auction</span>
+        <span>KFA catalog + e-Katalog LKPP</span>
+        <span>AI supplier selection</span>
+        <span>Contract lifecycle mgmt</span>
+        <span>Supplier scorecard</span>
+        <span>Budget management</span>
+        <span>Approval workflow</span>
+      </div>
+    </div>
+
+    <div class="arr arr-blue">
+      <div class="arr-lbl">📄 PO<br>approved</div>
+      <div class="arr-sym">→</div>
+    </div>
+
+    <!-- M3 -->
+    <div class="mod c-blue" style="flex:0.95;">
+      <div class="mbadge">M3</div>
+      <div class="mname">📋 Order Management</div>
+      <div class="mfeats">
+        <span>PO lifecycle tracking</span>
+        <span>3-way matching</span>
+        <span>GRN + partial receipt</span>
+        <span>Split / backorder</span>
+        <span>RMA & returns</span>
+        <span>DO verification</span>
+      </div>
+    </div>
+
+    <div class="arr arr-blue">
+      <div class="arr-lbl">🚚 dispatch<br>order</div>
+      <div class="arr-sym">→</div>
+    </div>
+
+    <!-- M4 -->
+    <div class="mod c-blue" style="flex:1.2;">
+      <div class="mbadge">M4</div>
+      <div class="mname">🏭 Warehouse & Distribution</div>
+      <div class="mfeats">
+        <span>WMS: receive/put-away/pick/pack</span>
+        <span>Cold chain IoT monitoring (±0.1°C)</span>
+        <span>FEFO picking enforcement</span>
+        <span>Route optimization AI</span>
+        <span>GPS live tracking + ePOD</span>
+        <span>Driver app integration</span>
+        <span>CDOB compliance</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Flow hints: M4→M1 (stok update) and M4→M5 (invoice) -->
+  <div class="flow-hints">
+    <div class="fh" style="flex:1.05; text-align:center; color:#1e3a5f;">← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← 📦 stok diupdate ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ←</div>
+    <div style="flex:0; width:36px;"></div>
+    <div class="fh" style="flex:1.05;"></div>
+    <div style="flex:0; width:36px;"></div>
+    <div class="fh" style="flex:0.95;"></div>
+    <div style="flex:0; width:36px;"></div>
+    <div class="fh" style="flex:1.2; text-align:center;">↓ delivery confirmed → invoice diterbitkan ↓</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FINANCIAL  (M5 → M6 → M7 → M8)
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ltitle">💰 Financial Operations — Supply Chain Financing & BPJS Reconciliation</div>
+  <div class="row">
+
+    <!-- M5 -->
+    <div class="mod c-green" style="flex:1.3;">
+      <div class="mbadge">M5</div>
+      <div class="mname">💳 Financial & Payment</div>
+      <div class="mfeats">
+        <span>Reverse factoring</span>
+        <span>Invoice financing / factoring</span>
+        <span>Dynamic discounting</span>
+        <span>BPJS bridging loans</span>
+        <span>PO financing</span>
+        <span>3-way invoice matching</span>
+        <span>e-Faktur / Coretax DJP</span>
+        <span>Multi-bank SNAP + VA + Escrow</span>
+      </div>
+    </div>
+
+    <div class="arr arr-green">
+      <div class="arr-lbl">💰 financing<br>request</div>
+      <div class="arr-sym">→</div>
+    </div>
+
+    <!-- M6 -->
+    <div class="mod c-green" style="flex:1.05;">
+      <div class="mbadge">M6</div>
+      <div class="mname">📊 Credit & Risk Mgmt</div>
+      <div class="mfeats">
+        <span>Credit scoring RS & supplier</span>
+        <span>SLIK OJK integration</span>
+        <span>Early Warning System</span>
+        <span>Credit limit management</span>
+        <span>Portfolio risk dashboard</span>
+        <span>PD / LGD / EAD modeling</span>
+      </div>
+    </div>
+
+    <div class="arr arr-green">
+      <div class="arr-lbl">🏥 klaim<br>BPJS</div>
+      <div class="arr-sym">→</div>
+    </div>
+
+    <!-- M7 -->
+    <div class="mod c-green" style="flex:1.1;">
+      <div class="mbadge">M7</div>
+      <div class="mname">🏥 Revenue Cycle Mgmt</div>
+      <div class="mfeats">
+        <span>iDRG / INA-CBG grouper</span>
+        <span>BPJS claim lifecycle</span>
+        <span>Claim scrubbing AI</span>
+        <span>Denial management</span>
+        <span>Aging AR analytics</span>
+        <span>BPJS dispute tracking</span>
+      </div>
+    </div>
+
+    <div class="arr arr-green">
+      <div class="arr-lbl">💵 BPJS<br>cair</div>
+      <div class="arr-sym">→</div>
+    </div>
+
+    <!-- M8 -->
+    <div class="mod c-green" style="flex:1.1;">
+      <div class="mbadge">M8</div>
+      <div class="mname">🏦 Cash Flow & Treasury</div>
+      <div class="mfeats">
+        <span>13-week cash forecast AI</span>
+        <span>Working capital optimization</span>
+        <span>Multi-bank liquidity view</span>
+        <span>DSO / DPO / CCC tracking</span>
+        <span>Repayment orchestration</span>
+        <span>Stress test scenarios</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Feedback loops Financial -->
+  <div class="flow-hints">
+    <div class="fh" style="flex:1.3; text-align:center;">↕ limit approved / rejected ↕</div>
+    <div style="width:36px;"></div>
+    <div class="fh" style="flex:1.05;"></div>
+    <div style="width:36px;"></div>
+    <div class="fh" style="flex:1.1;"></div>
+    <div style="width:36px;"></div>
+    <div class="fh" style="flex:1.1; text-align:center;">↑ repay financing → standing instruction ↑</div>
+  </div>
+
+  <div class="div-row">
+    <div class="div-line"></div>
+    <span>↓ &nbsp;Monitoring · Audit · Fraud Detection · KYC Onboarding &nbsp;↓</span>
+    <div class="div-line"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       QUALITY & COMPLIANCE  (M9, M12, M13)
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ltitle">✅ Quality, Compliance & Anti-Fraud — Cross-Cutting Layer</div>
+  <div class="row">
+
+    <!-- M9 -->
+    <div class="mod c-amber" style="flex:1;">
+      <div class="mbadge">M9</div>
+      <div class="mname">🔬 Quality Management System</div>
+      <div class="mfeats">
+        <span>CAPA workflow digital</span>
+        <span>Deviation management</span>
+        <span>CDOB audit checklists</span>
+        <span>Training management</span>
+        <span>Complaint handling</span>
+        <span>Document control + SOP</span>
+      </div>
+    </div>
+
+    <div class="arr" style="width:24px;">
+      <div class="arr-sym" style="color:var(--amber-bd); font-size:14px;">↔</div>
+    </div>
+
+    <!-- M12 -->
+    <div class="mod c-amber" style="flex:1.2;">
+      <div class="mbadge">M12</div>
+      <div class="mname">📜 Compliance, Audit & Regulasi</div>
+      <div class="mfeats">
+        <span>BPOM TTAC serialisasi (Des 2025)</span>
+        <span>CDOB 9 pilar compliance</span>
+        <span>OJK SLIK reporting</span>
+        <span>SNARS / KARS akreditasi</span>
+        <span>Immutable audit trail</span>
+        <span>Halal tracking (BPJPH)</span>
+        <span>Narkotika/psikotropika</span>
+      </div>
+    </div>
+
+    <div class="arr" style="width:24px;">
+      <div class="arr-sym" style="color:var(--amber-bd); font-size:14px;">↔</div>
+    </div>
+
+    <!-- M13 -->
+    <div class="mod c-amber" style="flex:1.2;">
+      <div class="mbadge">M13</div>
+      <div class="mname">🔒 KYC/KYB & Anti-Fraud</div>
+      <div class="mfeats">
+        <span>eKYC Dukcapil biometrik</span>
+        <span>SLIK credit history inquiry</span>
+        <span>Invoice fraud ML detection</span>
+        <span>BPJS claim fraud ML</span>
+        <span>PEP / sanctions screening</span>
+        <span>Graph Neural Network colusion</span>
+        <span>Fraud case management</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Compliance arrow hints -->
+  <div class="flow-hints" style="gap:0;">
+    <div class="fh" style="flex:1; text-align:center;">↑ QC inspection M4 · deviation alert</div>
+    <div style="width:24px;"></div>
+    <div class="fh" style="flex:1.2; text-align:center;">👁 audit M4 · M5 · M7 · M2</div>
+    <div style="width:24px;"></div>
+    <div class="fh" style="flex:1.2; text-align:center;">✔ KYC supplier (M2) · KYC financing (M6)</div>
+  </div>
+
+  <div class="div-row">
+    <div class="div-line"></div>
+    <span>↕ &nbsp;Data Feed semua modul &nbsp;·&nbsp; AI Recommendations &nbsp;↕</span>
+    <div class="div-line"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       INTELLIGENCE  (M10 ↔ M11)
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ltitle">🧠 Intelligence Layer — AI / ML & Analytics</div>
+  <div class="row">
+
+    <!-- M10 -->
+    <div class="mod c-purple" style="flex:1;">
+      <div class="mbadge">M10</div>
+      <div class="mname">📈 Analytics & Business Intelligence</div>
+      <div class="mfeats">
+        <span>10 executive dashboards</span>
+        <span>Inventory health dashboard</span>
+        <span>BPJS claim analytics</span>
+        <span>Supplier benchmarking</span>
+        <span>Spend analysis</span>
+        <span>Custom report builder · PDF/Excel</span>
+        <span>Drill-down & ad-hoc query</span>
+      </div>
+    </div>
+
+    <div class="arr arr-purple">
+      <div class="arr-lbl">data<br>feed</div>
+      <div class="arr-sym">↔</div>
+    </div>
+
+    <!-- M11 -->
+    <div class="mod c-purple" style="flex:1;">
+      <div class="mbadge">M11</div>
+      <div class="mname">🤖 AI / Machine Learning</div>
+      <div class="mfeats">
+        <span>Demand forecasting (LSTM/Prophet)</span>
+        <span>Fraud detection (Graph NN)</span>
+        <span>Dynamic credit scoring</span>
+        <span>Supplier risk prediction</span>
+        <span>AI co-pilot procurement</span>
+        <span>OCR document intelligence</span>
+        <span>BPJS claim rejection prediction</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AI output hints -->
+  <div class="flow-hints">
+    <div class="fh" style="flex:1; text-align:center; font-size:7.5px; color:#2d1f3a;">
+      ↑ feeds M10 · M11 recommendations → M1 (forecast) · M2 (supplier) · M5 (fraud) · M6 (credit) · M13 (fraud alert) ↑
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PLATFORM FOUNDATION  (M14, M15, M16)
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ltitle" style="color:#3730a3;">🔧 Platform Foundation — Aktif di Seluruh Layer</div>
+  <div class="row">
+
+    <!-- M14 -->
+    <div class="mod c-indigo" style="flex:1;">
+      <div class="mbadge">M14</div>
+      <div class="mname">🔐 User Management & Security</div>
+      <div class="mfeats">
+        <span>RBAC granular + MFA + SSO SAML</span>
+        <span>AES-256 at rest · TLS 1.3 in transit</span>
+        <span>Zero-trust architecture</span>
+        <span>ISO 27001 · UU PDP No. 27/2022</span>
+        <span>Data residency PP 71/2019</span>
+      </div>
+    </div>
+
+    <!-- M15 -->
+    <div class="mod c-indigo" style="flex:1;">
+      <div class="mbadge">M15</div>
+      <div class="mname">📢 Communication & Collaboration</div>
+      <div class="mfeats">
+        <span>WhatsApp / SMS / Email / Push notif</span>
+        <span>Vendor portal self-service</span>
+        <span>Dispute resolution workflow</span>
+        <span>In-app messaging + @mention</span>
+        <span>Notification escalation rules</span>
+      </div>
+    </div>
+
+    <!-- M16 -->
+    <div class="mod c-indigo" style="flex:1;">
+      <div class="mbadge">M16</div>
+      <div class="mname">📱 Mobile Application</div>
+      <div class="mfeats">
+        <span>Driver app: route + GPS + ePOD</span>
+        <span>Barcode/QR scanning via camera</span>
+        <span>Mobile approvals (M2/M3/M5)</span>
+        <span>Offline capability: count, receive</span>
+        <span>Stock inquiry + temperature log</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       LEGEND
+  ══════════════════════════════════════════════════════════ -->
+  <div class="legend">
+    <div class="lg-item">
+      <div class="lg-dot" style="background:var(--blue-bg); border-color:var(--blue-bd);"></div>
+      Core Operations (M1–M4)
+    </div>
+    <div class="lg-item">
+      <div class="lg-dot" style="background:var(--green-bg); border-color:var(--green-bd);"></div>
+      Financial (M5–M8)
+    </div>
+    <div class="lg-item">
+      <div class="lg-dot" style="background:var(--amber-bg); border-color:var(--amber-bd);"></div>
+      Quality & Compliance (M9, M12–M13)
+    </div>
+    <div class="lg-item">
+      <div class="lg-dot" style="background:var(--purple-bg); border-color:var(--purple-bd);"></div>
+      Intelligence (M10–M11)
+    </div>
+    <div class="lg-item">
+      <div class="lg-dot" style="background:var(--indigo-bg); border-color:var(--indigo-bd);"></div>
+      Platform Foundation (M14–M16)
+    </div>
+    <div class="lg-item">
+      <div class="lg-dot" style="background:var(--cyan-bg); border-color:var(--cyan-bd);"></div>
+      Integration (M17)
+    </div>
+    <div class="lg-item">
+      <div class="lg-dot" style="background:#0c1628; border-color:#1a2535;"></div>
+      Stakeholder Eksternal
+    </div>
+    <div class="lg-item" style="color:#374151;">
+      → Alur data utama &nbsp;·&nbsp; ↔ Bidirectional &nbsp;·&nbsp; ↕ Feedback loop
+    </div>
+  </div>
+
+</div><!-- /canvas -->
+</body>
+</html>

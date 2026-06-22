@@ -1,0 +1,2126 @@
+
+PRODUCT REQUIREMENTS DOCUMENT
+TransLogX
+AI Supported E-Logistic Platform
+
+Versi        : 2.0.0 — Enhanced & Comprehensive
+Status       : Draft — Untuk Review & Approval
+Tanggal      : 22 Juni 2026
+Dibuat Untuk : Antigravity Product Planning
+Platform     : Web Application · API Platform · Mobile (iOS & Android)
+Basis        : PRD v1.0.0 (21 Mei 2026) + Riset Fitur Komprehensif
+
+CONFIDENTIAL — Internal Use Only
+
+================================================================================
+DAFTAR ISI
+================================================================================
+
+1.  Executive Summary
+2.  Latar Belakang & Konteks Bisnis
+3.  Tujuan Produk & Sasaran (OKR)
+4.  Stakeholder & Persona Pengguna
+5.  Arsitektur Modul Platform
+6.  MODUL 1  — Inventory Management
+7.  MODUL 2  — Procurement & Sourcing
+8.  MODUL 3  — Order Management
+9.  MODUL 4  — Warehouse & Distribution
+10. MODUL 5  — Financial & Payment
+11. MODUL 6  — Credit & Risk Management
+12. MODUL 7  — Revenue Cycle Management
+13. MODUL 8  — Cash Flow Management & Treasury
+14. MODUL 9  — Quality Management System (QMS)
+15. MODUL 10 — Analytics & Business Intelligence
+16. MODUL 11 — AI / Machine Learning
+17. MODUL 12 — Compliance, Audit & Regulasi
+18. MODUL 13 — KYC/KYB & Anti-Fraud
+19. MODUL 14 — User Management & Security
+20. MODUL 15 — Communication & Collaboration
+21. MODUL 16 — Mobile Application
+22. MODUL 17 — Integration & Platform
+23. Non-Functional Requirements
+24. User Stories & Acceptance Criteria
+25. Rencana Rilis & Roadmap
+26. Arsitektur Teknis
+27. Risiko & Mitigasi
+28. Metrik Keberhasilan
+29. Asumsi & Dependensi
+30. Appendix & Glosarium
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+
+TransLogX — AI Supported E-Logistic Platform adalah platform digital terintegrasi
+yang dirancang untuk mentransformasi manajemen rantai pasok medis di Indonesia.
+Platform ini menjembatani empat ekosistem utama — Rumah Sakit, Mitra KSM Logistic,
+Supplier/Distributor, dan Bank — dalam satu infrastruktur digital yang kohesif,
+transparan, dan berbasis data real-time.
+
+Dua masalah kritis yang menjadi fondasi:
+(1) Inefisiensi operasional manajemen pengadaan farmasi dan alat kesehatan yang
+    masih manual dan rawan kesalahan
+(2) Tekanan likuiditas kronis yang dialami rumah sakit akibat keterlambatan
+    pencairan klaim BPJS Kesehatan yang mencapai 60-120 hari
+
+Platform ini menawarkan solusi sistemik melalui:
+- Otomasi pengadaan end-to-end (requisition-to-payment)
+- Warehouse management system terintegrasi dengan cold chain monitoring
+- Mekanisme supply chain financing berbasis bank sebagai buffer likuiditas
+- Revenue cycle management untuk optimasi klaim BPJS
+- AI/ML untuk demand forecasting, fraud detection, dan decision support
+- Full regulatory compliance: BPOM, OJK, Kemenkes, BI, LKPP
+
+Nilai Bisnis Utama:
+- Reduksi lead time pengadaan 60%
+- Eliminasi risiko gagal bayar supplier
+- Visibilitas inventaris real-time seluruh jaringan RS
+- Kepatuhan regulasi OJK dan akreditasi RS terjaga otomatis
+- Cold chain integrity 100% terjamin dengan IoT monitoring
+- Fraud detection rate > 95% untuk invoice dan klaim
+
+Cakupan Platform (v2.0): 17 Modul, ~760 fitur/sub-fitur
+
+================================================================================
+2. LATAR BELAKANG & KONTEKS BISNIS
+================================================================================
+
+2.1 Masalah yang Diselesaikan
+------------------------------------------------------------------------
+
+MASALAH 1 — INEFISIENSI RANTAI PASOK
+- Proses pengadaan obat dan alkes masih sangat manual: telepon, email,
+  spreadsheet, dan dokumen fisik
+- Tidak ada visibilitas real-time stok di tingkat jaringan rumah sakit
+- Stockout dan overstock terjadi bersamaan di RS berbeda dalam satu jaringan
+- Verifikasi supplier dilakukan manual tanpa sistem rating performa terstandar
+- Dokumen PO, Invoice, dan Delivery Order tidak terintegrasi, rawan duplikasi
+- Tidak ada lot/batch tracking dan expiry management yang sistematis
+- Cold chain monitoring masih manual, rawan excursion tanpa deteksi
+- Recall management lambat, tidak bisa identifikasi lokasi produk terdampak
+
+MASALAH 2 — TEKANAN LIKUIDITAS BPJS
+- Rata-rata 60-120 hari keterlambatan pembayaran klaim BPJS Kesehatan ke RS
+- Lebih dari 60% pendapatan RS di Indonesia bergantung pada klaim JKN-KIS
+- RS tidak bisa membayar supplier tepat waktu -> supplier menahan produk -> stockout
+- Tidak ada mekanisme bridging financing yang terstandar dan terintegrasi
+- Coding errors menyebabkan claim rejection rate tinggi
+- Tidak ada cash flow forecasting berbasis pola pembayaran BPJS
+
+MASALAH 3 — RISIKO KEPATUHAN & KEAMANAN
+- Serialisasi produk farmasi (BPOM TTAC) belum terintegrasi
+- Pelaporan narkotika/psikotropika masih manual
+- Tidak ada audit trail digital untuk akreditasi RS (SNARS/KARS)
+- KYC/KYB untuk financing belum terstandar sesuai OJK
+- Risiko fraud invoice dan klaim BPJS tidak terdeteksi
+
+MASALAH 4 — KUALITAS & KEAMANAN PRODUK
+- Temperature excursion pada cold chain tidak terdeteksi real-time
+- Produk expired masih bisa terdistribusi karena FEFO tidak enforced
+- Recall response time lambat (>72 jam)
+- Tidak ada QMS digital: deviation, CAPA, complaint tidak terdokumentasi
+
+2.2 Peluang Pasar
+------------------------------------------------------------------------
+Segmen                    Ukuran           Potensi
+RS Pemerintah & BUMN      2.400+ fasilitas  Adopsi masif via regulasi
+RS Swasta Jaringan        850+ grup RS      Prioritas digitalisasi tinggi
+Klinik Pratama            10.000+ klinik    Ekspansi fase berikutnya
+Distributor / PBF         600+ entitas      Platform B2B logistik
+Bank & Lembaga Keuangan   50+ bank          Multi-funder SCF marketplace
+Produsen Farmasi/Alkes    200+ manufacturer  Traceability & compliance
+
+================================================================================
+3. TUJUAN PRODUK & SASARAN
+================================================================================
+
+3.1 Tujuan Strategis
+------------------------------------------------------------------------
+1. Membangun platform e-logistik medis terdepan di Indonesia yang menjadi
+   standar de facto manajemen rantai pasok rumah sakit
+2. Mengintegrasikan pembiayaan supply chain (invoice financing, reverse
+   factoring, dynamic discounting, BPJS bridging loans) langsung dalam
+   alur operasional pengadaan
+3. Menciptakan jaringan data rantai pasok medis yang memberikan nilai
+   analitik untuk seluruh stakeholder
+4. Memastikan kepatuhan terhadap regulasi kesehatan (Permenkes, BPOM, CDOB)
+   dan keuangan (OJK, BI) secara otomatis
+5. Menjamin integritas cold chain dan traceability produk dari manufacturer
+   sampai pasien
+6. Mengoptimalkan revenue cycle RS melalui AI-powered claim management
+
+3.2 OKR — Objectives & Key Results
+------------------------------------------------------------------------
+Objective                  Key Results (Target 12 Bulan)
+------------------------------------------------------------------------
+Adopsi Platform            50 RS aktif · 100 supplier terdaftar ·
+                           1.000 PO/bulan diproses · 3 bank mitra aktif
+Efisiensi Operasional      Lead time pengadaan dari 7 hari -> 2 hari ·
+                           Pick accuracy > 99.5% · Dock-to-stock < 4 jam
+Kesehatan Keuangan RS      Zero gagal bayar via bank bridging ·
+                           Aging AR < 45 hari · DSO turun 40%
+Kualitas & Keamanan        Stockout rate < 2% · Expiry loss < 1% ·
+                           Cold chain compliance 100% · Recall response < 24 jam
+Kepuasan Pengguna          NPS > 60 · Churn rate < 5%
+Revenue Platform           GMV Rp 500M/bulan · Financing attach rate > 30%
+Compliance                 Zero finding pada audit OJK/BPOM ·
+                           CDOB compliance score > 95%
+
+================================================================================
+4. STAKEHOLDER & PERSONA PENGGUNA
+================================================================================
+
+4.1 Peta Stakeholder
+------------------------------------------------------------------------
+Stakeholder           Peran                       Pain Point Utama                Ekspektasi
+Rumah Sakit           Pembeli akhir barang medis   Stok menipis, BPJS lama cair   Stok terjaga, cashflow sehat
+Mitra KSM Logistic    Koordinator pengadaan        Monitoring banyak RS manual     Visibilitas penuh, otomatis
+Supplier/Distributor  Penyedia produk medis        Piutang lama tertagih           Pembayaran cepat & pasti
+Bank (Financing)      Penyedia bridging likuiditas Risiko kredit tidak terukur     Data transaksi terverifikasi
+BPJS Kesehatan        Pembayar klaim RS            Verifikasi klaim kompleks       Rekonsiliasi otomatis
+Regulator (Kemenkes)  Pengawas sistem kesehatan    Transparansi distribusi         Laporan compliance otomatis
+BPOM                  Pengawas obat & alkes        Traceability produk lemah       Serialisasi & TTAC compliance
+OJK                   Pengawas jasa keuangan       Financing tidak termonitor      Pelaporan & SLIK compliance
+
+4.2 Persona Utama
+------------------------------------------------------------------------
+
+PERSONA 1 — KEPALA FARMASI RUMAH SAKIT
+dr. Rina, 38 tahun, Kepala Instalasi Farmasi RSUD Kelas B di Bandung.
+Memimpin tim 15 orang. Frustrasi dengan stok kritis yang baru diketahui
+saat pasien membutuhkan. Ingin sistem yang bisa memprediksi kebutuhan,
+tracking expiry/lot, dan memesan otomatis sebelum stockout. Butuh cold
+chain monitoring real-time untuk vaksin dan biologics.
+
+PERSONA 2 — MANAJER OPERASIONAL MITRA KSM
+Budi, 45 tahun, mengelola pengadaan untuk 20 RS dalam jaringan. Saat ini
+menggunakan spreadsheet dan WhatsApp. Membutuhkan dashboard terpusat untuk
+memantau PO, stok, pembayaran dari semua RS. Butuh supplier scorecard dan
+contract management yang terintegrasi.
+
+PERSONA 3 — FINANCE MANAGER SUPPLIER
+Sari, 35 tahun, Finance Manager di perusahaan distribusi farmasi nasional.
+Frustrasi dengan piutang menumpuk. Membutuhkan kepastian pembayaran melalui
+financing, visibilitas aging AR, dan akses ke multiple financing options
+(reverse factoring, invoice financing).
+
+PERSONA 4 — WAREHOUSE MANAGER
+Andi, 40 tahun, mengelola gudang farmasi dengan 5.000+ SKU termasuk cold
+chain products. Butuh WMS dengan FEFO enforcement, cycle counting, cold
+chain IoT monitoring, dan barcode/RFID scanning untuk semua operasi.
+
+PERSONA 5 — DIREKTUR KEUANGAN RS
+dr. Hadi, 50 tahun, CFO RS swasta besar. Fokus pada cash flow management,
+working capital optimization, dan BPJS claim monitoring. Butuh treasury
+dashboard, cash flow forecasting, dan financing decision support.
+
+PERSONA 6 — COMPLIANCE OFFICER
+Maya, 33 tahun, bertanggung jawab atas kepatuhan CDOB, BPOM serialisasi,
+dan pelaporan OJK. Butuh automated compliance monitoring, audit readiness
+dashboard, dan regulatory report generation.
+
+================================================================================
+5. ARSITEKTUR MODUL PLATFORM
+================================================================================
+
+TransLogX v2.0 terdiri dari 17 modul terintegrasi:
+
++-------------------------------------------------------------------+
+|                    TRANSLOGX PLATFORM v2.0                        |
++-------------------------------------------------------------------+
+|                                                                   |
+|  CORE OPERATIONS                                                  |
+|  [M1] Inventory Management    [M4] Warehouse & Distribution      |
+|  [M2] Procurement & Sourcing  [M3] Order Management              |
+|                                                                   |
+|  FINANCIAL                                                        |
+|  [M5] Financial & Payment     [M6] Credit & Risk Management      |
+|  [M7] Revenue Cycle Mgmt     [M8] Cash Flow & Treasury           |
+|                                                                   |
+|  QUALITY & COMPLIANCE                                             |
+|  [M9] Quality Management      [M12] Compliance & Audit           |
+|  [M13] KYC/KYB & Anti-Fraud                                      |
+|                                                                   |
+|  INTELLIGENCE                                                     |
+|  [M10] Analytics & BI         [M11] AI / Machine Learning        |
+|                                                                   |
+|  PLATFORM                                                         |
+|  [M14] User Mgmt & Security   [M15] Communication & Collab       |
+|  [M16] Mobile Application     [M17] Integration & Platform       |
+|                                                                   |
++-------------------------------------------------------------------+
+
+================================================================================
+6. MODUL 1 — INVENTORY MANAGEMENT
+================================================================================
+
+6.1 Real-Time Stock Monitoring & Visibility
+------------------------------------------------------------------------
+FR-INV-01: Stock Dashboard
+- Dashboard stok real-time per lokasi: gudang pusat, farmasi satelit,
+  ward/bangsal, ruang operasi, ICU
+- Multi-location inventory view dengan drill-down ke level rak/bin
+- Stock status visual: Normal / Menipis / Kritis / Stockout / Overstock
+- Notifikasi otomatis saat stok mendekati minimum threshold (configurable)
+- Dashboard refresh setiap 5 menit atau real-time via WebSocket
+
+FR-INV-02: Stock Movement Tracking
+- Tracking semua pergerakan: penerimaan, pengeluaran, transfer, adjustment, retur
+- Riwayat pergerakan stok dapat diaudit dengan detail waktu dan user
+- Stock valuation: FIFO, weighted average, standard cost
+- Export laporan stok ke Excel/PDF
+
+FR-INV-03: Stock Level Configuration
+- Minimum/maximum stock level per item per lokasi
+- PAR (Periodic Automatic Replenishment) level management per departemen
+- Safety stock calculation otomatis berbasis lead time dan variabilitas demand
+- Reorder point configuration
+
+FR-INV-04: Special Inventory Tracking
+- Consignment inventory tracking (stok milik supplier disimpan di RS)
+- Implant dan high-value device tracking per pasien/prosedur
+- Dead stock / slow-moving stock identification dan alerting
+
+Acceptance Criteria — INV-01:
+- Notifikasi minimum stok terkirim dalam < 60 detik setelah threshold tercapai
+- Dashboard refresh setiap 5 menit
+- Export laporan stok ke Excel/PDF tersedia
+- Multi-location view menampilkan data dari semua lokasi dalam < 3 detik
+
+6.2 Expiry & Shelf-Life Management
+------------------------------------------------------------------------
+FR-INV-05: Expiry Date Tracking
+- Expiry date tracking di level item/batch/lot — mandatory saat penerimaan
+- FEFO (First Expiry, First Out) enforcement di seluruh operasi outbound
+- Remaining shelf life calculation otomatis untuk setiap lot
+
+FR-INV-06: Expiry Alerts
+- Configurable multi-tier alerts: 180/90/60/30/14/7 hari sebelum expiry
+- Alert routing ke role relevan: warehouse manager, procurement, quality
+- Customer minimum shelf life enforcement saat pengiriman
+
+FR-INV-07: Near-Expiry Disposition
+- Near-expiry dashboard: overview inventory approaching expiry by category, value
+- Near-expiry redistribution suggestions: transfer antar RS dalam jaringan
+- Disposition options: markdown, donasi, retur ke supplier, pemusnahan
+- Donation management dengan full documentation
+
+FR-INV-08: Expired Product Management
+- Auto status change ke "Expired" pada expiry date; block dari picking
+- Expired product segregation ke designated zone
+- Destruction workflow: schedule, approved vendor, destruction certificate
+- Controlled substance destruction: BPOM witness requirements
+- Write-off financial processing otomatis
+- Monthly/quarterly expiry loss reporting
+
+Acceptance Criteria — INV-05:
+- FEFO violation rate = 0% (sistem block non-FEFO picking)
+- Expiry alerts terkirim tepat pada threshold yang dikonfigurasi
+- Near-expiry redistribution suggestion muncul saat stok < 90 hari
+
+6.3 Lot & Batch Tracking
+------------------------------------------------------------------------
+FR-INV-09: Lot Traceability
+- Full lot/batch traceability dari penerimaan sampai konsumsi pasien
+- Lot-level stock segregation fisik dan logis
+- Certificate of Analysis (CoA) attachment per lot
+- Lot-specific quality hold/release workflow
+
+FR-INV-10: Traceability Queries
+- Forward traceability: dari lot number, identifikasi semua RS penerima
+- Backward traceability: dari komplain, trace balik ke supplier, tanggal terima
+- Lot splitting/merging handling
+- Traceability query response < 30 detik
+
+6.4 Recall Management
+------------------------------------------------------------------------
+FR-INV-11: Recall Processing
+- Automated recall notification dari supplier/BPOM alerts
+- Identifikasi instan lokasi recalled lot: di gudang, in-transit, sudah dikirim
+- Recall classification: Class I/II/III sesuai BPOM
+- Quarantine workflow untuk recalled items
+- Downstream notification ke semua departemen/RS terdampak
+- Replacement order auto-generation
+
+FR-INV-12: Recall Tracking
+- Recall response documentation dan audit trail
+- Recall effectiveness tracking: % produk recalled yang recovered
+- Mock recall periodik untuk verifikasi kesiapan (target < 24 jam)
+- BPOM recall reporting document generation
+
+6.5 Barcode, RFID & Identifikasi
+------------------------------------------------------------------------
+FR-INV-13: Scanning & Identification
+- Barcode scanning untuk semua transaksi inventori
+- QR code support untuk item e-Katalog Indonesia
+- RFID-enabled real-time tracking untuk high-value items
+- GS1 compliance: GTIN, SSCC, GS1-128, GS1 DataMatrix
+- 2D DataMatrix scanning per regulasi BPOM serialisasi
+- UDI (Unique Device Identifier) scanning untuk medical devices
+- Label printing: barcode, shelf labels, bin labels
+
+6.6 Automated Replenishment
+------------------------------------------------------------------------
+FR-INV-14: Auto-Replenishment
+- Auto-generation purchase requisition saat stok mencapai reorder point
+- Demand-based replenishment (consumption-driven)
+- Schedule-based replenishment (periodic top-up)
+- Kanban-style two-bin replenishment untuk ward supplies
+- Smart bin integration (weight-sensor-based auto-reorder)
+- Cross-docking untuk urgent orders
+
+6.7 Cycle Counting & Stock Opname
+------------------------------------------------------------------------
+FR-INV-15: Counting Operations
+- Perpetual cycle counting berdasarkan ABC classification
+- Full physical inventory count support dengan freeze/unfreeze
+- Blind count (counter tidak melihat expected quantity)
+- Variance threshold dan auto-trigger recount
+- Count approval workflow dengan segregation of duties
+- Adjustment posting dengan mandatory reason codes
+- Controlled substance mandatory periodic reconciliation
+- Count by lot/serial untuk verifikasi spesifik
+
+6.8 Multi-Warehouse / Multi-Site
+------------------------------------------------------------------------
+FR-INV-16: Multi-Site Operations
+- Hierarki lokasi: gudang pusat > sub-store > farmasi satelit > ward cabinet
+- Inter-facility transfer orders
+- Stock balancing across sites dalam jaringan RS
+- Consolidated inventory view untuk hospital group
+- Transit stock tracking
+- Cross-facility near-expiry redistribution
+
+6.9 Formulary Management
+------------------------------------------------------------------------
+FR-INV-17: Formulary
+- Hospital formulary list maintenance per RS
+- Formulary committee approval workflows
+- Formulary item substitution rules (generik/brand)
+- Non-formulary request dan exception process
+- Formulary compliance reporting
+- Therapeutic equivalence mapping
+
+6.10 Demand Forecasting (AI/ML)
+------------------------------------------------------------------------
+FR-INV-18: AI Forecasting
+- Time-series forecasting: ARIMA, Prophet, LSTM neural networks
+- Proyeksi kebutuhan 30/60/90 hari berdasarkan data historis
+- Seasonal pattern recognition: Ramadan, musim flu, dengue outbreaks
+- Event-driven demand spikes: pandemi, bencana alam
+- Multi-factor: historis + sensus pasien + jadwal operasi + epidemiologi
+- Rekomendasi jumlah order optimal berdasarkan lead time dan pola konsumsi
+- Forecast accuracy tracking dan model retraining
+- What-if scenario simulation
+- Stockout probability prediction
+- Alert proaktif sebelum minimum stok berdasarkan tren penurunan
+
+Acceptance Criteria — INV-18:
+- Forecast accuracy > 80% untuk item fast-moving (ABC class A)
+- Rekomendasi order tersedia setiap hari pukul 06:00
+- Alert proaktif muncul minimal 7 hari sebelum projected stockout
+
+================================================================================
+7. MODUL 2 — PROCUREMENT & SOURCING
+================================================================================
+
+7.1 Purchase Requisition
+------------------------------------------------------------------------
+FR-PRC-01: Requisition Management
+- Department-level requisition creation
+- Budget check otomatis di tahap requisition
+- Auto-requisition dari inventory reorder points
+- Requisition consolidation across departments
+- Multi-level approval workflows (configurable by value, category, department)
+- Requisition templates untuk recurring orders
+- Emergency/urgent requisition fast-track
+- Requisition-to-PO conversion otomatis setelah approval
+
+7.2 Sourcing & Supplier Selection
+------------------------------------------------------------------------
+FR-PRC-02: Sourcing Tools
+- Request for Quotation (RFQ) creation dan distribution ke multiple suppliers
+- Request for Proposal (RFP) management untuk pengadaan kompleks
+- E-auction / reverse auction module
+- Supplier bid comparison matrix: harga, lead time, kualitas, payment terms
+- Framework agreement / blanket order sourcing
+- Spot-buy vs. contracted sourcing differentiation
+
+FR-PRC-03: AI-Powered Supplier Intelligence
+- Database supplier terverifikasi dengan rating performa multi-dimensi
+- Automated supplier recommendation berbasis histori, rating, dan risiko
+- AI-powered best supplier selection: price + lead time + quality + risk score
+- Verifikasi dokumen legal supplier terintegrasi
+
+7.3 Catalog Management
+------------------------------------------------------------------------
+FR-PRC-04: Product Catalog
+- Internal product catalog dengan standardized item master
+- Supplier punch-out catalogs (real-time supplier pricing)
+- e-Katalog LKPP integration: nasional, sektoral, lokal
+- KFA (Kode Farmasi dan Alkes) code mapping untuk semua item
+- Catalog content enrichment: images, specs, MSDS, sertifikat
+- Price comparison across catalogs
+- Catalog version control dan update management
+- Formulary-linked catalog filtering
+- HET (Harga Eceran Tertinggi) enforcement untuk produk farmasi
+
+7.4 Contract Management
+------------------------------------------------------------------------
+FR-PRC-05: Contract Lifecycle
+- Centralized contract repository
+- Contract templates dan clause library
+- Contract lifecycle: draft > negotiate > approve > execute > renew > terminate
+- Price agreement tracking: fixed price, tiered pricing, volume discounts
+- Contract compliance monitoring: spending vs. contract terms
+- Auto-alerts: renewal, expiry, price escalation dates
+- Off-contract spend detection dan alerts
+- Multi-year contract support dengan annual price adjustments
+- Contract performance KPIs
+- Quality agreements terpisah: roles, responsibilities, specifications
+
+7.5 Supplier Management
+------------------------------------------------------------------------
+FR-PRC-06: Supplier Onboarding
+- Onboarding workflow dengan document collection:
+  * SIUP, TDP/NIB, NPWP
+  * Izin PBF (Pedagang Besar Farmasi)
+  * Sertifikat CDOB/CDAKB/CPAKB
+  * Izin edar BPOM
+  * CPOB (untuk manufacturer)
+- Supplier qualification dan pre-qualification assessment
+- Supplier self-service portal untuk document upload dan update
+
+FR-PRC-07: Supplier Performance
+- Supplier scorecard multi-dimensi:
+  * Delivery on-time rate
+  * Fill rate (order completeness)
+  * Quality rejection rate
+  * Documentation accuracy
+  * Price competitiveness
+  * Responsiveness
+- Supplier risk scoring dan categorization: critical, major, standard
+- Supplier document expiry monitoring (licenses, certificates)
+- Supplier blacklist / suspension management
+- Supplier master data management dan deduplication
+- Supplier audit management: on-site, remote, periodic
+- Supplier improvement plans untuk underperforming vendors
+- Vendor Managed Inventory (VMI) support
+
+7.6 Approval Workflows
+------------------------------------------------------------------------
+FR-PRC-08: Approval Engine
+- Configurable multi-level approval chains
+- Value-based dan category-based approval routing
+- Delegation of authority (temporary approver assignment)
+- Mobile approval capability
+- Escalation rules untuk overdue approvals
+- Parallel vs. sequential approval paths
+- Digital signature integration (PrivyID / Peruri)
+- Segregation of duties enforcement (requester =/= approver)
+
+7.7 Budget Management
+------------------------------------------------------------------------
+FR-PRC-09: Budget Control
+- Department/cost center budget allocation
+- Budget commitment tracking (encumbrance)
+- Real-time budget consumption visibility
+- Budget vs. actual variance alerts
+- Annual budget planning support
+- Capital vs. operational expenditure classification (CapEx/OpEx)
+- Budget transfer/reallocation workflow
+
+================================================================================
+8. MODUL 3 — ORDER MANAGEMENT
+================================================================================
+
+8.1 Purchase Order Lifecycle
+------------------------------------------------------------------------
+FR-ORD-01: PO Management
+- PO creation: manual dan auto-generated dari approved requisitions
+- PO amendment / change order management
+- PO acknowledgment tracking dari supplier
+- PO status tracking:
+  Draft > Submitted > Acknowledged > Preparing > Shipped >
+  Partially Received > Fully Received > Closed
+- PO cancellation workflow dengan reason codes
+- Blanket PO / scheduled release management
+- Emergency PO processing
+- PO template standar sesuai format supplier
+- Notifikasi push ke semua pihak di setiap perubahan status
+
+8.2 Advanced Order Handling
+------------------------------------------------------------------------
+FR-ORD-02: Complex Orders
+- Split orders: partial shipment acceptance
+- Backorder management dan tracking
+- Substitute item handling dengan approval workflow
+- Minimum order quantity enforcement
+- Order consolidation untuk same supplier
+- Delivery schedule management: JIT, scheduled, on-demand
+- Drop-ship orders: supplier kirim langsung ke departemen
+
+8.3 Goods Receipt
+------------------------------------------------------------------------
+FR-ORD-03: Receiving
+- Three-way matching: PO, Goods Receipt, Invoice
+- Partial receipt processing
+- Over/under delivery tolerance configuration
+- Quality inspection at receipt (quarantine workflow)
+- Certificate of Analysis verification
+- Temperature verification logging untuk cold chain items
+- Goods Receipt Note (GRN) auto-generation
+- Discrepancy reporting dan resolution workflow
+- Barcode/RFID scan at receiving
+- Document capture: CoA, packing list, invoice, temperature logger data
+
+Acceptance Criteria — ORD-03:
+- 3-way matching otomatis dalam < 5 detik per line item
+- Tolerance rules configurable per item category
+- GRN auto-generate dalam < 10 detik setelah receipt confirmation
+
+8.4 Returns & RMA
+------------------------------------------------------------------------
+FR-ORD-04: Return Management
+- Return Material Authorization (RMA) workflow
+- Return reason categorization: expired, damaged, recall, overstock,
+  wrong item, temperature excursion
+- Return policy enforcement otomatis
+- Credit note tracking dan auto-generation
+- Supplier return shipment coordination
+- Defective goods quarantine
+- Return-to-vendor vs. dispose decision workflow
+- Return receiving & inspection workflow
+- Photo documentation untuk kondisi produk retur
+- Restocking rules: validasi expiry, packaging, temperature history
+- Destruction/write-off workflow untuk controlled substances
+- Returns analytics: rate by product, customer, reason
+
+================================================================================
+9. MODUL 4 — WAREHOUSE & DISTRIBUTION
+================================================================================
+
+9.1 Receiving & Inbound
+------------------------------------------------------------------------
+FR-WMS-01: Inbound Operations
+- Dock scheduling dan appointment management
+- ASN (Advanced Shipping Notice) processing
+- Barcode/2D DataMatrix scanning at receiving dock
+- Quality inspection queue management
+- Quarantine zone management untuk items pending QC
+- Document verification: delivery order, CoA, packing list
+- Weight/volume verification
+- All pharma/alkes auto-status "Quarantine" pending QC per CDOB
+
+9.2 Storage & Put-Away
+------------------------------------------------------------------------
+FR-WMS-02: Put-Away
+- System-directed put-away: algorithm-driven location assignment
+- Location hierarchy: Warehouse > Zone > Aisle > Rack > Level > Bin
+- Temperature zone routing:
+  * Frozen: -20C atau di bawah (biologics -70C)
+  * Refrigerated/Cold: 2-8C (vaksin, insulin, biologics)
+  * Cool: 8-15C
+  * Controlled Room Temp (CRT): 15-25C
+  * Ambient
+- Hazardous material segregation
+- Narcotics/psychotropics vault routing: secured, dual-access controls
+- FEFO slot optimization
+- Cross-docking capability untuk urgent orders
+- Pallet/case/each level put-away
+- Confirmation scanning: location + product barcode
+- Capacity management: real-time utilization per zone
+- Dynamic slotting: periodic re-slotting berdasarkan velocity/seasonality
+
+9.3 Picking & Packing
+------------------------------------------------------------------------
+FR-WMS-03: Outbound Operations
+- Wave planning: group orders by priority, route, customer, delivery window
+- Pick strategy: zone, batch, cluster, discrete — configurable per order
+- FEFO-enforced picking dengan supervisor override control
+- Barcode-verified picking: scan product + location + lot
+- Pick-to-cart / pick-to-tote dengan mobile device
+- Substitution rules untuk item tidak tersedia
+- Short-expiry validation: block jika remaining shelf life < minimum
+- Pack verification: scan each item into shipping container
+- Cartonization: optimal box size suggestion
+- Cold chain packing: auto-add gel packs, dry ice, insulated packaging
+- Temperature logger insertion prompt
+- Shipping label generation: GS1-compliant barcodes, SSCC
+- Kit assembly: pre-packaged procedure kits
+- Manifest creation: consolidate orders per vehicle
+
+9.4 Cold Chain Management
+------------------------------------------------------------------------
+FR-WMS-04: Cold Chain Monitoring
+- Real-time IoT temperature monitoring: pharma-grade accuracy (+/-0.1C)
+- Monitoring frequency: 1-5 menit interval
+- Multi-parameter: temperature, humidity, light exposure, door open/close
+- Redundant sensors untuk prevent monitoring gaps
+- Sensor calibration management
+
+FR-WMS-05: Cold Chain Alerts & Excursions
+- Real-time alerting: SMS/email/push saat temperature deviasi
+- Multi-level escalation: operator > supervisor > quality manager > director
+- Warning vs. alarm thresholds
+- Excursion documentation: start time, duration, peak temperature
+- Mean Kinetic Temperature (MKT) calculation
+- Excursion assessment workflow: pharmacist/QA review
+- Auto-CAPA untuk repeated/severe excursions
+
+FR-WMS-06: Cold Chain Equipment
+- Equipment registry: refrigerators, freezers, cold rooms, reefer vehicles
+- IQ/OQ/PQ qualification documents per CDOB
+- Preventive maintenance scheduling
+- Equipment failure protocol dan contingency plan
+- Performance dashboard: uptime, MTBF, energy consumption
+
+FR-WMS-07: Cold Chain Compliance
+- Per-shipment temperature history reports
+- Certificate of compliance: cold chain maintained throughout
+- Data logger management: inventory, calibration, assignment
+- Regulatory audit package untuk BPOM CDOB
+- Historical trend analysis per zone/season/equipment
+
+9.5 Internal Distribution
+------------------------------------------------------------------------
+FR-WMS-08: Facility Distribution
+- Ward/department delivery scheduling
+- Internal delivery route optimization
+- Proof of delivery capture: digital signature
+- Emergency delivery prioritization (CITO)
+- Trolley/cart tracking
+- Direct-to-department delivery support
+- Last-mile tracking dalam fasilitas
+
+9.6 Transportation & Delivery Management
+------------------------------------------------------------------------
+FR-WMS-09: Route & Fleet
+- AI-based route optimization: multi-stop, traffic, delivery windows, capacity
+- Hospital delivery window compliance
+- Multi-drop planning dan zone-based routing
+- Emergency/CITO order routing: priority lane
+- Return trip planning: koordinasi pickups
+- Fleet management: vehicle registry, capacity, temp capability, maintenance
+- Vehicle temperature qualification per CDOB
+- Driver management: license, CDOB training, health screening
+
+FR-WMS-10: Tracking & Visibility
+- GPS live tracking semua shipment aktif
+- Dynamic ETA calculation berbasis real-time traffic
+- Geofencing: auto-detect arrival/departure
+- Customer shipment tracking portal untuk RS
+- Milestone notifications: dispatched, in-transit, arriving, delivered
+- Exception alerts: route deviation, unplanned stops, late delivery
+
+FR-WMS-11: Proof of Delivery (ePOD)
+- Electronic POD: digital signature capture
+- Photo POD: photograph of delivered goods
+- Timestamp & GPS location auto-capture
+- Recipient verification: name, role, ID/badge
+- Temperature at delivery recording
+- Condition notes untuk damage/discrepancy
+- Document delivery: CoA, delivery note, temperature log
+- POD archival minimum 5 tahun per CDOB
+
+FR-WMS-12: Cold Chain Transport
+- In-transit temperature monitoring via IoT cellular/satellite
+- Temperature excursion alerts real-time
+- Humidity monitoring untuk sensitive products
+- Door-open events tracking
+- Temperature logger data auto-download at delivery
+- Excursion assessment workflow sebelum delivery acceptance
+
+Acceptance Criteria — WMS-04:
+- Temperature alert terkirim dalam < 30 detik setelah excursion
+- Cold chain compliance rate target 100%
+- Temperature data tersimpan minimum 5 tahun
+- MKT calculation otomatis untuk setiap excursion event
+
+================================================================================
+10. MODUL 5 — FINANCIAL & PAYMENT
+================================================================================
+
+10.1 Accounts Payable
+------------------------------------------------------------------------
+FR-FIN-01: Invoice Processing
+- Automated invoice capture: OCR / e-invoice / AI extraction
+- Three-way matching (PO, GRN, Invoice) dengan tolerance rules
+- Two-way matching untuk service items
+- Invoice exception handling workflow
+- Payment scheduling dan batch processing
+- Early payment discount tracking
+- Debit note / credit note processing
+- Duplicate invoice detection: AI-powered fuzzy matching
+- Invoice numbering compliance dengan e-Faktur
+
+FR-FIN-02: Payment Processing
+- Payment status tracking dan supplier notification
+- Withholding tax auto-calculation: PPh 22, PPh 23
+- Payment approval workflow
+- Batch payment processing
+
+10.2 Accounts Receivable & AR Management
+------------------------------------------------------------------------
+FR-FIN-03: AR Management
+- Invoice processing otomatis dalam sistem
+- Matching otomatis: invoice vs PO (3-way matching)
+- AR Account per Mitra KSM: tracking piutang, jatuh tempo, bunga
+- Aging report otomatis: Current / 30 / 60 / 90 / >90 hari
+- Dunning / reminder automation
+- Payment collection tracking
+- Bad debt management
+
+10.3 Supply Chain Financing
+------------------------------------------------------------------------
+
+FR-FIN-04: Reverse Factoring (Supplier Finance)
+- Buyer (RS)-initiated program
+- Approved payable upload dari procurement system
+- Multi-funder marketplace: bank berkompetisi untuk fund invoices
+- Funder allocation rules: round-robin, lowest rate, preferred bank
+- Auto discount calculation berdasarkan days-to-maturity
+- Supplier acceptance portal: accept/reject financing offer
+- Non-recourse financing: risk transfer ke funder
+- Program-level dan supplier-level credit limits
+
+FR-FIN-05: Invoice Financing / Factoring
+- Supplier-initiated financing terhadap outstanding receivables
+- Recourse dan non-recourse options
+- Selective invoice financing: pilih invoice mana
+- Advance rate configuration: 70-90% dari face value
+- Reserve/holdback management
+- Factoring fee calculation: flat fee, discount rate, tiered
+- Notice of Assignment (NOA) workflow dan e-signature
+- Collection dan remittance tracking
+
+FR-FIN-06: Dynamic Discounting
+- RS gunakan cash untuk bayar supplier lebih awal dengan diskon
+- Sliding scale discount rates: earlier = higher discount
+- "Name Your Rate" functionality
+- Cash-available triggers
+- Supplier opt-in/opt-out per invoice
+- APR-equivalent display untuk transparansi
+
+FR-FIN-07: BPJS-Specific Bridging Loans
+- Pre-financing terhadap verified BPJS claims
+- BPJS claim status sebagai collateral proxy
+- Tiered advance rates berdasarkan claim verification status:
+  * Submitted tapi unverified: lower advance rate
+  * Verified/approved oleh BPJS: higher advance rate
+  * Partially disputed: adjusted advance rate
+- Automatic repayment saat BPJS disbursement
+- BPJS payment waterfall: BPJS > escrow > auto-deduct loan + fees > RS
+- Claim-to-loan matching dan reconciliation
+- INA-CBG/iDRG tariff-based pre-approval
+
+FR-FIN-08: Purchase Order Financing
+- Pre-shipment financing berdasarkan confirmed POs
+- PO verification dan validation
+- Milestone-based disbursement: production, shipping, delivery
+- Conversion ke invoice financing saat delivery acceptance
+
+FR-FIN-09: Inventory / Warehouse Financing
+- Financing terhadap healthcare inventory sebagai collateral
+- Warehouse receipt sebagai collateral
+- Real-time inventory monitoring integration
+- Expiry date tracking (critical untuk pharmaceuticals)
+- Automatic margin calls saat inventory depreciation
+
+Acceptance Criteria — FIN-04:
+- Aktivasi term of payment selesai dalam < 4 jam kerja
+- Pembayaran supplier dikreditkan T+1 setelah bank aktivasi
+- Kalkulator bunga akurat hingga 4 desimal
+- Multi-funder bid comparison tersedia dalam < 1 menit
+
+10.4 BPJS Reconciliation
+------------------------------------------------------------------------
+
+FR-FIN-10: VClaim API Integration
+- Patient eligibility verification real-time
+- SEP (Surat Eligibilitas Peserta) creation dan management
+- Referral data synchronization
+- Service type classification: outpatient/inpatient
+- Diagnosis dan procedure code lookup: ICD-10, ICD-9-CM
+- Fallback mechanisms saat API downtime
+
+FR-FIN-11: INA-CBG / iDRG Claim Processing
+- INA-CBG grouper integration untuk claim amount estimation
+- iDRG transition support: 5 severity levels, 1.318 DRG groups
+- Case-mix index monitoring dan optimization
+- Diagnosis coding quality assurance dengan AI suggestions
+- Claim amount estimation sebelum submission (pre-grouping)
+- Top-up claim management: special procedures, high-cost drugs
+- Claim file generation format TXT untuk e-Klaim
+- Re-grouping dan appeal management
+
+FR-FIN-12: BPJS Claim Lifecycle Tracking
+- Status pipeline lengkap:
+  Service Delivered > Coded > Grouped > Submitted >
+  Under Verification > Verified > Approved >
+  Queued for Payment > Paid
+- Verification result tracking: approved, revision, rejected
+- Dispute/clarification management workflow
+- Claim revision dan resubmission tracking
+- Payment batch tracking dari BPJS
+- Historical claim approval rate analytics
+- Claim rejection root cause analysis
+- Average days-to-payment tracking per RS
+
+FR-FIN-13: BPJS Receivable Analytics
+- Total outstanding BPJS receivables dashboard
+- Aging analysis: 0-30, 31-60, 61-90, 91-120, 120+ hari
+- Expected collection timeline forecasting
+- Payment pattern analysis by region, tipe RS, kategori klaim
+- Variance analysis: expected vs. actual reimbursement
+- Write-off dan provision estimation
+- Receivable turnover ratio tracking
+
+FR-FIN-14: Standing Instruction
+- Pembayaran otomatis ke Mitra KSM saat dana BPJS masuk
+- Rekonsiliasi otomatis penerimaan dana BPJS vs kewajiban bayar
+- Laporan reconciliation bulanan untuk audit
+
+FR-FIN-15: SatuSehat Integration
+- Data synchronization dengan national health data platform
+- Patient encounter data sharing
+- FHIR-based health information exchange
+
+10.5 Tax Management (Indonesia-Specific)
+------------------------------------------------------------------------
+
+FR-FIN-16: PPN (VAT)
+- Auto PPN calculation pada invoices
+- PPN Masukan dan PPN Keluaran tracking
+- VAT-exempt transaction handling untuk healthcare services tertentu
+- PPN reconciliation antara buyer dan supplier
+- Monthly SPT Masa PPN preparation support
+
+FR-FIN-17: e-Faktur / Coretax Integration
+- Coretax DJP integration (pengganti e-Faktur)
+- Real-time invoice clearance model compliance
+- Auto e-Faktur generation saat invoice approval
+- NSFP (Nomor Seri Faktur Pajak) management
+- e-Faktur status tracking: created, approved, cancelled, replaced
+- Input VAT credit validation
+- PJAP API integration
+
+FR-FIN-18: PPh Withholding
+- PPh 23 calculation: 2% on services
+- PPh 22 untuk imported medical supplies
+- Bukti Potong generation
+- Tax withholding reconciliation
+
+10.6 Payment Orchestration & Bank Integration
+------------------------------------------------------------------------
+
+FR-FIN-19: Multi-Bank Connectivity
+- Integration dengan major banks: BCA, Mandiri, BRI, BNI, CIMB Niaga
+- SNAP (Standard National Open API Payment) protocol compliance
+- Real-time balance inquiry across multiple accounts
+- Multi-bank transaction routing optimization
+- Bank connectivity health monitoring dan failover
+
+FR-FIN-20: Payment Rails
+- BI-FAST: real-time retail payments, 24/7, instant settlement
+- RTGS (BI-RTGS Gen 3): high-value/urgent, ISO 20022
+- SKN/SKNBI: national clearing untuk batch payments
+- QRIS: QR-code based payments
+- Intra-bank instant transfers
+- Payment rail selection logic: amount, urgency, cost
+
+FR-FIN-21: Virtual Account Management
+- Unique VA generation per transaction/invoice/supplier/RS
+- Real-time payment notification on VA credit
+- Multi-bank VA support
+- VA expiry management
+- Auto reconciliation VA payments ke invoices
+- Bulk VA creation
+
+FR-FIN-22: Escrow Account Management
+- Dedicated escrow per financing program (OJK requirement)
+- Funds flow: Funder > Escrow > Supplier & RS > Escrow > Funder
+- T+2 compliance: max 2 hari kerja di escrow per OJK
+- Lender Fund Account (RDL) integration
+- Automated waterfall payment logic
+- Multi-party escrow
+
+FR-FIN-23: Disbursement Engine
+- Bulk disbursement processing
+- Scheduled disbursement: same-day, next-day, future-dated
+- Disbursement approval workflow
+- Status tracking: initiated > processing > completed > failed > reversed
+- Auto-retry on failed disbursements
+- Net disbursement calculation: face value minus fee
+
+FR-FIN-24: Collection Engine
+- Automated collection scheduling berdasarkan due dates
+- Standing instruction / auto-debit setup
+- Collection reminder workflow: pre-due, on-due, past-due
+- Partial payment handling dan allocation
+- Payment matching: automatic dan manual
+- BPJS payment collection routing: auto-route ke funder
+
+10.7 Cost Accounting
+------------------------------------------------------------------------
+FR-FIN-25: Cost Management
+- Item cost tracking: landed cost calculation
+- Department/cost center allocation
+- Procedure-based cost analysis
+- Supply cost per patient/case analysis
+- Waste dan shrinkage cost tracking
+
+================================================================================
+11. MODUL 6 — CREDIT & RISK MANAGEMENT
+================================================================================
+
+11.1 Credit Scoring Models
+------------------------------------------------------------------------
+
+FR-CRM-01: Hospital/Buyer Scoring
+- BPJS claim history dan payment reliability
+- Hospital classification: Type A/B/C/D
+- Historical revenue dan operating margins
+- Bed occupancy rates dan patient volume trends
+- Accreditation status (KARS level)
+- Geographic risk: region-level BPJS payment performance
+- Government vs. private hospital differentiation
+- Outstanding BPJS receivables aging
+- Working capital ratio analysis
+
+FR-CRM-02: Supplier Scoring
+- Financial statement analysis
+- SLIK credit bureau data (mandatory per OJK Reg. 11/2024)
+- Payment history across platform
+- Industry sector risk
+- Size, diversification, customer concentration
+- Years in operation dan track record
+- Legal/compliance status
+
+FR-CRM-03: Transaction-Level Scoring
+- Invoice validity score: PO match, delivery confirmation, approval
+- Dilution risk: historis credit notes, returns, disputes
+- Concentration risk per buyer-supplier pair
+- Seasonal adjustment factors
+- BPJS claim verification status weight
+
+11.2 Credit Limit Management
+------------------------------------------------------------------------
+FR-CRM-04: Limit Management
+- Aggregate program-level limits
+- Per-buyer dan per-supplier credit limits
+- Per-transaction dan tenor limits
+- Sector dan geographic concentration limits
+- Dynamic limit adjustment berdasarkan real-time risk signals
+- Limit utilization monitoring dan alerts
+- Temporary limit increases dengan approval workflow
+- Automatic limit freeze on adverse events
+
+11.3 Risk Monitoring
+------------------------------------------------------------------------
+FR-CRM-05: Portfolio Risk
+- Real-time portfolio risk dashboard
+- PD, LGD, EAD modeling
+- Stress testing dan scenario analysis
+- Early Warning System (EWS):
+  * Payment behavior deterioration
+  * BPJS claim rejection rate increase
+  * Financial ratio covenant breaches
+  * Negative news monitoring
+- Watchlist dan blacklist management
+- Collateral coverage monitoring
+- Portfolio concentration heat maps
+
+================================================================================
+12. MODUL 7 — REVENUE CYCLE MANAGEMENT
+================================================================================
+
+FR-RCM-01: Pre-Service
+- Patient eligibility verification: BPJS dan private insurance
+- Prior authorization management
+- Cost estimation dan patient financial counseling
+
+FR-RCM-02: Coding & Documentation
+- Charge capture at point of care
+- AI-assisted coding: ICD-10, ICD-9-CM suggestions
+- Clinical Documentation Improvement (CDI) prompts
+- DRG optimization
+- Unbundling dan upcoding detection (compliance safeguard)
+- Charge Description Master (CDM) management
+
+FR-RCM-03: Claims Management
+- Clean claim rate monitoring dan optimization
+- Claim scrubbing: pre-submission validation
+- Electronic claim submission ke BPJS dan private insurers
+- Denial management workflow: identify, appeal, resolve, prevent
+- Denial root cause analytics
+- Payment posting dan auto-posting rules
+- Remittance advice processing
+
+FR-RCM-04: RCM Analytics
+- Key Performance Indicators:
+  * Days in Accounts Receivable (DAR)
+  * Clean claim rate
+  * Denial rate dan denial value
+  * Net collection rate
+  * Cost to collect
+  * BPJS average days to payment
+  * Claim approval rate
+- Payer mix analysis
+- Revenue leakage identification
+- Benchmark comparison across RS dalam platform
+
+================================================================================
+13. MODUL 8 — CASH FLOW MANAGEMENT & TREASURY
+================================================================================
+
+FR-TRS-01: Cash Flow Forecasting
+- AI/ML-powered cash flow prediction
+- Rolling 13-week cash flow forecast
+- Long-term monthly/quarterly/annual projections
+- Scenario modeling: best case, expected, worst case
+- BPJS payment timing prediction berdasarkan historical patterns
+- Supplier payment scheduling optimization
+- Forecast vs. actual variance analysis
+- Multi-entity consolidation untuk hospital group
+
+FR-TRS-02: Working Capital Optimization
+- Days Sales Outstanding (DSO) tracking
+- Days Payable Outstanding (DPO) management
+- Cash Conversion Cycle (CCC) analysis
+- Working capital ratio monitoring
+- BPJS receivable-specific metrics
+- Payment term negotiation support
+- Early payment discount opportunity identification
+- Financing cost vs. discount benefit analysis
+
+FR-TRS-03: Liquidity Management
+- Real-time cash position across semua bank accounts
+- Minimum cash balance alerts
+- Cash pooling untuk hospital groups
+- Intercompany lending management
+- Line of credit utilization monitoring
+- Liquidity buffer calculation
+- Stress testing untuk liquidity scenarios
+
+FR-TRS-04: Treasury Dashboard
+- Consolidated cash position view
+- Bank balance aggregation multi-bank
+- Upcoming payment obligations calendar
+- Expected inflows: BPJS, patient collections, insurance
+- FX exposure monitoring untuk imported supplies
+- Treasury policy compliance monitoring
+
+================================================================================
+14. MODUL 9 — QUALITY MANAGEMENT SYSTEM (QMS)
+================================================================================
+
+FR-QMS-01: Document Control
+- Version-controlled SOPs untuk semua proses
+- Document approval workflow: Draft > Review > Approve > Effective
+- Change control process
+- Distribution & acknowledgement tracking
+- Retention management per CDOB
+
+FR-QMS-02: Deviation & Non-Conformance
+- Deviation reporting untuk departure dari SOP
+- Severity classification: Critical, Major, Minor
+- Root cause analysis tools: Fishbone/Ishikawa, 5-Why
+- Impact assessment pada product quality dan patient safety
+- Investigation workflow dengan deadline tracking
+- Deviation trending dan statistical analysis
+
+FR-QMS-03: CAPA (Corrective and Preventive Action)
+- CAPA initiation triggers: complaint, audit, deviation, OOS, recall
+- Root cause investigation terstruktur
+- Action plan: corrective dan preventive
+- Effectiveness verification
+- Escalation untuk overdue CAPAs
+- Metrics: open, aging, on-time closure rate, recurrence
+
+FR-QMS-04: Audit Management
+- Internal audit annual plan per CDOB
+- Checklist templates: CDOB, WHO GDP
+- Audit execution: findings, evidence
+- Audit report auto-generation
+- Finding tracking linked ke CAPAs
+- Supplier/vendor audit templates
+- Regulatory inspection readiness dashboard
+
+FR-QMS-05: Training Management
+- Training matrix per role
+- Records: completion, scores, certification expiry
+- Re-training triggers: SOP update, CAPA, periodic
+- CDOB competency requirements compliance
+- Training effectiveness assessment
+
+FR-QMS-06: Complaint Management
+- Multi-channel intake: portal, email, phone
+- Classification: product quality, delivery, documentation, adverse event
+- Investigation linked ke lot/batch
+- Response SLA tracking
+- Auto-flag complaints requiring BPOM reporting
+- Complaint trending dashboard
+
+================================================================================
+15. MODUL 10 — ANALYTICS & BUSINESS INTELLIGENCE
+================================================================================
+
+FR-ANL-01: Dashboards
+- Executive summary: spend, savings, compliance, KPIs
+- Inventory health: stockouts, overstock, expiry risk, turnover
+- Procurement performance: cycle time, savings, supplier performance
+- Financial: AP aging, payment status, financing utilization
+- BPJS reconciliation: claim status, payment tracking
+- Supply chain risk: disruption alerts, supplier risk scores
+- Perfect Order: on-time, in-full, error-free
+- Warehouse KPIs: throughput, accuracy, pick rate, dock-to-stock
+- Delivery KPIs: on-time rate, completion, SLA compliance
+- Quality KPIs: rejection rate, CAPA closure, complaint resolution
+
+FR-ANL-02: Standard Reports
+- Consumption by item/category/department/period
+- Spend analysis by supplier/category/department
+- Inventory valuation
+- Stock movement
+- Expiry report
+- Supplier performance
+- Contract utilization
+- Budget vs. actual
+- Outstanding PO
+- GRNI (Goods Received Not Invoiced)
+- Slow-moving dan dead stock
+- Controlled substance reports
+- Temperature compliance reports
+- Compliance reporting: BPOM, Kemenkes, SNARS/KARS format
+
+FR-ANL-03: Predictive Analytics (AI/ML)
+- Demand forecasting
+- Stockout probability prediction
+- Lead time variability analysis
+- Supplier risk prediction
+- Price trend forecasting
+- Budget overrun prediction
+- Expiry risk scoring
+- BPJS claim rejection prediction
+- Cash flow forecasting
+- Invoice fraud detection scoring
+
+FR-ANL-04: Benchmarking
+- Price benchmarking across RS/regions
+- Consumption: per bed, per admission, per procedure
+- Supplier performance benchmarking
+- Inventory turnover benchmarking
+- Procurement cycle time benchmarking
+- Cost-per-case benchmarking
+
+FR-ANL-05: Custom Reporting
+- Report builder / ad-hoc query tool
+- Scheduled report delivery: email, dashboard
+- Export: Excel, PDF, CSV
+- Data visualization: charts, graphs, heat maps
+- Drill-down capability: summary ke transaction level
+- AI natural language report generation
+
+================================================================================
+16. MODUL 11 — AI / MACHINE LEARNING
+================================================================================
+
+FR-AIM-01: Intelligent Procurement
+- Optimal order quantity recommendation
+- Best supplier recommendation: price + lead time + quality + risk
+- Price anomaly detection
+- Spend pattern anomaly detection
+- Maverick spend identification
+- Contract compliance prediction
+
+FR-AIM-02: Supply Chain Risk & Disruption
+- Supplier risk scoring: financial, operational, external data
+- Supply disruption early warning
+- Alternative supplier auto-suggestion saat disruption
+- Lead time prediction dan variability analysis
+- Disruption sensing
+
+FR-AIM-03: Financial Intelligence
+- Invoice fraud detection: duplicate, unusual amounts, suspicious patterns
+- Payment timing optimization
+- BPJS claim rejection prediction
+- Dynamic credit scoring
+- Cash flow forecasting AI
+
+FR-AIM-04: Operational Optimization
+- Warehouse slotting optimization
+- Delivery route optimization
+- Par level auto-optimization
+- Expiry risk scoring
+- Inventory right-sizing recommendations
+
+FR-AIM-05: Conversational AI
+- AI chatbot: stock availability, PO status, delivery ETA
+- Natural language search across inventory dan transactions
+- AI co-pilot untuk procurement decisions
+- Automated report generation dari natural language
+- Guided troubleshooting untuk supply chain issues
+
+FR-AIM-06: Document Intelligence
+- OCR untuk invoice digitization
+- Automated data extraction: CoA, DO, packing list
+- Contract clause extraction dan analysis
+- Intelligent document classification dan routing
+
+================================================================================
+17. MODUL 12 — COMPLIANCE, AUDIT & REGULASI
+================================================================================
+
+17.1 Audit Trail
+------------------------------------------------------------------------
+FR-CMP-01: Audit Logging
+- Complete transaction audit log: who, what, when, where, from-value, to-value
+- Immutable audit records
+- User action logging: login, view, create, edit, delete, approve, reject
+- Document version history
+- IP address dan device tracking
+
+17.2 Regulatory Compliance Indonesia
+------------------------------------------------------------------------
+
+FR-CMP-02: BPOM Compliance
+- Product registration verification (izin edar)
+- Distribution license (CDAKB) checks
+- BPOM TTAC serialization integration
+- 2D DataMatrix compliance:
+  * Phase 1 (Des 2025): narkotika dan psikotropika
+  * Phase 2 (Des 2027): semua obat resep termasuk biologics
+- Aggregation hierarchy: unit > inner pack > case > pallet
+
+FR-CMP-03: CDOB Compliance
+- 9 pilar CDOB: manajemen mutu, organisasi & personalia, bangunan &
+  peralatan, operasi, inspeksi diri, keluhan pelanggan, produk ditarik,
+  retur, dokumentasi
+- CDOB certificate management: validity, renewal, audit preparation
+- Personnel qualification records: Apoteker Penanggung Jawab
+- Self-inspection module: built-in checklists per CDOB
+
+FR-CMP-04: Kemenkes Compliance
+- KFA code enforcement
+- e-Katalog compliance
+- Hospital facility licensing
+- SatuSehat platform integration
+
+FR-CMP-05: LKPP Compliance
+- e-Procurement process adherence untuk RS publik
+- e-Tendering support
+
+FR-CMP-06: OJK Compliance
+- Supply chain financing regulatory limits
+- P2P lending reporting per Circular Letter 4/2025
+- SLIK integration: debtor data submission, credit inquiry
+- Funding limits: IDR 2 miliar per recipient
+- NPF ratio monitoring
+- Governance structure disclosure
+
+FR-CMP-07: Bank Indonesia Compliance
+- SNAP protocol adherence
+- AML reporting ke PPATK
+- Payment system requirements
+
+FR-CMP-08: Tax Compliance
+- e-Faktur/Coretax integration
+- PPN dan PPh compliance
+- Tax reporting automation
+
+FR-CMP-09: SNARS/KARS Compliance
+- Hospital accreditation reporting
+- Procurement & pharmacy service documentation
+- Annual reporting automation
+
+FR-CMP-10: Halal Compliance
+- BPJPH halal certification tracking per device class
+- Phased deadline monitoring
+
+17.3 Controlled Substance Management
+------------------------------------------------------------------------
+FR-CMP-11: Narcotics & Psychotropics
+- Surat Izin Khusus tracking
+- BPOM-approved ordering quotas enforcement
+- Dual-custody handling: two-person verification di setiap tahap
+- Monthly/quarterly regulatory reporting ke BPOM
+- Witnessed destruction per BPOM guidelines
+
+17.4 Compliance Reporting
+------------------------------------------------------------------------
+FR-CMP-12: Report Generation
+- Regulatory reports: BPOM, Kemenkes, Dinkes
+- CDOB self-inspection reports
+- Controlled substance reports
+- OJK periodic reports: business plan, monthly, quarterly
+- SLIK debtor data submission
+- Internal audit reports
+- Compliance score/rating per supplier
+- Inspection readiness dashboard
+
+================================================================================
+18. MODUL 13 — KYC/KYB & ANTI-FRAUD
+================================================================================
+
+18.1 KYC Hospital (Buyer) Onboarding
+------------------------------------------------------------------------
+FR-KYC-01: Hospital KYC
+- Legal entity verification: NIB, SIUP, TDP/OSS
+- Hospital license verification (izin operasional)
+- BPJS cooperation agreement verification
+- Beneficial ownership identification
+- Director/commissioner eKYC: KTP-based
+- Financial statement collection dan analysis
+- Bank reference verification
+- Risk category assignment: low/medium/high
+- Periodic re-verification: annual KYC refresh
+
+18.2 KYC Supplier Onboarding
+------------------------------------------------------------------------
+FR-KYC-02: Supplier KYC
+- Business registration: NIB, NPWP, SIUP
+- PKP status verification
+- Product license: izin edar BPOM
+- Bank account ownership verification
+- SLIK credit history inquiry
+- Sanctions dan PEP screening
+- eKYC biometric verification
+- Digital signature enrollment
+- Document expiry tracking
+
+18.3 eKYC Technology
+------------------------------------------------------------------------
+FR-KYC-03: Digital KYC
+- Biometric verification: facial recognition vs KTP photo
+- OCR-based ID document extraction
+- Liveness detection (anti-spoofing)
+- Video call verification untuk EDD
+- Dukcapil (civil registry) integration
+- OJK Circular No. 12/SEOJK.03/2022 compliance
+
+18.4 Anti-Fraud Detection
+------------------------------------------------------------------------
+
+FR-AFD-01: Invoice Fraud
+- Duplicate invoice detection: exact match dan fuzzy matching
+- Invoice-to-PO anomaly: price variance, quantity variance
+- Ghost supplier detection
+- Fictitious invoice identification (no matching GRN)
+- Invoice splitting detection
+- Round-amount flagging
+- Vendor master manipulation alerts (bank account changes)
+- Cross-RS comparison untuk collusion detection
+
+FR-AFD-02: BPJS Claim Fraud
+- Upcoding detection
+- Phantom patient detection
+- Claim amount anomaly vs. DRG benchmarks
+- Unusual readmission pattern detection
+- Service unbundling detection
+- Duplicate claim submission detection
+
+FR-AFD-03: Transaction Fraud
+- Real-time transaction monitoring
+- Velocity checks
+- Amount threshold alerts
+- Device fingerprinting
+- Session hijacking prevention
+
+FR-AFD-04: ML-Based Detection
+- Supervised learning dari historical fraud cases
+- Unsupervised anomaly detection untuk novel patterns
+- Graph Neural Networks untuk collusion analysis
+- Real-time fraud scoring per transaction
+- Explainable AI untuk fraud justification
+- Adaptive model retraining
+- Fraud case management workflow
+
+================================================================================
+19. MODUL 14 — USER MANAGEMENT & SECURITY
+================================================================================
+
+FR-SEC-01: Access Control
+- Role-Based Access Control (RBAC) granular
+- Organization hierarchy: hospital group > RS > department > unit
+- Data-level security: users see only their scope
+- Function-level: view, create, edit, delete, approve per module
+- Segregation of duties enforcement
+- IP whitelisting
+
+FR-SEC-02: Authentication
+- Multi-Factor Authentication (MFA) — wajib untuk transaksi finansial
+- Single Sign-On (SSO): SAML 2.0 / OAuth 2.0
+- Active Directory / LDAP integration
+- Password policy: complexity, rotation, history
+- Session management: timeout, concurrent limits
+- Biometric authentication support
+
+FR-SEC-03: Data Security
+- Encryption: TLS 1.3 in transit, AES-256 at rest
+- Database encryption
+- PII/PHI data masking
+- Data Loss Prevention (DLP) controls
+- Regular penetration testing
+- ISO 27001 compliance framework
+- Data residency: Indonesian sovereignty (PP 71/2019)
+- Zero-trust architecture
+
+FR-SEC-04: User Administration
+- User provisioning dan de-provisioning workflows
+- Bulk user management
+- User activity monitoring dan reporting
+- License management
+- Profile dan preference management
+
+================================================================================
+20. MODUL 15 — COMMUNICATION & COLLABORATION
+================================================================================
+
+FR-COM-01: Notification System
+- Multi-channel: in-app, email, SMS, WhatsApp Business API, push
+- Configurable rules per event type
+- Escalation: if not acknowledged within X hours
+- Digest notifications: daily/weekly summary
+- Priority-based categorization
+- SMS backup untuk kritis saat internet tidak tersedia
+
+FR-COM-02: Vendor Portal
+- Supplier self-registration dan onboarding
+- PO acknowledgment dan confirmation
+- ASN submission
+- Invoice submission dan status tracking
+- Document upload: certificates, licenses, CoA
+- Performance scorecard visibility
+- RFQ response submission
+- Contract review dan digital signature
+- Payment status visibility
+- Financing application submission
+
+FR-COM-03: Internal Collaboration
+- In-app messaging / comments on transactions
+- @mention capability
+- Task assignment dan tracking
+- Document sharing dan annotation
+- Approval comments dan rejection reasons
+
+FR-COM-04: Dispute Resolution
+- Formal dispute filing: price discrepancy, quality, delivery
+- Dispute tracking dengan SLA monitoring
+- Evidence attachment: photos, documents
+- Resolution documentation
+- BPJS claim dispute tracking
+
+================================================================================
+21. MODUL 16 — MOBILE APPLICATION
+================================================================================
+
+FR-MOB-01: Mobile Inventory
+- Barcode/QR scanning via camera
+- Stock count via mobile
+- Stock inquiry by scanning
+- Expiry check by scanning
+- Receiving confirmation
+
+FR-MOB-02: Mobile Approvals
+- Push notification untuk pending approvals
+- Approve/reject dengan comments
+- Approval history
+- Delegation management
+
+FR-MOB-03: Mobile Procurement
+- Requisition creation
+- PO status tracking
+- Delivery tracking
+- Supplier communication
+
+FR-MOB-04: Mobile Dashboard
+- Key KPI widgets
+- Alert center
+- Quick-access reports
+- Offline capability untuk critical functions
+
+FR-MOB-05: Driver App (Field Operations)
+- Route navigation
+- Proof of delivery: signature, photo
+- Temperature logging during transport
+- Damaged goods photo documentation
+- GPS tracking
+- Delivery status updates real-time
+- Return pickup coordination
+
+================================================================================
+22. MODUL 17 — INTEGRATION & PLATFORM
+================================================================================
+
+22.1 Hospital Information System
+------------------------------------------------------------------------
+FR-INT-01: HIS/SIMRS Integration
+- Patient data sync untuk supply-to-patient linking
+- Procedure/surgery schedule untuk proactive supply preparation
+- Ward consumption data feed
+- Charge capture integration
+
+22.2 Government Systems
+------------------------------------------------------------------------
+FR-INT-02: Government Integration
+- e-Katalog LKPP: catalog sync, e-purchasing, price reference
+- BPJS Kesehatan: VClaim, e-Klaim, INA-CBGs, SEP
+- BPOM: product registration, recall feed, TTAC serialization
+- Kemenkes / SatuSehat: KFA registry, facility licensing, FHIR
+- DJP: e-Faktur/Coretax, tax reporting
+- Dukcapil: identity verification untuk eKYC
+
+22.3 Banking & Payment
+------------------------------------------------------------------------
+FR-INT-03: Bank Integration
+- Multi-bank API via SNAP protocol
+- Payment gateway: virtual accounts, bulk transfer
+- Bank statement auto-reconciliation
+- Real-time payment notification
+
+22.4 Supplier Integration
+------------------------------------------------------------------------
+FR-INT-04: Supplier Systems
+- Supplier portal API
+- EDI / electronic document exchange: PO, invoice, ASN
+- Punch-out catalog protocol: cXML, OCI
+- VMI (Vendor Managed Inventory) support
+
+22.5 IoT & Devices
+------------------------------------------------------------------------
+FR-INT-05: IoT Integration
+- Temperature sensor/logger data ingestion
+- Smart bin weight sensor integration
+- RFID reader/antenna integration
+- Barcode scanner integration
+- Automated dispensing cabinet (ADC) integration
+
+22.6 Digital Signature
+------------------------------------------------------------------------
+FR-INT-06: e-Signature
+- e-Signature compliant dengan PP 71/2019
+- Provider integration: PrivyID, Peruri
+- Signature workflow: contracts, POs, approvals
+
+22.7 API Platform
+------------------------------------------------------------------------
+FR-INT-07: API Infrastructure
+- RESTful API untuk semua modul
+- GraphQL support untuk flexible queries
+- Webhook untuk real-time event notifications
+- API rate limiting dan throttling
+- API documentation: OpenAPI/Swagger
+- Developer portal untuk third-party integration
+
+22.8 Platform Architecture
+------------------------------------------------------------------------
+FR-INT-08: Platform
+- Multi-tenant: hospital group support via Supabase RLS
+- White-label capability
+- Tenant-specific configuration
+- Hosted on Vercel Pro (Edge Network) + Supabase Pro
+- Serverless auto-scaling (Go functions on Vercel)
+- CDN via Vercel Edge Network
+- Data backup: Supabase Pro daily backups + point-in-time recovery
+- Data archival policy: active/archive/purge
+- Master data management
+- Data quality monitoring
+- Repository: GitHub (CI/CD via GitHub Actions + Vercel)
+
+22.9 Localization
+------------------------------------------------------------------------
+FR-INT-09: Indonesia Localization
+- Bahasa Indonesia primary, English support
+- Indonesian Rupiah (IDR) primary currency
+- Indonesian date/number formatting
+- Indonesian tax rules engine
+- Indonesian regulatory calendar integration
+
+================================================================================
+23. NON-FUNCTIONAL REQUIREMENTS
+================================================================================
+
+Kategori         Requirement                        Target / SLA
+------------------------------------------------------------------------
+Performance      Response time API                  < 200ms P95 untuk CRUD
+Performance      Throughput sistem                  10.000 request/menit peak
+Performance      Search/query response              < 1 detik untuk 1M records
+Availability     Uptime platform                    99.9% SLA
+Availability     RTO (Recovery Time Objective)      < 30 detik
+Availability     RPO (Recovery Point Objective)     0 (zero data loss)
+Availability     Disaster recovery                  Secondary datacenter aktif
+Security         Enkripsi at rest                   AES-256
+Security         Enkripsi in transit                TLS 1.3
+Security         Autentikasi finansial              MFA wajib
+Security         Penetration testing                Quarterly
+Security         Certification target               ISO 27001
+Compliance       Regulasi data                      UU PDP No. 27/2022
+Compliance       Data sovereignty                   PP 71/2019 (data di Indonesia)
+Compliance       Retensi data finansial             10 tahun (OJK)
+Compliance       Retensi data distribusi            5 tahun (CDOB)
+Scalability      Kapasitas RS                       1.000 RS aktif tanpa degradasi
+Scalability      Arsitektur                         Vercel Serverless + Supabase auto-scaling
+Scalability      Database                           Supabase Pro partitioning, read replicas
+Usability        Onboarding RS baru                 < 2 hari kerja
+Usability        Mobile                             iOS & Android native
+Usability        Offline capability                 Critical functions tersedia
+Usability        Bahasa                             ID (primary) + EN
+Reliability      Cold chain monitoring              Zero gap tolerance
+Reliability      Audit trail                        Immutable, tamper-proof
+Reliability      Backup                             Hourly incremental, daily full
+
+================================================================================
+24. USER STORIES & ACCEPTANCE CRITERIA
+================================================================================
+
+24.1 Epic: Inventory Intelligence
+------------------------------------------------------------------------
+US-INV-001: Sebagai Kepala Farmasi RS, saya ingin mendapatkan notifikasi
+otomatis ketika stok mendekati minimum threshold, SEHINGGA saya dapat
+memulai pengadaan sebelum stockout yang membahayakan pasien.
+
+US-INV-002: Sebagai Manajer Logistik Mitra KSM, saya ingin melihat status
+stok semua RS dalam jaringan dalam satu dashboard, SEHINGGA saya dapat
+memprioritaskan pengadaan untuk RS paling kritis.
+
+US-INV-003: Sebagai Kepala Farmasi, saya ingin sistem memperingatkan saya
+tentang item yang mendekati expiry, SEHINGGA saya dapat melakukan
+redistribusi atau disposisi sebelum expired.
+
+US-INV-004: Sebagai Quality Manager, saya ingin melakukan trace lot/batch
+dari supplier sampai pasien dalam < 30 detik, SEHINGGA saya bisa respond
+recall BPOM dengan cepat.
+
+24.2 Epic: Procurement Automation
+------------------------------------------------------------------------
+US-PRC-001: Sebagai Manajer Pengadaan Mitra KSM, saya ingin sistem otomatis
+memilih supplier terbaik berdasarkan rating, harga, dan ketersediaan,
+SEHINGGA proses yang biasanya 2 jam selesai dalam menit.
+
+US-PRC-002: Sebagai Finance Manager Supplier, saya ingin Invoice langsung
+terhubung dengan PO dan sistem AR, SEHINGGA tidak ada dispute akibat
+dokumen tidak cocok.
+
+US-PRC-003: Sebagai Procurement Manager, saya ingin membuat RFQ ke multiple
+supplier dan membandingkan penawaran dalam satu matrix, SEHINGGA saya
+mendapat harga terbaik.
+
+24.3 Epic: Financial Flows
+------------------------------------------------------------------------
+US-FIN-001: Sebagai Direktur Keuangan RS, saya ingin platform otomatis
+mengaktifkan bank financing saat invoice diterbitkan, SEHINGGA supplier
+selalu dibayar tepat waktu meskipun BPJS belum cair.
+
+US-FIN-002: Sebagai Treasurer Mitra KSM, saya ingin standing instruction
+pembayaran otomatis saat dana BPJS masuk, SEHINGGA tidak ada piutang
+terlewat atau terlambat.
+
+US-FIN-003: Sebagai Supplier, saya ingin memilih invoice mana yang mau
+saya finansiasi dan melihat penawaran dari multiple bank, SEHINGGA saya
+mendapat terms terbaik.
+
+24.4 Epic: Warehouse Operations
+------------------------------------------------------------------------
+US-WMS-001: Sebagai Warehouse Manager, saya ingin sistem mengarahkan
+put-away ke lokasi yang benar berdasarkan suhu produk, SEHINGGA cold chain
+integrity terjaga.
+
+US-WMS-002: Sebagai Warehouse Operator, saya ingin scanning barcode di
+setiap tahap (receive, pick, pack, ship), SEHINGGA akurasi order > 99.5%.
+
+US-WMS-003: Sebagai Quality Manager, saya ingin mendapat alert real-time
+saat temperature excursion terjadi, SEHINGGA saya bisa assess dan take
+action dalam < 30 menit.
+
+24.5 Epic: Compliance & Quality
+------------------------------------------------------------------------
+US-CMP-001: Sebagai Compliance Officer, saya ingin dashboard yang
+menunjukkan status compliance CDOB real-time, SEHINGGA saya selalu siap
+untuk inspeksi BPOM.
+
+US-CMP-002: Sebagai Pharmacist, saya ingin sistem enforce FEFO di semua
+picking, SEHINGGA tidak ada produk expired yang terdistribusi.
+
+US-CMP-003: Sebagai Compliance Officer, saya ingin CAPA workflow digital
+dengan tracking dan escalation, SEHINGGA semua deviation tertangani sesuai
+SLA.
+
+24.6 Epic: Cash Flow & Treasury
+------------------------------------------------------------------------
+US-TRS-001: Sebagai CFO RS, saya ingin cash flow forecast 13 minggu
+berdasarkan pola pembayaran BPJS historis, SEHINGGA saya bisa plan
+working capital dengan akurat.
+
+US-TRS-002: Sebagai CFO, saya ingin melihat posisi kas konsolidasi dari
+semua bank account dalam satu dashboard, SEHINGGA saya bisa optimize
+cash allocation.
+
+================================================================================
+25. RENCANA RILIS & ROADMAP
+================================================================================
+
+25.1 Fase Pengembangan
+------------------------------------------------------------------------
+Fase                   Durasi     Timeline    Scope Utama
+------------------------------------------------------------------------
+Fase 0 — Discovery     4 minggu   Bulan 1     Research mendalam, validasi
+                                               asumsi dengan 5 RS pilot,
+                                               finalisasi arsitektur teknis,
+                                               regulatory assessment
+
+Fase 1 — Foundation    8 minggu   Bulan 2-3   Core platform: Auth (MFA/SSO),
+                                               Master Data, Inventory
+                                               monitoring basic, Notifikasi
+                                               dasar, Dashboard minimal,
+                                               User management RBAC,
+                                               Barcode scanning basic
+
+Fase 2 — Procurement   8 minggu   Bulan 4-5   PO automation, Supplier
+                                               management & onboarding,
+                                               Document management, 3-way
+                                               matching, Requisition workflow,
+                                               Catalog management, e-Katalog
+                                               LKPP integration basic
+
+Fase 3 — Financial     10 minggu  Bulan 6-8   AR management, Bank financing:
+                                               reverse factoring & invoice
+                                               financing, BPJS reconciliation
+                                               basic, Standing instruction,
+                                               Multi-bank integration (SNAP),
+                                               Virtual accounts, Escrow,
+                                               e-Faktur/Coretax, KYC/KYB
+                                               onboarding, Credit scoring v1
+
+Fase 4 — Warehouse     8 minggu   Bulan 9-10  WMS: receiving, put-away,
+                                               picking, packing, shipping,
+                                               Cold chain IoT monitoring,
+                                               Fleet & delivery management,
+                                               GPS tracking, ePOD,
+                                               Temperature excursion alerts
+
+Fase 5 — Intelligence  6 minggu   Bulan 11-12 Executive dashboards, Demand
+                                               forecasting AI, Compliance
+                                               reports, Supplier benchmarking,
+                                               BPJS claim analytics, Cash flow
+                                               forecasting, QMS basic (CAPA,
+                                               deviation), Anti-fraud v1
+
+Fase 6 — Scale         8 minggu   Bulan 13-15 Mobile native app (iOS/Android),
+                                               Driver app, API marketplace,
+                                               Multi-bank financing expansion,
+                                               Dynamic discounting, BPOM TTAC
+                                               serialization, Advanced AI:
+                                               chatbot, co-pilot, fraud ML,
+                                               Full QMS, Revenue cycle mgmt,
+                                               Akuisisi RS masif
+
+25.2 MVP Definition (Fase 1 + Fase 2)
+------------------------------------------------------------------------
+Minimum Viable Product — Target: Bulan 5
+
+MVP mencakup:
+(1) Dashboard inventory real-time untuk RS
+(2) Notifikasi min-stock otomatis
+(3) Expiry tracking dan FEFO basic
+(4) Barcode scanning basic
+(5) PO creation & supplier selection
+(6) Multi-level approval workflow
+(7) Status tracking PO end-to-end
+(8) Invoice upload & 3-way matching
+(9) Supplier onboarding & scorecard
+(10) e-Katalog LKPP integration basic
+(11) User management dengan RBAC dan MFA
+
+MVP tidak mencakup:
+- Bank financing integration (Fase 3)
+- BPJS reconciliation (Fase 3)
+- WMS & cold chain (Fase 4)
+- Demand forecasting AI (Fase 5)
+- Mobile native app (Fase 6)
+- BPOM serialization (Fase 6)
+
+================================================================================
+26. ARSITEKTUR TEKNIS
+================================================================================
+
+26.1 Stack Teknologi
+------------------------------------------------------------------------
+Layer               Teknologi                  Alasan Pemilihan
+------------------------------------------------------------------------
+Frontend Web        Vue 3 + Nuxt 4             SSR/SSG, performance, DX,
+                                               composables, auto-imports
+Backend Services    Go (Vercel Serverless)     High throughput, type-safe,
+                                               low memory, fast cold start
+Primary Database    Supabase Pro (PostgreSQL)  Managed Postgres, built-in
+                                               Auth, Realtime, Storage,
+                                               Edge Functions, Row Level
+                                               Security (RLS)
+Realtime Engine     Supabase Realtime          WebSocket subscriptions untuk
+                                               live stock updates, notifikasi
+Auth                Supabase Auth              Built-in MFA, SSO, RBAC,
+                                               JWT-based, social login
+File Storage        Supabase Storage           Documents, images, CoA, POD
+                                               photos, dengan access policies
+Cache               Supabase + Vercel KV       Session, real-time stock cache
+Message Queue       Supabase Database Webhooks Event-driven triggers untuk
+                    + Vercel Cron Jobs         async processing
+Analytics DB        Supabase (pg_analytics)    Columnar extension atau
+                    / ClickHouse               dedicated analytics jika scale
+Search              Supabase (pg_trgm +        Full-text search built-in;
+                    pg_vector)                 vector search untuk AI features
+Hosting & CDN       Vercel Pro                 Edge network, auto-scaling,
+                                               serverless, preview deploys
+Mobile              Vue + Capacitor /          Single codebase, leverage
+                    NativeScript Vue           Vue ecosystem
+Repository          GitHub                     Source control, CI/CD triggers
+CI/CD               GitHub Actions + Vercel    GitOps, auto preview per PR,
+                                               production deploy on merge
+ML/AI               Python (Vercel Serverless  Forecasting, fraud detection,
+                    / Supabase Edge Functions) demand prediction
+IoT Platform        Supabase Realtime +        Sensor data ingestion via
+                    Edge Functions             WebSocket / HTTP endpoints
+Monitoring          Vercel Analytics +         Performance, Web Vitals,
+                    Supabase Dashboard         database metrics
+Logging             Vercel Logs + Supabase     Centralized, searchable
+                    Postgres Logs
+Object Storage      Supabase Storage +         Documents, reports, large
+                    Vercel Blob (jika perlu)   file handling
+
+26.2 Integrasi Eksternal
+------------------------------------------------------------------------
+- Bank Indonesia BI-FAST / RTGS / SKN: Transfer dana antar bank via SNAP
+- BPJS Kesehatan API: VClaim, e-Klaim, tracking klaim, SEP
+- BPOM e-Notifikasi: Verifikasi izin edar, recall notifications
+- BPOM TTAC: Track and Trace Anti-Counterfeit serialization
+- Kemenkes SatuSehat: FHIR-based health data exchange
+- KFA Registry: Kode Farmasi dan Alkes mapping
+- LKPP e-Katalog: Product catalog, e-purchasing
+- DJP Coretax: e-Faktur, tax reporting
+- Dukcapil: Identity verification (eKYC)
+- OJK SLIK: Credit bureau data
+- PPATK: AML/CFT reporting
+- Kemenkeu NPWP Verification: Validasi data pajak
+- WhatsApp Business API: Notifikasi operasional
+- E-Signature: PrivyID / Peruri
+- IoT Sensor Providers: Temperature, humidity, GPS
+- Multiple Bank APIs: BCA, Mandiri, BRI, BNI, CIMB via SNAP
+
+================================================================================
+27. RISIKO & MITIGASI
+================================================================================
+
+Risiko                                    Level    Mitigasi
+------------------------------------------------------------------------
+Adopsi lambat oleh RS resisten            TINGGI   Program onboarding terpandu,
+perubahan                                          champion program, ROI calculator
+
+API BPJS tidak stabil / berubah          TINGGI   Abstraksi layer, manual fallback,
+                                                   SLA dengan BPJS
+
+Regulasi OJK untuk financing berubah     SEDANG   Legal counsel retainer, desain
+                                                   modular komponen finansial
+
+Data breach / kebocoran data medis       TINGGI   Zero-trust, pentest berkala,
+                                                   ISO 27001, UU PDP compliance
+
+Supplier besar tidak mau integrasi       SEDANG   API open standard, EDI support,
+                                                   manual upload fallback
+
+Ketergantungan satu bank mitra           SEDANG   Multi-bank dari awal, min 3
+                                                   bank sebelum launch Fase 3
+
+Skalabilitas saat pertumbuhan cepat      SEDANG   Load testing sejak Fase 1,
+                                                   Vercel serverless auto-scaling,
+                                                   Supabase read replicas
+
+Cold chain IoT sensor failure            SEDANG   Redundant sensors, failover,
+                                                   manual logging backup
+
+Transisi iDRG dari INA-CBG              SEDANG   Dual-system support, gradual
+                                                   migration, monitoring
+
+Coretax DJP transition dari e-Faktur    SEDANG   Parallel support both systems,
+                                                   PJAP partnership
+
+BPOM serialization deadline             TINGGI   Early implementation, Phase 1
+                                                   narcotics Dec 2025, testing Q3
+
+OJK SLIK integration complexity         SEDANG   Dedicated integration team,
+                                                   sandbox testing, fallback
+
+Fraud dan collusion dalam financing     TINGGI   ML-based detection, multi-layer
+                                                   verification, audit trail
+
+================================================================================
+28. METRIK KEBERHASILAN
+================================================================================
+
+28.1 Product Metrics
+------------------------------------------------------------------------
+Metrik                         Target (12 Bln)  Cara Pengukuran
+------------------------------------------------------------------------
+RS Aktif (MAU)                 50 RS            Login aktif >= 2x/minggu
+PO Diproses/Bulan             1.000 PO         Transaction count
+Lead Time Pengadaan            < 2 hari         PO create -> DO received
+Stockout Rate                  < 2%/item/bulan  Stok=0 / total item aktif
+Expiry Loss Rate               < 1%             Expired value / total inventory
+Cold Chain Compliance          100%             Zero temperature excursion breach
+Supplier Payment On-Time       > 95%            Bayar sebelum due date / total
+AR Aging > 90 hari             < 5% total AR    Outstanding AR>90 / total AR
+NPS Keseluruhan                > 60             Quarterly survey
+GMV Platform                   Rp 500M/bulan   Total nilai transaksi
+Financing Attach Rate          > 30%            Invoices financed / total
+Pick Accuracy                  > 99.5%          Correct picks / total picks
+BPJS Clean Claim Rate          > 90%            Clean claims / total submitted
+Recall Response Time           < 24 jam         Notification to quarantine
+Fraud Detection Rate           > 95%            Detected / actual fraud
+FEFO Compliance                100%             Zero FEFO violations
+
+28.2 Technical Metrics
+------------------------------------------------------------------------
+API Response Time P95          < 200ms
+System Uptime                  99.9%
+Mean Time to Recovery          < 30 detik
+Data Backup Success            100%
+Security Incidents             0 critical
+Deployment Frequency           Daily (CI/CD)
+
+================================================================================
+29. ASUMSI & DEPENDENSI
+================================================================================
+
+29.1 Asumsi
+------------------------------------------------------------------------
+- Minimal satu bank BUMN bersedia menjadi mitra financing sejak Fase 3
+- BPJS Kesehatan menyediakan API (VClaim) yang dapat diakses
+- RS pilot bersedia menyediakan data historis pengadaan 2 tahun
+- Regulasi Permenkes terkait e-procurement tidak berubah signifikan
+- IoT sensor infrastructure tersedia untuk cold chain monitoring
+- BPOM TTAC API tersedia untuk serialization reporting
+- Coretax DJP API tersedia dan stabil
+- OJK menyetujui model SCF yang diajukan
+
+29.2 Dependensi Eksternal
+------------------------------------------------------------------------
+- Perizinan OJK untuk fitur invoice financing (estimasi 4-6 bulan)
+- MoU dengan BPJS Kesehatan untuk akses data API
+- Kontrak dengan minimal 3 mitra bank sebelum launch Fase 3
+- Sertifikasi ISO 27001 sebelum onboarding RS pemerintah skala besar
+- BPOM TTAC system readiness untuk serialization integration
+- Coretax DJP production readiness
+- SNAP certification dari Bank Indonesia
+- SLIK access approval dari OJK
+- SatuSehat integration approval dari Kemenkes
+- IoT sensor vendor selection dan procurement
+
+================================================================================
+30. APPENDIX & GLOSARIUM
+================================================================================
+
+30.1 Glosarium
+------------------------------------------------------------------------
+Istilah                  Definisi
+------------------------------------------------------------------------
+PO                       Purchase Order — Dokumen pemesanan resmi
+DO                       Delivery Order — Dokumen pengiriman barang
+GRN                      Goods Receipt Note — Bukti penerimaan barang
+AR                       Account Receivable — Piutang
+AP                       Account Payable — Hutang
+KSM                      Kelompok Staf Medis (konteks: Mitra Logistik)
+BPJS                     Badan Penyelenggara Jaminan Sosial Kesehatan
+JKN-KIS                  Jaminan Kesehatan Nasional
+PBF                      Pedagang Besar Farmasi
+SNARS                    Standar Nasional Akreditasi Rumah Sakit
+KARS                     Komisi Akreditasi Rumah Sakit
+GMV                      Gross Merchandise Value
+Standing Instruction     Instruksi pembayaran otomatis berkala
+FEFO                     First Expiry, First Out
+CDOB                     Cara Distribusi Obat yang Baik (GDP)
+CPOB                     Cara Pembuatan Obat yang Baik (GMP)
+CDAKB                    Cara Distribusi Alat Kesehatan yang Baik
+CPAKB                    Cara Pembuatan Alat Kesehatan yang Baik
+TTAC                     Track and Trace Anti-Counterfeit (BPOM)
+KFA                      Kode Farmasi dan Alkes
+LKPP                     Lembaga Kebijakan Pengadaan Barang/Jasa
+e-Katalog                Katalog elektronik pengadaan pemerintah
+SNAP                     Standard National Open API Payment (BI)
+BI-FAST                  Bank Indonesia Fast Payment
+RTGS                     Real-Time Gross Settlement
+SKN/SKNBI                Sistem Kliring Nasional Bank Indonesia
+QRIS                     Quick Response Code Indonesian Standard
+VA                       Virtual Account
+RDL                      Rekening Dana Lender
+SLIK                     Sistem Layanan Informasi Keuangan (OJK)
+NPF                      Non-Performing Financing
+PPATK                    Pusat Pelaporan dan Analisis Transaksi Keuangan
+AML/CFT                  Anti-Money Laundering / Counter-Financing Terrorism
+CDD/EDD                  Customer Due Diligence / Enhanced Due Diligence
+PEP                      Politically Exposed Person
+INA-CBG                  Indonesia Case Base Groups
+iDRG                     Indonesian Diagnosis Related Groups
+SEP                      Surat Eligibilitas Peserta (BPJS)
+CDI                      Clinical Documentation Improvement
+CDM                      Charge Description Master
+RCM                      Revenue Cycle Management
+DSO                      Days Sales Outstanding
+DPO                      Days Payable Outstanding
+CCC                      Cash Conversion Cycle
+MKT                      Mean Kinetic Temperature
+CAPA                     Corrective and Preventive Action
+QMS                      Quality Management System
+ASN                      Advanced Shipping Notice
+RMA                      Return Material Authorization
+UDI                      Unique Device Identifier
+GTIN                     Global Trade Item Number
+SSCC                     Serial Shipping Container Code
+GS1                      Global Standards 1 (barcode standards)
+RFQ                      Request for Quotation
+RFP                      Request for Proposal
+VMI                      Vendor Managed Inventory
+ePOD                     Electronic Proof of Delivery
+OCR                      Optical Character Recognition
+PPN                      Pajak Pertambahan Nilai (VAT)
+PPh                      Pajak Penghasilan (Income Tax)
+NSFP                     Nomor Seri Faktur Pajak
+PJAP                     Penyedia Jasa Aplikasi Perpajakan
+EWS                      Early Warning System
+PD                       Probability of Default
+LGD                      Loss Given Default
+EAD                      Exposure at Default
+SOP                      Standard Operating Procedure
+IQ/OQ/PQ                 Installation/Operational/Performance Qualification
+WMS                      Warehouse Management System
+CapEx/OpEx               Capital/Operational Expenditure
+SSO                      Single Sign-On
+MFA                      Multi-Factor Authentication
+RBAC                     Role-Based Access Control
+DLP                      Data Loss Prevention
+UU PDP                   Undang-Undang Pelindungan Data Pribadi
+
+30.2 Referensi Regulasi
+------------------------------------------------------------------------
+- UU No. 27/2022 tentang Pelindungan Data Pribadi
+- PP No. 71/2019 tentang Penyelenggaraan Sistem dan Transaksi Elektronik
+- POJK No. 11/2024 tentang Layanan Pendanaan Bersama Berbasis TI
+- SE OJK No. 4/2025 tentang Pelaporan LPBBTI
+- SE OJK No. 12/SEOJK.03/2022 tentang eKYC
+- Peraturan BPOM tentang CDOB (No. 9/2019, updated No. 20/2025)
+- Peraturan BPOM tentang Serialisasi Produk Farmasi (TTAC)
+- Permenkes tentang Standar Pelayanan Farmasi RS
+- Regulasi LKPP tentang e-Katalog dan e-Procurement
+- Standar SNARS/KARS untuk Akreditasi Rumah Sakit
+- Bank Indonesia Blueprint Sistem Pembayaran 2025
+- Standar SNAP (Standard National Open API Payment)
+- GS1 Healthcare Standards
+
+30.3 Ringkasan Cakupan
+------------------------------------------------------------------------
+Total Modul           : 17
+Total Fitur/Sub-Fitur : ~760
+Integrasi Eksternal   : 16+ sistem
+Regulasi Tercakup     : 13+ regulasi
+Platform              : Web + Mobile (iOS/Android) + API
+Bahasa                : Indonesia + English
+
+— Akhir Dokumen PRD v2.0.0 —

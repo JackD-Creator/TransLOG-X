@@ -1,0 +1,619 @@
+
+PRODUCT REQUIREMENTS DOCUMENT
+TransLogX 
+AI Supported E-Logistic Platform
+
+Versi
+1.0.0 — Initial Release
+Status
+Draft — Untuk Review & Approval
+Tanggal
+21 Mei 2026
+Dibuat Untuk
+Antigravity Product Planning
+Platform
+Web Application · API Platform
+
+
+
+CONFIDENTIAL — Internal Use Only
+
+1. Executive Summary
+TransLogX - AI Supported E-Logistic Platform adalah platform digital terintegrasi yang dirancang untuk mentransformasi manajemen rantai pasok medis di Indonesia. Platform ini menjembatani empat ekosistem utama — Rumah Sakit, Mitra KSM Logistic, Supplier/Distributor, dan Bank — dalam satu infrastruktur digital yang kohesif, transparan, dan berbasis data real-time.
+
+Dua masalah kritis yang menjadi fondasi inisiatif ini adalah: (1) inefisiensi operasional manajemen pengadaan farmasi dan alat kesehatan yang masih manual dan rawan kesalahan, serta (2) tekanan likuiditas kronis yang dialami rumah sakit akibat keterlambatan pencairan klaim BPJS Kesehatan yang dapat mencapai 60–120 hari. Platform ini menawarkan solusi sistemik melalui otomasi pengadaan end-to-end dan mekanisme supply chain financing berbasis bank sebagai buffer likuiditas.
+
+Nilai Bisnis Utama
+Reduksi lead time pengadaan 60% · Eliminasi risiko gagal bayar supplier · Visibilitas inventaris real-time seluruh jaringan RS · Kepatuhan regulasi OJK dan akreditasi RS terjaga otomatis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. Latar Belakang & Konteks Bisnis
+2.1 Masalah yang Diselesaikan
+MASALAH 1 — INEFISIENSI RANTAI PASOK
+Proses pengadaan obat dan alkes masih sangat manual: telepon, email, spreadsheet, dan dokumen fisik
+Tidak ada visibilitas real-time stok di tingkat jaringan rumah sakit
+Stockout dan overstock terjadi bersamaan di RS yang berbeda dalam satu jaringan
+Verifikasi supplier dilakukan manual tanpa sistem rating performa terstandar
+Dokumen PO, Invoice, dan Delivery Order tidak terintegrasi, rawan duplikasi dan kehilangan
+
+MASALAH 2 — TEKANAN LIKUIDITAS BPJS
+Rata-rata 60–120 hari keterlambatan pembayaran klaim BPJS Kesehatan ke rumah sakit
+Lebih dari 60% pendapatan RS di Indonesia bergantung pada klaim JKN-KIS
+RS tidak bisa membayar supplier tepat waktu → supplier menahan produk → stockout
+Tidak ada mekanisme bridging financing yang terstandar dan terintegrasi dengan sistem pengadaan
+2.2 Peluang Pasar
+Segmen
+Ukuran
+Potensi
+RS Pemerintah & BUMN
+2.400+ fasilitas
+Adopsi masif via regulasi
+RS Swasta Jaringan
+850+ grup RS
+Prioritas digitalisasi tinggi
+Klinik Pratama
+10.000+ klinik
+Ekspansi fase berikutnya
+Distributor / PBF
+600+ entitas
+Platform B2B logistik
+
+
+
+
+
+
+
+
+
+
+
+
+3. Tujuan Produk & Sasaran
+3.1 Tujuan Strategis
+Membangun platform e-logistik medis terdepan di Indonesia yang menjadi standar de facto manajemen rantai pasok rumah sakit
+Mengintegrasikan pembiayaan supply chain (invoice financing) langsung dalam alur operasional pengadaan
+Menciptakan jaringan data rantai pasok medis yang memberikan nilai analitik untuk seluruh stakeholder
+Memastikan kepatuhan terhadap regulasi kesehatan (Permenkes, BPOM) dan keuangan (OJK, BI)
+
+3.2 OKR — Objectives & Key Results
+Objective
+Key Results (Target 12 Bulan)
+Adopsi Platform
+50 RS aktif · 100 supplier terdaftar · 1.000 PO/bulan diproses
+Efisiensi Operasional
+Penurunan lead time pengadaan dari 7 hari menjadi 2 hari rata-rata
+Kesehatan Keuangan RS
+Zero gagal bayar via bank bridging · Aging AR < 45 hari
+Kepuasan Pengguna
+NPS > 60 dari RS dan Mitra KSM · Churn rate < 5%
+Revenue Platform
+GMV Rp 500M/bulan · Attach rate financing > 30%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4. Stakeholder & Persona Pengguna
+4.1 Peta Stakeholder
+Stakeholder
+Peran
+Pain Point Utama
+Ekspektasi
+Rumah Sakit
+Pembeli akhir barang medis
+Stok menipis, tagihan BPJS lama cair
+Stok terjaga, cashflow sehat
+Mitra KSM Logistic
+Koordinator pengadaan
+Monitoring banyak RS manual
+Visibilitas penuh, proses otomatis
+Supplier / Distributor
+Penyedia produk medis
+Piutang lama tertagih
+Pembayaran cepat & pasti
+Bank (Mitra Financing)
+Penyedia bridging likuiditas
+Risiko kredit tidak terukur
+Data transaksi terverifikasi
+BPJS Kesehatan
+Pembayar klaim RS
+Verifikasi klaim kompleks
+Rekonsiliasi otomatis
+Regulator (Kemenkes)
+Pengawas sistem kesehatan
+Transparansi data distribusi
+Laporan compliance otomatis
+
+4.2 Persona Utama
+PERSONA 1 — KEPALA FARMASI RUMAH SAKIT
+dr. Rina, 38 tahun, Kepala Instalasi Farmasi RSUD Kelas B di Bandung. Memimpin tim 15 orang. Frustrasi dengan stok kritis yang baru diketahui saat pasien membutuhkan. Ingin sistem yang bisa memprediksi kebutuhan dan memesan otomatis sebelum stockout.
+PERSONA 2 — MANAJER OPERASIONAL MITRA KSM
+Budi, 45 tahun, mengelola pengadaan untuk 20 RS dalam jaringan. Saat ini menggunakan spreadsheet dan WhatsApp. Membutuhkan dashboard terpusat untuk memantau status PO, stok, dan pembayaran dari semua RS secara real-time.
+PERSONA 3 — FINANCE MANAGER SUPPLIER
+Sari, 35 tahun, Finance Manager di perusahaan distribusi farmasi nasional. Frustrasi dengan piutang yang menumpuk karena RS tidak bisa bayar tepat waktu. Membutuhkan kepastian pembayaran dan visibilitas aging AR yang akurat.
+
+
+
+
+
+
+
+
+5. Fitur Produk & Functional Requirements
+5.1 Modul Inventory Management (Rumah Sakit)
+FR-INV-01: Real-time Stock Monitoring
+Sistem memantau kuantitas stok setiap item medis secara real-time
+Notifikasi otomatis dikirim ketika stok mendekati minimum threshold (configurable per item)
+Dashboard visual menampilkan status semua item: Normal / Menipis / Kritis / Stockout
+Riwayat pergerakan stok (stock movement) dapat diaudit dengan detail waktu dan user
+
+FR-INV-02: Demand Forecasting
+Sistem menggunakan data historis penggunaan untuk memproyeksikan kebutuhan 30/60/90 hari ke depan
+Rekomendasi jumlah order yang optimal berdasarkan lead time supplier dan pola konsumsi
+Alert proaktif sebelum minimum stok tercapai berdasarkan tren penurunan
+
+Acceptance Criteria — INV-01
+Notifikasi minimum stok terkirim dalam < 60 detik setelah threshold tercapai. Dashboard refresh setiap 5 menit. Export laporan stok ke Excel/PDF tersedia.
+
+5.2 Modul Procurement (Mitra KSM)
+FR-PRC-01: Supplier Intelligence & Selection
+Database supplier terverifikasi dengan rating performa: ketepatan waktu, kualitas produk, harga kompetitif
+Sistem merekomendasikan supplier terbaik untuk setiap item berdasarkan histori dan rating
+Verifikasi dokumen legal supplier: SIUP, NPWP, izin PBF/distributor terintegrasi
+
+FR-PRC-02: Purchase Order Automation
+PO dibuat otomatis dari notifikasi minimum stok dengan approval workflow berjenjang
+Template PO terstandar sesuai format yang diterima supplier
+Status tracking PO real-time: Draft → Submitted → Confirmed → Preparing → Delivered → Received
+Notifikasi push ke semua pihak relevan di setiap perubahan status
+
+FR-PRC-03: Document Management
+Semua dokumen (PO, Invoice, DO, Receipt) tersimpan digital dan dapat diakses kapan saja
+e-Signature terintegrasi untuk persetujuan dokumen
+Pencarian dokumen berdasarkan nomor, tanggal, supplier, atau status
+
+5.3 Modul Financial & Payment
+FR-FIN-01: Invoice & AR Management
+Invoice dari supplier diterima dan diproses otomatis dalam sistem
+Matching otomatis antara invoice dan PO (3-way matching: PO, GR, Invoice)
+AR Account per Mitra KSM dengan tracking piutang, jatuh tempo, dan bunga
+Aging report otomatis: Current / 30 hari / 60 hari / 90 hari / >90 hari
+
+FR-FIN-02: Bank Financing Integration
+Integrasi dengan bank mitra untuk aktivasi term of payment otomatis
+Invoice financing: bank membayar supplier langsung, RS membayar bank setelah BPJS cair
+Kalkulator bunga dan simulasi cash flow tersedia untuk decision support
+Notifikasi jatuh tempo pembayaran H-7, H-3, H-1 secara otomatis
+
+FR-FIN-03: BPJS Payment Reconciliation
+Integrasi dengan sistem informasi BPJS untuk tracking status klaim
+Rekonsiliasi otomatis antara penerimaan dana BPJS dan kewajiban pembayaran supplier
+Standing instruction: pembayaran otomatis ke Mitra KSM saat dana BPJS masuk
+Laporan reconciliation bulanan tersedia untuk audit
+
+Acceptance Criteria — FIN-02
+Aktivasi term of payment selesai dalam < 4 jam kerja. Pembayaran supplier dikreditkan T+1 setelah bank aktivasi. Kalkulator bunga akurat hingga 4 desimal.
+
+5.4 Modul Notifikasi & Komunikasi
+FR-NOT-01: Multi-channel Notification
+Push notification via aplikasi mobile (iOS & Android)
+Email notification untuk dokumen formal (PO, Invoice, konfirmasi pembayaran)
+WhatsApp Business API untuk notifikasi operasional real-time
+SMS backup untuk notifikasi kritis ketika internet tidak tersedia
+
+5.5 Modul Analitik & Pelaporan
+FR-ANL-01: Dashboard Eksekutif
+KPI overview: total PO aktif, nilai transaksi, aging AR, status stok kritis
+Trend analysis: spending per kategori, performa supplier, efisiensi pengadaan
+Benchmarking antar RS dalam jaringan (dengan anonymization untuk data sensitif)
+
+FR-ANL-02: Compliance Reporting
+Laporan distribusi farmasi sesuai format Kemenkes dan BPOM
+Audit trail lengkap semua transaksi untuk keperluan akreditasi RS (SNARS)
+Export laporan dalam format Excel, PDF, dan API data untuk sistem eksternal
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6. Non-Functional Requirements
+Kategori
+Requirement
+Target / SLA
+Performance
+Response time API
+< 200ms P95 untuk operasi CRUD
+Performance
+Throughput sistem
+10.000 request/menit peak load
+Availability
+Uptime platform
+99.9% SLA · RTO < 30 detik
+Availability
+Disaster recovery
+RPO = 0 · Secondary datacenter aktif
+Security
+Enkripsi data sensitif
+AES-256 at rest · TLS 1.3 in transit
+Security
+Autentikasi
+MFA wajib untuk transaksi finansial
+Compliance
+Regulasi data
+UU PDP No. 27/2022 · POJK 38/2016
+Compliance
+Retensi data finansial
+10 tahun sesuai regulasi OJK
+Scalability
+Kapasitas RS
+Support 1.000 RS aktif tanpa degradasi
+Scalability
+Arsitektur
+Microservices · Auto-scaling Kubernetes
+Usability
+Onboarding RS baru
+Konfigurasi dasar selesai < 2 hari kerja
+Usability
+Mobile responsiveness
+Aplikasi mobile iOS & Android native
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7. User Stories & Acceptance Criteria
+7.1 Epic: Inventory Intelligence
+US-INV-001
+Sebagai Kepala Farmasi RS, saya ingin mendapatkan notifikasi otomatis ketika stok suatu item mendekati minimum threshold, SEHINGGA saya dapat memulai proses pengadaan sebelum terjadi stockout yang membahayakan pasien.
+
+US-INV-002
+Sebagai Manajer Logistik Mitra KSM, saya ingin melihat status stok semua RS dalam jaringan saya dalam satu dashboard, SEHINGGA saya dapat memprioritaskan pengadaan untuk RS yang paling kritis terlebih dahulu.
+
+7.2 Epic: Procurement Automation
+US-PRC-001
+Sebagai Manajer Pengadaan Mitra KSM, saya ingin sistem secara otomatis memilih supplier terbaik berdasarkan rating performa, harga, dan ketersediaan stok, SEHINGGA proses checking supplier yang biasanya 2 jam dapat selesai dalam hitungan menit.
+
+US-PRC-002
+Sebagai Finance Manager Supplier, saya ingin Invoice yang saya kirim langsung terhubung dengan PO dan sistem AR Mitra KSM, SEHINGGA tidak ada lagi dispute atau keterlambatan pembayaran akibat dokumen yang tidak cocok.
+
+7.3 Epic: Financial Flows
+US-FIN-001
+Sebagai Direktur Keuangan RS, saya ingin platform secara otomatis mengaktifkan mekanisme bank financing saat invoice diterbitkan supplier, SEHINGGA supplier selalu dibayar tepat waktu meskipun klaim BPJS kami belum cair.
+
+US-FIN-002
+Sebagai Treasurer Mitra KSM, saya ingin sistem menjalankan standing instruction pembayaran ke bank secara otomatis ketika dana BPJS masuk ke rekening RS, SEHINGGA tidak ada piutang yang terlewat atau terlambat ditagih.
+
+
+
+8. Rencana Rilis & Roadmap
+8.1 Fase Pengembangan
+Fase
+Durasi
+Timeline
+Scope Utama
+Fase 0 — Discovery
+4 minggu
+Bulan 1
+Research mendalam, validasi asumsi dengan 5 RS pilot, finalisasi arsitektur teknis
+Fase 1 — Foundation
+8 minggu
+Bulan 2–3
+Core platform: Auth, Master Data, Inventory monitoring, notifikasi dasar, dashboard minimal
+Fase 2 — Procurement
+8 minggu
+Bulan 4–5
+PO automation, supplier management, document management, 3-way matching invoice
+Fase 3 — Financial
+10 minggu
+Bulan 6–8
+AR management, bank financing integration, BPJS reconciliation, standing instruction
+Fase 4 — Analytics
+6 minggu
+Bulan 9–10
+Executive dashboard, compliance reports, demand forecasting, supplier benchmarking
+Fase 5 — Scale
+8 minggu
+Bulan 11–12
+Mobile native app, API marketplace, multi-bank integration, akuisisi RS masif
+
+8.2 MVP Definition (Fase 1 + Fase 2)
+Minimum Viable Product — Target: Bulan 5
+MVP mencakup: (1) Dashboard inventory real-time untuk RS, (2) Notifikasi min-stock otomatis, (3) PO creation & supplier selection, (4) Status tracking PO end-to-end, (5) Invoice upload & matching dasar. MVP tidak mencakup: bank financing integration, BPJS reconciliation, demand forecasting, dan  native.
+
+
+
+
+
+
+
+
+
+
+
+9. Arsitektur Teknis Ringkas
+9.1 Stack Teknologi
+Layer
+Teknologi
+Alasan Pemilihan
+Backend Services
+Node.js + TypeScript / Go
+High throughput, microservices ready
+Primary Database
+PostgreSQL 16
+ACID compliance, JSON support, partitioning
+Cache
+Redis 7 Cluster
+Session, real-time stock, queue
+Message Queue
+RabbitMQ / Kafka
+Event-driven, decoupled services
+Analytics DB
+ClickHouse
+Columnar, fast aggregation queries
+API Gateway
+Kong / AWS API Gateway
+Rate limiting, auth, routing
+Mobile
+React Native
+Single codebase iOS & Android
+Frontend Web
+Next.js 15 + TypeScript
+SSR, performance, SEO
+Infrastructure
+Kubernetes + AWS / GCP
+Auto-scaling, multi-zone HA
+CI/CD
+GitHub Actions + ArgoCD
+GitOps, automated deployment
+
+9.2 Integrasi Eksternal
+Bank Indonesia RTGS/SKN: Transfer dana antar bank
+BPJS Kesehatan API: Tracking status klaim dan penerimaan pembayaran
+BPOM e-Notifikasi: Verifikasi izin edar produk farmasi dan alkes
+Kemenkeu NPWP Verification: Validasi data pajak supplier
+WhatsApp Business API: Notifikasi operasional
+E-Signature (PrivyID / Peruri): Penandatanganan dokumen digital sah secara hukum
+
+
+
+
+
+
+
+
+
+
+
+
+10. Risiko & Mitigasi
+Risiko
+Level
+Strategi Mitigasi
+Adopsi lambat oleh RS yang resisten perubahan
+TINGGI
+Program onboarding terpandu, champion program di setiap RS, ROI calculator yang konkret
+API BPJS tidak stabil / berubah
+TINGGI
+Abstraksi layer BPJS, manual reconciliation fallback, SLA dengan BPJS untuk data feed
+Regulasi OJK untuk financing berubah
+SEDANG
+Legal counsel retainer, desain modular agar komponen finansial dapat diadaptasi cepat
+Data breach / kebocoran data medis
+TINGGI
+Zero-trust architecture, penetration testing berkala, ISO 27001 certification target
+Supplier besar tidak mau integrasi
+SEDANG
+API open standard, EDI support, manual upload fallback, insentif early adopter
+Ketergantungan pada satu bank mitra
+SEDANG
+Multi-bank architecture dari awal, minimal 3 bank mitra sebelum launch fase 3
+Skalabilitas teknis saat pertumbuhan cepat
+SEDANG
+Load testing sejak fase 1, auto-scaling K8s, database sharding siap di fase 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11. Metrik Keberhasilan
+11.1 Product Metrics
+Metrik
+Target (12 Bln)
+Cara Pengukuran
+RS Aktif (MAU)
+50 RS
+Login aktif ≥ 2x/minggu
+PO Diproses/Bulan
+1.000 PO
+Transaction count di DB
+Lead Time Pengadaan
+< 2 hari rata-rata
+Timestamp PO create → DO received
+Stockout Rate
+< 2% per item/bulan
+Item dengan stok = 0 / total item aktif
+Supplier Payment On-Time
+> 95%
+Pembayaran sebelum due date / total
+AR Aging > 90 hari
+< 5% dari total AR
+Outstanding AR > 90 hari / total AR
+NPS Keseluruhan
+> 60
+Quarterly survey ke semua pengguna
+GMV Platform
+Rp 500M/bulan
+Total nilai transaksi diproses
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+12. Asumsi & Dependensi
+12.1 Asumsi
+Minimal satu bank BUMN bersedia menjadi mitra financing sejak fase 3
+BPJS Kesehatan menyediakan API data klaim yang dapat diakses oleh platform terintegrasi
+RS pilot bersedia menyediakan data historis pengadaan 2 tahun terakhir untuk konfigurasi awal
+Regulasi Permenkes terkait e-procurement farmasi tidak berubah signifikan selama 12 bulan pertama
+
+12.2 Dependensi Eksternal
+Perizinan operasional dari OJK untuk fitur invoice financing (estimasi 4–6 bulan)
+MoU dengan BPJS Kesehatan untuk akses data API
+Kontrak dengan minimal 3 mitra bank sebelum launch Fase 3
+Sertifikasi ISO 27001 selesai sebelum onboarding RS pemerintah skala besar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+13. Appendix
+13.1 Glosarium
+Istilah
+Definisi
+PO
+Purchase Order — Dokumen pemesanan resmi dari pembeli ke supplier
+DO
+Delivery Order — Dokumen pengiriman barang dari supplier ke RS
+AR
+Account Receivable — Piutang yang belum diterima dari pelanggan
+KSM
+Kelompok Staf Medis — Dalam konteks ini merujuk pada Mitra Logistik
+BPJS
+Badan Penyelenggara Jaminan Sosial Kesehatan
+JKN-KIS
+Jaminan Kesehatan Nasional — Kartu Indonesia Sehat
+PBF
+Pedagang Besar Farmasi — Distributor resmi produk farmasi
+SNARS
+Standar Nasional Akreditasi Rumah Sakit
+GMV
+Gross Merchandise Value — Total nilai transaksi di platform
+Standing Instruction
+Instruksi pembayaran otomatis yang aktif secara berkala
+
+
+— Akhir Dokumen PRD v1.0 —

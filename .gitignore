@@ -1,0 +1,26 @@
+# Environment & secrets — JANGAN pernah commit ini
+.env
+.env.local
+.env.*.local
+*.env
+
+# Dependencies
+node_modules/
+.nuxt/
+.output/
+dist/
+
+# Supabase local
+supabase/.temp/
+supabase/config.toml.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build
+.vercel/
