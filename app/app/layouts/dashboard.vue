@@ -37,6 +37,15 @@ const navGroups = [
       { label: 'Analytics & BI', icon: 'i-lucide-bar-chart-2',  to: '/dashboard/analytics' },
       { label: 'AI / ML',        icon: 'i-lucide-brain',         to: '/dashboard/ai' }
     ]
+  },
+  {
+    label: 'Platform',
+    items: [
+      { label: 'User Management', icon: 'i-lucide-users',       to: '/dashboard/users' },
+      { label: 'Komunikasi',      icon: 'i-lucide-message-square', to: '/dashboard/communication' },
+      { label: 'Mobile App',      icon: 'i-lucide-smartphone',  to: '/dashboard/mobile' },
+      { label: 'Integrasi & API', icon: 'i-lucide-plug',        to: '/dashboard/integration' }
+    ]
   }
 ]
 
