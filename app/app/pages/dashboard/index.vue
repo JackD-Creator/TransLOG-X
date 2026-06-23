@@ -406,7 +406,7 @@ const supplierUpdates = ref<any[]>([])
         </div>
 
         <div class="relative" @mouseleave="hovering = false">
-          <svg :viewBox="`0 0 ${CW} ${CH}`" class="w-full" style="height:190px;cursor:crosshair" @mousemove="onChartMove">
+          <svg :viewBox="`0 0 ${CW} ${CH}`" class="w-full" style="height:300px;cursor:crosshair" @mousemove="onChartMove">
             <defs>
               <linearGradient id="ga-obat"  x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/><stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/></linearGradient>
               <linearGradient id="ga-alkes" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a78bfa" stop-opacity="0.2"/><stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/></linearGradient>
