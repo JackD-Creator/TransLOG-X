@@ -59,12 +59,9 @@ watchEffect(() => { if (user.value) router.push('/dashboard') })
         <h1 class="text-5xl font-bold tracking-wide mb-3">
           <span class="text-[#1a1a1a]">Trans</span><span class="text-[#6b1525]">LOG-X</span>
         </h1>
-        <p class="text-xs font-semibold tracking-[0.3em] uppercase mb-5 text-[#6b1525]">
-          AI-Driven E-Logistic Management Platform
-        </p>
         <div class="w-12 h-0.5 bg-[#6b1525] mb-5" />
         <p class="text-sm text-[#999]">
-          Medical &amp; Equipment Supply Chain Ecosystem
+          Medical &amp; Consumables Supply Platform
         </p>
       </div>
 
