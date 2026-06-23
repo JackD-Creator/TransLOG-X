@@ -67,10 +67,7 @@ async function logout() {
     <aside class="w-56 flex-shrink-0 flex flex-col bg-[#f5f5f5] border-r border-[#e5e5e5]">
 
       <!-- Logo -->
-      <div class="flex items-center gap-2.5 px-5 py-5">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#6b1525]">
-          <UIcon name="i-lucide-zap" class="text-white text-base"/>
-        </div>
+      <div class="flex items-center px-5 py-5">
         <div class="min-w-0">
           <p class="font-bold text-sm text-[#1a1a1a] leading-none">Trans<span class="text-[#6b1525]">LOG-X</span></p>
           <p class="text-[10px] text-[#999] mt-0.5">Medical &amp; Consumable Platform</p>
