@@ -3,7 +3,6 @@ definePageMeta({ layout: 'dashboard' })
 
 const supabase = useSupabaseClient()
 
-// ── Filters ───────────────────────────────────────────────────────
 const search      = ref('')
 const category    = ref('all')
 const stockFilter = ref('all')
@@ -24,7 +23,6 @@ const stockFilters = [
   { label: 'Stok Habis',   value: 'empty'  },
 ]
 
-// ── Data types ────────────────────────────────────────────────────
 interface StockSummary {
   qty_on_hand: number
   qty_available: number
@@ -46,18 +44,15 @@ interface Product {
   is_narkotika: boolean
   is_psikotropika: boolean
   stock_summary: StockSummary[]
-  // computed
   qty: number
   status: 'normal' | 'low' | 'empty'
 }
 
-// ── State ─────────────────────────────────────────────────────────
 const loading   = ref(true)
 const error     = ref<string | null>(null)
 const products  = ref<Product[]>([])
 const totalCount = ref(0)
 
-// ── Fetch ─────────────────────────────────────────────────────────
 async function fetchProducts() {
   loading.value = true
   error.value   = null
@@ -87,7 +82,6 @@ async function fetchProducts() {
     return
   }
 
-  // Enrich with computed qty & status
   products.value = (data ?? []).map((p: any) => {
     const ss: StockSummary[] = p.stock_summary ?? []
     const qty = ss.reduce((sum: number, s: StockSummary) => sum + (s.qty_available ?? 0), 0)
@@ -101,13 +95,11 @@ async function fetchProducts() {
   loading.value = false
 }
 
-// Filter by stock status (client-side after fetch)
 const filtered = computed(() => {
   if (stockFilter.value === 'all') return products.value
   return products.value.filter(p => p.status === stockFilter.value)
 })
 
-// ── Summary cards ─────────────────────────────────────────────────
 const summary = computed(() => ({
   total:  products.value.length,
   normal: products.value.filter(p => p.status === 'normal').length,
@@ -115,11 +107,10 @@ const summary = computed(() => ({
   empty:  products.value.filter(p => p.status === 'empty').length,
 }))
 
-// ── Stock badge ───────────────────────────────────────────────────
 function stockBadge(p: Product) {
-  if (p.status === 'empty') return { label: 'Habis',        cls: 'bg-red-100 text-red-700' }
-  if (p.status === 'low')   return { label: 'Hampir Habis', cls: 'bg-amber-100 text-amber-700' }
-  return                           { label: 'Normal',        cls: 'bg-emerald-100 text-emerald-700' }
+  if (p.status === 'empty') return { label: 'Habis',        cls: 'bg-rose-500/10 text-rose-400 border border-rose-500/20' }
+  if (p.status === 'low')   return { label: 'Hampir Habis', cls: 'bg-amber-500/10 text-amber-400 border border-amber-500/20' }
+  return                           { label: 'Normal',        cls: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' }
 }
 
 function rp(n: number | null) {
@@ -127,7 +118,6 @@ function rp(n: number | null) {
   return 'Rp ' + n.toLocaleString('id-ID')
 }
 
-// ── Watchers: refetch on filter change ────────────────────────────
 const searchDebounce = ref<ReturnType<typeof setTimeout>>()
 watch(search, () => {
   clearTimeout(searchDebounce.value)
@@ -144,31 +134,38 @@ onMounted(fetchProducts)
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Inventory</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        <h1 class="text-xl font-bold" style="color:#1a1a1a">Inventory</h1>
+        <p class="text-sm mt-0.5" style="color:#666">
           Kelola stok obat, alkes, BMHP &amp; reagensia
-          <span v-if="!loading" class="text-gray-400">· {{ totalCount.toLocaleString('id-ID') }} SKU aktif</span>
+          <span v-if="!loading" style="color:#999">· {{ totalCount.toLocaleString('id-ID') }} SKU aktif</span>
         </p>
       </div>
       <div class="flex gap-2">
-        <UButton icon="i-lucide-refresh-cw" color="neutral" variant="outline" size="sm" :loading="loading" @click="fetchProducts">
+        <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors" style="border-color:#e5e5e5; color:#666; background:#f5f5f5" @click="fetchProducts">
+          <UIcon name="i-lucide-refresh-cw" class="text-sm" :class="loading ? 'animate-spin' : ''"/>
           Refresh
-        </UButton>
-        <UButton icon="i-lucide-download" color="neutral" variant="outline" size="sm">Export</UButton>
+        </button>
+        <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium" style="border-color:#e5e5e5; color:#666; background:#f5f5f5">
+          <UIcon name="i-lucide-download" class="text-sm"/>
+          Export
+        </button>
         <NuxtLink to="/dashboard/inventory/add">
-          <UButton icon="i-lucide-plus" color="primary" size="sm">Tambah SKU</UButton>
+          <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#6b1525">
+            <UIcon name="i-lucide-plus" class="text-sm"/>
+            Tambah SKU
+          </button>
         </NuxtLink>
       </div>
     </div>
 
     <!-- Error state -->
-    <div v-if="error" class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-      <UIcon name="i-lucide-alert-circle" class="text-red-500 text-lg flex-shrink-0 mt-0.5"/>
+    <div v-if="error" class="rounded-xl p-4 flex items-start gap-3 border" style="background:#f5f5f5; border-color:#6b1525">
+      <UIcon name="i-lucide-alert-circle" class="text-rose-400 text-lg flex-shrink-0 mt-0.5"/>
       <div>
-        <p class="text-sm font-semibold text-red-700">Gagal memuat data</p>
-        <p class="text-xs text-red-500 mt-0.5">{{ error }}</p>
-        <p class="text-xs text-red-400 mt-1">
-          Pastikan sudah menjalankan <code class="font-mono bg-red-100 px-1 rounded">node supabase/seed_inventory.mjs</code>
+        <p class="text-sm font-semibold text-rose-400">Gagal memuat data</p>
+        <p class="text-xs mt-0.5" style="color:#666">{{ error }}</p>
+        <p class="text-xs mt-1" style="color:#999">
+          Pastikan sudah menjalankan <code class="font-mono px-1 rounded" style="background:#e5e5e5">node supabase/seed_inventory.mjs</code>
           dan login ulang.
         </p>
       </div>
@@ -178,128 +175,128 @@ onMounted(fetchProducts)
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <div
         v-for="card in [
-          { label: 'Total SKU',     value: summary.total,  icon: 'i-lucide-package',       color: 'text-blue-600',   bg: 'bg-blue-50' },
-          { label: 'Stok Normal',   value: summary.normal, icon: 'i-lucide-check-circle',  color: 'text-emerald-600',bg: 'bg-emerald-50' },
-          { label: 'Hampir Habis',  value: summary.low,    icon: 'i-lucide-triangle-alert', color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Stok Habis',    value: summary.empty,  icon: 'i-lucide-x-circle',      color: 'text-red-600',    bg: 'bg-red-50' },
+          { label: 'Total SKU',     value: summary.total,  icon: 'i-lucide-package',        color: '#38bdf8', bg: 'rgba(56,189,248,0.1)' },
+          { label: 'Stok Normal',   value: summary.normal, icon: 'i-lucide-check-circle',   color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
+          { label: 'Hampir Habis',  value: summary.low,    icon: 'i-lucide-triangle-alert', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+          { label: 'Stok Habis',    value: summary.empty,  icon: 'i-lucide-x-circle',       color: '#f43f5e', bg: 'rgba(244,63,94,0.1)' },
         ]" :key="card.label"
-        class="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3"
+        class="rounded-xl border p-4 flex items-center gap-3" style="background:#f5f5f5; border-color:#e5e5e5"
       >
-        <div :class="[card.bg, 'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0']">
-          <UIcon :name="card.icon" :class="[card.color, 'text-lg']"/>
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" :style="{ background: card.bg }">
+          <UIcon :name="card.icon" class="text-lg" :style="{ color: card.color }"/>
         </div>
         <div>
-          <p class="text-xl font-bold text-gray-900">
-            <span v-if="loading" class="inline-block w-8 h-5 bg-gray-200 rounded animate-pulse"/>
+          <p class="text-xl font-bold" style="color:#1a1a1a">
+            <span v-if="loading" class="inline-block w-8 h-5 rounded animate-pulse" style="background:#e5e5e5"/>
             <span v-else>{{ card.value }}</span>
           </p>
-          <p class="text-xs text-gray-500">{{ card.label }}</p>
+          <p class="text-xs" style="color:#999">{{ card.label }}</p>
         </div>
       </div>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-xl border border-gray-200 p-4 flex flex-wrap gap-3 items-center">
+    <div class="rounded-xl border p-4 flex flex-wrap gap-3 items-center" style="background:#f5f5f5; border-color:#e5e5e5">
       <div class="flex-1 min-w-48 relative">
-        <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"/>
+        <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style="color:#999"/>
         <input
           v-model="search"
           type="text"
           placeholder="Cari nama atau kode SKU..."
-          class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+          class="w-full rounded-lg pl-9 pr-3 py-2 text-sm border outline-none transition-all focus:ring-2"
+          style="background:#f0f0f0; border-color:#e5e5e5; color:#1a1a1a; --tw-ring-color: rgba(107,21,37,0.4)"
         >
       </div>
-      <!-- Category -->
       <div class="flex gap-1.5 flex-wrap">
         <button
           v-for="cat in categories" :key="cat.value"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="category === cat.value ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+          :style="category === cat.value
+            ? 'background:#6b1525; color:white'
+            : 'background:#eee; color:#666; border:1px solid #e5e5e5'"
           @click="category = cat.value; page = 1"
         >{{ cat.label }}</button>
       </div>
-      <!-- Stock status -->
       <div class="flex gap-1.5 flex-wrap">
         <button
           v-for="sf in stockFilters" :key="sf.value"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="stockFilter === sf.value ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+          :style="stockFilter === sf.value
+            ? 'background:#1a1a1a; color:white'
+            : 'background:#eee; color:#666; border:1px solid #e5e5e5'"
           @click="stockFilter = sf.value"
         >{{ sf.label }}</button>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="rounded-xl border overflow-hidden" style="background:#f5f5f5; border-color:#e5e5e5">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="border-b border-gray-200 bg-gray-50">
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Kode</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nama Item</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Kategori</th>
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Stok</th>
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Min</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Kadaluarsa</th>
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Harga</th>
+            <tr style="border-bottom:1px solid #e5e5e5; background:#fafafa">
+              <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Kode</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Nama Item</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Kategori</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Stok</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Min</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Status</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Kadaluarsa</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#999">Harga</th>
               <th class="px-4 py-3"/>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
-
-            <!-- Loading skeleton -->
+          <tbody>
             <template v-if="loading">
-              <tr v-for="i in 8" :key="i" class="animate-pulse">
-                <td class="px-4 py-3"><div class="h-3 w-16 bg-gray-200 rounded"/></td>
-                <td class="px-4 py-3"><div class="h-3 w-40 bg-gray-200 rounded"/></td>
-                <td class="px-4 py-3"><div class="h-3 w-14 bg-gray-200 rounded"/></td>
-                <td class="px-4 py-3 text-right"><div class="h-3 w-12 bg-gray-200 rounded ml-auto"/></td>
-                <td class="px-4 py-3 text-right"><div class="h-3 w-10 bg-gray-200 rounded ml-auto"/></td>
-                <td class="px-4 py-3"><div class="h-4 w-20 bg-gray-200 rounded-full"/></td>
-                <td class="px-4 py-3"><div class="h-3 w-20 bg-gray-200 rounded"/></td>
-                <td class="px-4 py-3 text-right"><div class="h-3 w-20 bg-gray-200 rounded ml-auto"/></td>
+              <tr v-for="i in 8" :key="i" class="animate-pulse" :style="i < 8 ? 'border-bottom:1px solid #f5f5f5' : ''">
+                <td class="px-4 py-3"><div class="h-3 w-16 rounded" style="background:#e5e5e5"/></td>
+                <td class="px-4 py-3"><div class="h-3 w-40 rounded" style="background:#e5e5e5"/></td>
+                <td class="px-4 py-3"><div class="h-3 w-14 rounded" style="background:#e5e5e5"/></td>
+                <td class="px-4 py-3 text-right"><div class="h-3 w-12 rounded ml-auto" style="background:#e5e5e5"/></td>
+                <td class="px-4 py-3 text-right"><div class="h-3 w-10 rounded ml-auto" style="background:#e5e5e5"/></td>
+                <td class="px-4 py-3"><div class="h-4 w-20 rounded-full" style="background:#e5e5e5"/></td>
+                <td class="px-4 py-3"><div class="h-3 w-20 rounded" style="background:#e5e5e5"/></td>
+                <td class="px-4 py-3 text-right"><div class="h-3 w-20 rounded ml-auto" style="background:#e5e5e5"/></td>
                 <td class="px-4 py-3"/>
               </tr>
             </template>
 
-            <!-- Empty state -->
             <tr v-else-if="filtered.length === 0">
-              <td colspan="9" class="text-center py-14 text-gray-400">
-                <UIcon name="i-lucide-package-open" class="text-4xl mb-3 block mx-auto text-gray-300"/>
+              <td colspan="9" class="text-center py-14" style="color:#999">
+                <UIcon name="i-lucide-package-open" class="text-4xl mb-3 block mx-auto" style="color:#e5e5e5"/>
                 <p class="text-sm font-medium">Tidak ada item ditemukan</p>
                 <p class="text-xs mt-1">Coba ubah filter atau jalankan seed inventory</p>
               </td>
             </tr>
 
-            <!-- Data rows -->
             <tr
               v-else
               v-for="item in filtered" :key="item.id"
-              class="hover:bg-gray-50 transition-colors cursor-pointer group"
+              class="transition-colors cursor-pointer group hover:bg-[#eee]"
+              style="border-bottom:1px solid #f5f5f5"
               @click="$router.push(`/dashboard/inventory/${item.id}`)"
             >
               <td class="px-4 py-3">
                 <div class="flex items-center gap-1.5">
-                  <span class="font-mono text-xs text-gray-500">{{ item.internal_code ?? '—' }}</span>
-                  <span v-if="item.is_narkotika"    class="text-[9px] font-bold bg-red-100 text-red-600 px-1 rounded">NAR</span>
-                  <span v-if="item.is_psikotropika" class="text-[9px] font-bold bg-purple-100 text-purple-600 px-1 rounded">PSI</span>
-                  <span v-if="item.is_fornas"       class="text-[9px] font-bold bg-blue-100 text-blue-600 px-1 rounded">FNS</span>
+                  <span class="font-mono text-xs" style="color:#666">{{ item.internal_code ?? '—' }}</span>
+                  <span v-if="item.is_narkotika"    class="text-[9px] font-bold bg-rose-100 text-rose-600 border border-rose-200 px-1 rounded">NAR</span>
+                  <span v-if="item.is_psikotropika" class="text-[9px] font-bold bg-violet-100 text-violet-600 border border-violet-200 px-1 rounded">PSI</span>
+                  <span v-if="item.is_fornas"       class="text-[9px] font-bold bg-sky-100 text-sky-600 border border-sky-200 px-1 rounded">FNS</span>
                 </div>
               </td>
-              <td class="px-4 py-3 font-medium text-gray-900 group-hover:text-red-700 transition-colors">
+              <td class="px-4 py-3 font-medium transition-colors" :style="'color:#1a1a1a'" @mouseenter="($event.target as HTMLElement).style.color='#6b1525'" @mouseleave="($event.target as HTMLElement).style.color='#1a1a1a'">
                 {{ item.name }}
               </td>
               <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 capitalize">
+                <span class="px-2 py-0.5 rounded text-xs border capitalize" style="background:#eee; border-color:#e5e5e5; color:#666">
                   {{ item.category }}
                 </span>
               </td>
               <td class="px-4 py-3 text-right">
-                <span class="font-semibold text-gray-900">{{ item.qty.toLocaleString('id-ID') }}</span>
-                <span class="text-xs text-gray-400 ml-1">{{ item.uom_base }}</span>
+                <span class="font-semibold" style="color:#1a1a1a">{{ item.qty.toLocaleString('id-ID') }}</span>
+                <span class="text-xs ml-1" style="color:#999">{{ item.uom_base }}</span>
               </td>
-              <td class="px-4 py-3 text-right text-xs text-gray-400">
+              <td class="px-4 py-3 text-right text-xs" style="color:#999">
                 {{ item.min_stock.toLocaleString('id-ID') }}
               </td>
               <td class="px-4 py-3">
@@ -310,45 +307,43 @@ onMounted(fetchProducts)
               <td class="px-4 py-3 text-xs">
                 <span
                   v-if="item.stock_summary[0]?.nearest_expiry"
-                  :class="[
-                    'font-mono',
-                    new Date(item.stock_summary[0].nearest_expiry) < new Date(Date.now() + 30*86400000)
-                      ? 'text-red-500 font-semibold'
-                      : 'text-gray-400'
-                  ]"
+                  class="font-mono"
+                  :style="new Date(item.stock_summary[0].nearest_expiry) < new Date(Date.now() + 30*86400000)
+                    ? 'color:#f43f5e; font-weight:600'
+                    : 'color:#999'"
                 >
                   {{ item.stock_summary[0].nearest_expiry }}
                 </span>
-                <span v-else class="text-gray-300">—</span>
+                <span v-else style="color:#e5e5e5">—</span>
               </td>
-              <td class="px-4 py-3 text-right text-sm text-gray-700">
+              <td class="px-4 py-3 text-right text-sm" style="color:#333">
                 {{ rp(item.standard_price) }}
               </td>
               <td class="px-4 py-3 text-right">
-                <UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs"/>
+                <UIcon name="i-lucide-chevron-right" class="text-sm" style="color:#e5e5e5"/>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Footer -->
-      <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-        <p class="text-xs text-gray-500">
+      <div class="px-4 py-3 flex items-center justify-between" style="border-top:1px solid #e5e5e5">
+        <p class="text-xs" style="color:#999">
           <template v-if="!loading">
             Menampilkan {{ filtered.length }} dari {{ totalCount.toLocaleString('id-ID') }} item
           </template>
         </p>
-        <!-- Pagination -->
         <div v-if="totalCount > perPage" class="flex items-center gap-2">
           <button
-            class="px-3 py-1 text-xs rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
+            class="px-3 py-1 text-xs rounded border transition-colors disabled:opacity-40"
+            style="border-color:#e5e5e5; color:#666; background:#f5f5f5"
             :disabled="page <= 1"
             @click="page--"
           >← Prev</button>
-          <span class="text-xs text-gray-500">Hal {{ page }} / {{ Math.ceil(totalCount / perPage) }}</span>
+          <span class="text-xs" style="color:#999">Hal {{ page }} / {{ Math.ceil(totalCount / perPage) }}</span>
           <button
-            class="px-3 py-1 text-xs rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
+            class="px-3 py-1 text-xs rounded border transition-colors disabled:opacity-40"
+            style="border-color:#e5e5e5; color:#666; background:#f5f5f5"
             :disabled="page >= Math.ceil(totalCount / perPage)"
             @click="page++"
           >Next →</button>

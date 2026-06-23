@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-@theme static {
+@theme {
   --font-sans: 'Public Sans', sans-serif;
 
   --color-green-50: #EFFDF5;
@@ -15,4 +15,16 @@
   --color-green-800: #016538;
   --color-green-900: #0A5331;
   --color-green-950: #052E16;
+
+  --color-bordeaux-50: #fdf2f4;
+  --color-bordeaux-100: #fce7eb;
+  --color-bordeaux-200: #f9d0d9;
+  --color-bordeaux-300: #f0a3b5;
+  --color-bordeaux-400: #9a3040;
+  --color-bordeaux-500: #6b1525;
+  --color-bordeaux-600: #5a1120;
+  --color-bordeaux-700: #4a0e1a;
+  --color-bordeaux-800: #3a0b15;
+  --color-bordeaux-900: #2d0910;
+  --color-bordeaux-950: #1a050a;
 }

@@ -1,212 +1,221 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({ layout: 'dashboard', title: 'Order & Distribusi' })
 
-const activeTab = ref('internal')
+const supabase = useSupabaseClient()
 
-const tabs = [
-  { key: 'internal', label: 'Distribusi Internal', icon: 'i-lucide-arrow-right-left' },
-  { key: 'external', label: 'Distribusi Eksternal', icon: 'i-lucide-truck' },
-  { key: 'retur',    label: 'Retur',                icon: 'i-lucide-undo-2' },
-]
+const activeTab = ref<'issue'|'return'>('issue')
+const loading = ref(true)
+const issueList = ref<any[]>([])
+const returnList = ref<any[]>([])
+const issueTotal = ref(0)
+const returnTotal = ref(0)
+const page = ref(1)
+const perPage = 15
+const search = ref('')
+let debounce: ReturnType<typeof setTimeout>
 
-const stats = [
-  { label: 'Order Hari Ini',    value: 8,  icon: 'i-lucide-clipboard-list',  color: 'text-blue-600',   bg: 'bg-blue-50 dark:bg-blue-950' },
-  { label: 'Pending Pick',      value: 3,  icon: 'i-lucide-package',          color: 'text-amber-600',  bg: 'bg-amber-50 dark:bg-amber-950' },
-  { label: 'Dalam Pengiriman',  value: 2,  icon: 'i-lucide-truck',            color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950' },
-  { label: 'Selesai Bulan Ini', value: 47, icon: 'i-lucide-check-circle',     color: 'text-emerald-600',bg: 'bg-emerald-50 dark:bg-emerald-950' },
-]
+const kpis = ref({ today: 0, issueTotal: 0, returnTotal: 0, totalQty: 0 })
 
-const internalOrders = ref([
-  { id: 'DO-INT-0089', tanggal: '2026-06-22', dari: 'Gudang Utama', ke: 'Farmasi Rawat Inap', item_count: 12, status: 'delivered',  picker: 'Budi S.' },
-  { id: 'DO-INT-0088', tanggal: '2026-06-22', dari: 'Gudang Utama', ke: 'IGD',                item_count: 5,  status: 'picking',    picker: 'Rini A.' },
-  { id: 'DO-INT-0087', tanggal: '2026-06-21', dari: 'Gudang Utama', ke: 'Poli Umum',          item_count: 8,  status: 'pending',    picker: '-' },
-  { id: 'DO-INT-0086', tanggal: '2026-06-21', dari: 'Gudang Utama', ke: 'ICU',                item_count: 6,  status: 'delivered',  picker: 'Budi S.' },
-  { id: 'DO-INT-0085', tanggal: '2026-06-20', dari: 'Gudang B',     ke: 'OK / Bedah',         item_count: 20, status: 'delivered',  picker: 'Sari D.' },
-])
-
-const externalOrders = ref([
-  { id: 'DO-EXT-0021', tanggal: '2026-06-22', tujuan: 'RS Mitra Sehat', alamat: 'Jl. Gatot Subroto No. 12', item_count: 30, status: 'in_transit', epod: false },
-  { id: 'DO-EXT-0020', tanggal: '2026-06-20', tujuan: 'Klinik Pratama', alamat: 'Jl. Sudirman No. 5',      item_count: 10, status: 'delivered',  epod: true },
-])
-
-const returList = ref([
-  { id: 'RTR-0015', tanggal: '2026-06-21', dari: 'Farmasi Rawat Inap', alasan: 'Mendekati expired', item_count: 3, status: 'processed' },
-  { id: 'RTR-0014', tanggal: '2026-06-18', dari: 'IGD',                alasan: 'Barang rusak',      item_count: 1, status: 'pending' },
-])
-
-function badge(status: string) {
-  const map: Record<string, string> = {
-    pending:    'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-    picking:    'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
-    packed:     'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
-    in_transit: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400',
-    delivered:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
-    processed:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
-  }
-  return map[status] ?? 'bg-gray-100 text-gray-600'
+function fDate(d: string | null, withTime = false) {
+  if (!d) return '—'
+  const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+  if (withTime) { opts.hour = '2-digit'; opts.minute = '2-digit' }
+  return new Date(d).toLocaleDateString('id-ID', opts)
 }
 
-function badgeLabel(status: string) {
-  const map: Record<string, string> = {
-    pending: 'Pending', picking: 'Picking', packed: 'Packed',
-    in_transit: 'Dalam Perjalanan', delivered: 'Terkirim', processed: 'Diproses',
-  }
-  return map[status] ?? status
+async function fetchKPIs() {
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0)
+  const [
+    { count: todayCount },
+    { count: issueCount },
+    { count: retCount },
+  ] = await Promise.all([
+    supabase.from('stock_movements').select('*', { count:'exact', head:true }).eq('movement_type','issue').gte('created_at', todayStart.toISOString()),
+    supabase.from('stock_movements').select('*', { count:'exact', head:true }).eq('movement_type','issue'),
+    supabase.from('stock_movements').select('*', { count:'exact', head:true }).in('movement_type',['return_in','return_out']),
+  ])
+  kpis.value = { today: todayCount ?? 0, issueTotal: issueCount ?? 0, returnTotal: retCount ?? 0, totalQty: 0 }
 }
+
+async function fetchIssues() {
+  loading.value = true
+  let q = supabase
+    .from('stock_movements')
+    .select('id, movement_type, qty, ref_number, notes, created_at, products(name, category, uom_base)', { count: 'exact' })
+    .eq('movement_type', 'issue')
+    .order('created_at', { ascending: false })
+    .range((page.value - 1) * perPage, page.value * perPage - 1)
+  if (search.value.trim()) q = q.ilike('ref_number', `%${search.value.trim()}%`)
+  const { data, count } = await q
+  issueList.value = (data ?? []).map(m => ({
+    ...m, prodName: (m.products as any)?.name ?? '—', uom: (m.products as any)?.uom_base ?? '',
+    category: (m.products as any)?.category ?? '', unit: extractUnit(m.notes),
+  }))
+  issueTotal.value = count ?? 0
+  loading.value = false
+}
+
+async function fetchReturns() {
+  loading.value = true
+  let q = supabase
+    .from('stock_movements')
+    .select('id, movement_type, qty, ref_number, notes, created_at, products(name, category, uom_base)', { count: 'exact' })
+    .in('movement_type', ['return_in', 'return_out'])
+    .order('created_at', { ascending: false })
+    .range((page.value - 1) * perPage, page.value * perPage - 1)
+  if (search.value.trim()) q = q.ilike('ref_number', `%${search.value.trim()}%`)
+  const { data, count } = await q
+  returnList.value = (data ?? []).map(m => ({
+    ...m, prodName: (m.products as any)?.name ?? '—', uom: (m.products as any)?.uom_base ?? '',
+    unit: extractUnit(m.notes),
+  }))
+  returnTotal.value = count ?? 0
+  loading.value = false
+}
+
+function extractUnit(notes: string | null): string {
+  if (!notes) return '—'
+  return notes.split('—')[0]?.trim() ?? notes.slice(0, 30)
+}
+
+function fetchTab() {
+  if (activeTab.value === 'issue') fetchIssues()
+  else fetchReturns()
+}
+
+watch([page], fetchTab)
+watch(activeTab, () => { page.value = 1; fetchTab() })
+watch(search, () => { clearTimeout(debounce); debounce = setTimeout(() => { page.value = 1; fetchTab() }, 400) })
+onMounted(() => { fetchKPIs(); fetchTab() })
+
+const currentList = computed(() => activeTab.value === 'issue' ? issueList.value : returnList.value)
+const currentTotal = computed(() => activeTab.value === 'issue' ? issueTotal.value : returnTotal.value)
+const totalPages = computed(() => Math.max(1, Math.ceil(currentTotal.value / perPage)))
 </script>
 
 <template>
   <div class="space-y-5">
 
+    <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Order & Distribusi</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Distribusi internal, eksternal & retur barang</p>
+        <h1 class="text-xl font-bold text-[#1a1a1a]">Order & Distribusi</h1>
+        <p class="text-sm mt-0.5 text-[#999]">Distribusi internal, retur & tracking pengiriman</p>
       </div>
-      <UButton icon="i-lucide-plus" color="primary" size="sm">Buat Order</UButton>
+      <button class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold text-white bg-[#6b1525] hover:bg-[#4a0e1a] transition-colors">
+        <UIcon name="i-lucide-plus" class="text-sm"/>
+        Buat Order
+      </button>
     </div>
 
-    <!-- Stats -->
+    <!-- KPI Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <div
-        v-for="s in stats" :key="s.label"
-        class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 flex items-center gap-3"
+      <div v-for="card in [
+        { label: 'Distribusi Hari Ini', value: kpis.today,       icon: 'i-lucide-clipboard-list', color: 'text-blue-600',    bg: 'bg-blue-50' },
+        { label: 'Total Distribusi',    value: kpis.issueTotal,  icon: 'i-lucide-arrow-up-circle', color: 'text-violet-600', bg: 'bg-violet-50' },
+        { label: 'Total Retur',         value: kpis.returnTotal, icon: 'i-lucide-undo-2',          color: 'text-amber-600',  bg: 'bg-amber-50' },
+        { label: 'Dokumen Total',       value: kpis.issueTotal + kpis.returnTotal, icon: 'i-lucide-check-circle', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      ]" :key="card.label"
+        class="rounded-xl border border-[#e5e5e5] bg-[#f5f5f5] p-4 flex items-center gap-3"
       >
-        <div :class="[s.bg, 'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0']">
-          <UIcon :name="s.icon" :class="[s.color, 'text-lg']" />
+        <div :class="[card.bg, 'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0']">
+          <UIcon :name="card.icon" :class="[card.color, 'text-lg']"/>
         </div>
         <div>
-          <p class="text-xl font-bold text-gray-900 dark:text-white">{{ s.value }}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 leading-tight">{{ s.label }}</p>
+          <p class="text-xl font-bold text-[#1a1a1a]">{{ card.value }}</p>
+          <p class="text-xs text-[#999]">{{ card.label }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Tabs + Table -->
-    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-      <div class="flex border-b border-gray-200 dark:border-gray-800">
-        <button
-          v-for="tab in tabs" :key="tab.key"
-          class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors border-b-2 -mb-px"
-          :class="activeTab === tab.key
-            ? 'border-red-600 text-red-600 dark:text-red-400'
-            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-          @click="activeTab = tab.key"
-        >
-          <UIcon :name="tab.icon" class="text-base" />{{ tab.label }}
-        </button>
+    <!-- Main Card -->
+    <div class="rounded-xl border border-[#e5e5e5] bg-[#f5f5f5] overflow-hidden">
+
+      <!-- Tabs + Search -->
+      <div class="flex items-center justify-between gap-4 px-5 pt-4 pb-0 border-b border-[#e5e5e5]">
+        <div class="flex gap-1 -mb-px">
+          <button
+            v-for="tab in [
+              { key: 'issue',  label: 'Distribusi Internal', icon: 'i-lucide-arrow-up-circle', count: kpis.issueTotal },
+              { key: 'return', label: 'Retur',               icon: 'i-lucide-undo-2',          count: kpis.returnTotal },
+            ]" :key="tab.key"
+            class="flex items-center gap-2 px-4 py-3 text-xs font-medium transition-colors border-b-2 -mb-px"
+            :class="activeTab === tab.key
+              ? 'border-[#6b1525] text-[#6b1525]'
+              : 'border-transparent text-[#999] hover:text-[#666]'"
+            @click="activeTab = tab.key as any"
+          >
+            <UIcon :name="tab.icon" class="text-sm"/>
+            {{ tab.label }}
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              :class="activeTab === tab.key ? 'bg-[#fdf2f4] text-[#6b1525]' : 'bg-[#f0f0f0] text-[#999]'">{{ tab.count }}</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#e5e5e5] bg-[#f0f0f0]">
+          <UIcon name="i-lucide-search" class="text-sm text-[#999]"/>
+          <input v-model="search" type="text" placeholder="Cari ref number..." class="bg-transparent text-xs outline-none w-36 text-[#1a1a1a] placeholder:text-[#bbb]"/>
+        </div>
       </div>
 
-      <!-- Internal -->
-      <div v-if="activeTab === 'internal'" class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">No. DO</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Tanggal</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Dari</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Ke</th>
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Item</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Picker</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
-              <th class="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-            <tr v-for="o in internalOrders" :key="o.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors cursor-pointer">
-              <td class="px-4 py-3 font-mono text-xs text-red-600 dark:text-red-400 font-semibold">{{ o.id }}</td>
-              <td class="px-4 py-3 text-xs text-gray-500">{{ o.tanggal }}</td>
-              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ o.dari }}</td>
-              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ o.ke }}</td>
-              <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">{{ o.item_count }}</td>
-              <td class="px-4 py-3 text-xs text-gray-500">{{ o.picker }}</td>
-              <td class="px-4 py-3">
-                <span :class="['px-2 py-0.5 rounded-full text-xs font-medium', badge(o.status)]">{{ badgeLabel(o.status) }}</span>
-              </td>
-              <td class="px-4 py-3 text-right">
-                <UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Loading -->
+      <div v-if="loading" class="p-4 space-y-2">
+        <div v-for="i in 6" :key="i" class="h-11 rounded-lg bg-[#e5e5e5] animate-pulse"/>
       </div>
 
-      <!-- External -->
-      <div v-if="activeTab === 'external'" class="overflow-x-auto">
-        <table class="w-full text-sm">
+      <!-- Table -->
+      <div v-else-if="currentList.length" class="overflow-x-auto">
+        <table class="w-full text-xs">
           <thead>
-            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">No. DO</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Tanggal</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Tujuan</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Alamat</th>
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Item</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">ePOD</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
-              <th class="px-4 py-3" />
+            <tr class="bg-[#fafafa] border-b border-[#e5e5e5]">
+              <th class="text-left px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Waktu</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Ref</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Produk</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Unit Tujuan</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Qty</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Tipe</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-            <tr v-for="o in externalOrders" :key="o.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors cursor-pointer">
-              <td class="px-4 py-3 font-mono text-xs text-red-600 dark:text-red-400 font-semibold">{{ o.id }}</td>
-              <td class="px-4 py-3 text-xs text-gray-500">{{ o.tanggal }}</td>
-              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ o.tujuan }}</td>
-              <td class="px-4 py-3 text-xs text-gray-500">{{ o.alamat }}</td>
-              <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">{{ o.item_count }}</td>
+          <tbody>
+            <tr v-for="mv in currentList" :key="mv.id" class="transition-colors cursor-pointer hover:bg-[#eee] border-b border-[#f0f0f0]">
+              <td class="px-4 py-3 text-[#999]">{{ fDate(mv.created_at, true) }}</td>
+              <td class="px-4 py-3 font-mono font-semibold text-[#6b1525]">{{ mv.ref_number ?? '—' }}</td>
               <td class="px-4 py-3">
-                <span :class="o.epod ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'" class="text-xs font-medium">
-                  {{ o.epod ? '✓ Confirmed' : 'Belum' }}
+                <p class="font-medium text-[#1a1a1a]">{{ mv.prodName }}</p>
+                <p class="text-[10px] text-[#bbb] capitalize">{{ mv.category }}</p>
+              </td>
+              <td class="px-4 py-3 text-[#666]">{{ mv.unit }}</td>
+              <td class="px-4 py-3 text-right font-bold" :class="mv.qty > 0 ? 'text-emerald-600' : 'text-rose-600'">
+                {{ mv.qty > 0 ? '+' : '' }}{{ Math.abs(Number(mv.qty)).toLocaleString('id-ID') }}
+                <span class="text-[#bbb] font-normal ml-0.5">{{ mv.uom }}</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                  :class="mv.movement_type === 'issue' ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                    : mv.movement_type === 'return_in' ? 'bg-teal-50 text-teal-600 border border-teal-200'
+                    : 'bg-orange-50 text-orange-600 border border-orange-200'">
+                  {{ mv.movement_type === 'issue' ? 'Distribusi' : mv.movement_type === 'return_in' ? 'Return Masuk' : 'Return Keluar' }}
                 </span>
               </td>
-              <td class="px-4 py-3">
-                <span :class="['px-2 py-0.5 rounded-full text-xs font-medium', badge(o.status)]">{{ badgeLabel(o.status) }}</span>
-              </td>
-              <td class="px-4 py-3 text-right">
-                <UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs" />
-              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Retur -->
-      <div v-if="activeTab === 'retur'" class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">No. Retur</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Tanggal</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Dari Unit</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Alasan</th>
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Item</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
-              <th class="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-            <tr v-for="r in returList" :key="r.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors cursor-pointer">
-              <td class="px-4 py-3 font-mono text-xs text-red-600 dark:text-red-400 font-semibold">{{ r.id }}</td>
-              <td class="px-4 py-3 text-xs text-gray-500">{{ r.tanggal }}</td>
-              <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ r.dari }}</td>
-              <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ r.alasan }}</td>
-              <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">{{ r.item_count }}</td>
-              <td class="px-4 py-3">
-                <span :class="['px-2 py-0.5 rounded-full text-xs font-medium', badge(r.status)]">{{ badgeLabel(r.status) }}</span>
-              </td>
-              <td class="px-4 py-3 text-right">
-                <UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Empty -->
+      <div v-else class="py-14 flex flex-col items-center gap-3">
+        <UIcon name="i-lucide-inbox" class="text-3xl text-[#ccc]"/>
+        <p class="text-sm text-[#999]">Tidak ada data ditemukan</p>
       </div>
 
-      <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-800">
-        <p class="text-xs text-gray-400">
-          {{ activeTab === 'internal' ? internalOrders.length : activeTab === 'external' ? externalOrders.length : returList.length }} dokumen
-        </p>
+      <!-- Footer -->
+      <div class="px-5 py-3 flex items-center justify-between border-t border-[#e5e5e5]">
+        <p class="text-xs text-[#999]">{{ currentTotal }} dokumen</p>
+        <div v-if="currentTotal > perPage" class="flex items-center gap-2">
+          <button class="px-3 py-1 text-xs rounded border border-[#e5e5e5] text-[#666] hover:bg-[#eee] disabled:opacity-40 transition-colors" :disabled="page <= 1" @click="page--">← Prev</button>
+          <span class="text-xs text-[#999]">{{ page }} / {{ totalPages }}</span>
+          <button class="px-3 py-1 text-xs rounded border border-[#e5e5e5] text-[#666] hover:bg-[#eee] disabled:opacity-40 transition-colors" :disabled="page >= totalPages" @click="page++">Next →</button>
+        </div>
       </div>
     </div>
-
   </div>
 </template>

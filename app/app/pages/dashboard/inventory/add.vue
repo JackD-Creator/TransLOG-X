@@ -29,16 +29,15 @@ const satuanOptions   = ['Tablet', 'Kapsul', 'Botol', 'Ampul', 'Vial', 'Pcs', 'S
     <div class="flex items-center gap-3">
       <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" @click="router.back()" />
       <div>
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Tambah SKU Baru</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Isi detail item untuk ditambahkan ke inventory</p>
+        <h1 class="text-xl font-bold text-[#1a1a1a]">Tambah SKU Baru</h1>
+        <p class="text-sm text-[#999] mt-0.5">Isi detail item untuk ditambahkan ke inventory</p>
       </div>
     </div>
 
     <form class="space-y-5" @submit.prevent="save">
 
-      <!-- Identitas -->
-      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Identitas Item</h2>
+      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#666]">Identitas Item</h2>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="col-span-1">
@@ -74,9 +73,8 @@ const satuanOptions   = ['Tablet', 'Kapsul', 'Botol', 'Ampul', 'Vial', 'Pcs', 'S
         </div>
       </div>
 
-      <!-- Stok -->
-      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Batas Stok</h2>
+      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#666]">Batas Stok</h2>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="lbl">Stok Minimum</label>
@@ -89,9 +87,8 @@ const satuanOptions   = ['Tablet', 'Kapsul', 'Botol', 'Ampul', 'Vial', 'Pcs', 'S
         </div>
       </div>
 
-      <!-- Harga -->
-      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Harga</h2>
+      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#666]">Harga</h2>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="lbl">Harga Beli (Rp)</label>
@@ -104,9 +101,8 @@ const satuanOptions   = ['Tablet', 'Kapsul', 'Botol', 'Ampul', 'Vial', 'Pcs', 'S
         </div>
       </div>
 
-      <!-- Keterangan -->
-      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Keterangan</h2>
+      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#666]">Keterangan</h2>
         <textarea
           v-model="form.keterangan"
           rows="3"
@@ -115,7 +111,6 @@ const satuanOptions   = ['Tablet', 'Kapsul', 'Botol', 'Ampul', 'Vial', 'Pcs', 'S
         />
       </div>
 
-      <!-- Actions -->
       <div class="flex gap-3 justify-end">
         <UButton type="button" color="neutral" variant="outline" @click="router.back()">Batal</UButton>
         <UButton type="submit" color="primary" :loading="saving" icon="i-lucide-save">
@@ -129,35 +124,18 @@ const satuanOptions   = ['Tablet', 'Kapsul', 'Botol', 'Ampul', 'Vial', 'Pcs', 'S
 
 <style scoped>
 .lbl {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #6b7280;
-  margin-bottom: 6px;
+  display: block; font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: #666; margin-bottom: 6px;
 }
-.dark .lbl { color: #9ca3af; }
 
 .inp {
-  width: 100%;
-  padding: 9px 12px;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 8px;
-  background: #f9fafb;
-  color: #111827;
-  font-size: 0.875rem;
-  outline: none;
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid #e5e5e5; border-radius: 8px;
+  background: #f0f0f0; color: #1a1a1a;
+  font-size: 0.875rem; outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
-.dark .inp {
-  border-color: #374151;
-  background: #111827;
-  color: #f9fafb;
-}
-.inp:focus {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
-}
+.inp:focus { border-color: #6b1525; box-shadow: 0 0 0 3px rgba(107,21,37,0.1); }
 </style>
