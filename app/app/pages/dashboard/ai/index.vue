@@ -6,7 +6,7 @@ const supabase = useSupabaseClient()
 const features = [
   {
     title: 'Demand Forecasting',
-    desc: 'Prediksi kebutuhan stok 30 hari ke depan berbasis pola historis & AI Groq Llama 3.3.',
+    desc: 'Prediksi kebutuhan stok 30 hari ke depan berbasis pola historis & kecerdasan buatan.',
     status: 'live', icon: 'i-lucide-brain', color: 'text-purple-600', bg: 'bg-purple-50',
     action: 'forecast'
   },
@@ -133,7 +133,7 @@ function runAction(action: string | null) {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-bold text-[#1a1a1a]">AI / Machine Learning</h1>
-        <p class="text-sm text-[#999] mt-0.5">Powered by Groq Llama 3.3 70B — optimasi logistik & prediksi</p>
+        <p class="text-sm text-[#999] mt-0.5">AI-powered — optimasi logistik &amp; prediksi</p>
       </div>
       <div class="flex gap-2 text-xs">
         <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium">● Live</span>
