@@ -73,7 +73,7 @@ async function logout() {
         </div>
         <div class="min-w-0">
           <p class="font-bold text-sm text-[#1a1a1a] leading-none">Trans<span class="text-[#6b1525]">LOG-X</span></p>
-          <p class="text-[10px] text-[#999] mt-0.5">AI E-Logistics Platform</p>
+          <p class="text-[10px] text-[#999] mt-0.5">Medical &amp; Consumable Platform</p>
         </div>
       </div>
 
