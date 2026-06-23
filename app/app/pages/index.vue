@@ -1,10 +1,9 @@
 <script setup lang="ts">
 definePageMeta({ layout: false })
 const user = useSupabaseUser()
-const router = useRouter()
 watchEffect(() => {
-  if (user.value) router.replace('/dashboard')
-  else router.replace('/login')
+  if (user.value) navigateTo('/dashboard', { replace: true })
+  else navigateTo('/login', { replace: true })
 })
 </script>
 
