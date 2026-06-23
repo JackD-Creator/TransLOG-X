@@ -78,6 +78,9 @@ const navKSM = [
       { label: 'Fasilitas SCF',  icon: 'i-lucide-landmark',         to: '/dashboard/ksm/scf' },
       { label: 'Pembayaran',     icon: 'i-lucide-banknote',         to: '/dashboard/ksm/payments' },
       { label: 'Lap. Keuangan',  icon: 'i-lucide-trending-up',      to: '/dashboard/ksm/finance' },
+      { label: 'P&L',            icon: 'i-lucide-bar-chart-2',      to: '/dashboard/ksm/finance/pl' },
+      { label: 'Neraca',         icon: 'i-lucide-scale',            to: '/dashboard/ksm/finance/balance-sheet' },
+      { label: 'Arus Kas',       icon: 'i-lucide-waves',            to: '/dashboard/ksm/finance/cash-flow' },
       { label: 'Revenue Cycle',  icon: 'i-lucide-refresh-cw',       to: '/dashboard/ksm/rcm' }
     ]
   },
@@ -178,6 +181,14 @@ const navBank = [
       { label: 'Risiko Kredit',    icon: 'i-lucide-shield-alert',      to: '/dashboard/bank/credit-risk' },
       { label: 'KYC Mitra',        icon: 'i-lucide-fingerprint',       to: '/dashboard/bank/kyc' },
       { label: 'Kepatuhan',        icon: 'i-lucide-scale',             to: '/dashboard/compliance' }
+    ]
+  },
+  {
+    label: 'LAPORAN KEUANGAN',
+    items: [
+      { label: 'P&L Bank',         icon: 'i-lucide-trending-up',      to: '/dashboard/bank/finance/pl' },
+      { label: 'Portfolio SCF',    icon: 'i-lucide-pie-chart',        to: '/dashboard/bank/finance/portfolio' },
+      { label: 'Risk Report',      icon: 'i-lucide-shield-alert',     to: '/dashboard/bank/finance/risk-report' },
     ]
   },
   {

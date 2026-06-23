@@ -3,6 +3,65 @@ definePageMeta({ layout: 'dashboard' })
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+
+// Role detection — tampilkan dashboard berbeda per portal
+const { portalType, tenantName, isKSM, isDistributor, isBank, loading: roleLoading } = useUserRole()
+
+// ─── KSM Dashboard Data ───────────────────────────────────────────────────────
+const ksmStats = ref({ pos: 0, arOutstanding: 0, scfUsed: 0, scfLimit: 0, pendingNotif: 0 })
+async function loadKsmStats() {
+  const [{ data: pos, count: poCount }, { data: ar }, { data: scf }, { count: notifCount }] = await Promise.all([
+    supabase.from('ksm_purchase_orders').select('total_amount', { count:'exact' }).in('status',['submitted','confirmed','delivered']),
+    supabase.from('ar_accounts').select('outstanding_amount').neq('status','paid'),
+    supabase.from('scf_facilities').select('outstanding,facility_limit').eq('status','approved'),
+    supabase.from('hospital_notifications').select('*', { count:'exact', head:true }).eq('status','pending'),
+  ])
+  ksmStats.value = {
+    pos: poCount ?? 0,
+    arOutstanding: (ar ?? []).reduce((s,a) => s + Number(a.outstanding_amount ?? 0), 0),
+    scfUsed: (scf ?? []).reduce((s,f) => s + Number(f.outstanding ?? 0), 0),
+    scfLimit: (scf ?? []).reduce((s,f) => s + Number(f.facility_limit ?? 0), 0),
+    pendingNotif: notifCount ?? 0,
+  }
+}
+
+// ─── Distributor Dashboard Data ───────────────────────────────────────────────
+const distStats = ref({ activePOs: 0, pendingInvoices: 0, revenue: 0, stockItems: 0 })
+async function loadDistStats() {
+  const [{ data: pos, count: poCount }, { data: inv }] = await Promise.all([
+    supabase.from('ksm_purchase_orders').select('total_amount,status', { count:'exact' }).in('status',['confirmed','processing']),
+    supabase.from('ksm_purchase_orders').select('total_amount').eq('status','delivered'),
+  ])
+  distStats.value = {
+    activePOs: poCount ?? 0,
+    pendingInvoices: (pos ?? []).length,
+    revenue: (inv ?? []).reduce((s,p) => s + Number(p.total_amount ?? 0), 0),
+    stockItems: 0,
+  }
+}
+
+// ─── Bank Dashboard Data ──────────────────────────────────────────────────────
+const bankStats = ref({ activeFacilities: 0, totalLimit: 0, totalOutstanding: 0, interestEarned: 0, overdueAR: 0 })
+async function loadBankStats() {
+  const [{ data: fac }, { data: ar }] = await Promise.all([
+    supabase.from('scf_facilities').select('facility_limit,outstanding,status').eq('status','approved'),
+    supabase.from('ar_accounts').select('outstanding_amount,interest_amount,status'),
+  ])
+  const overdue = (ar ?? []).filter(a => a.status === 'overdue').reduce((s,a) => s + Number(a.outstanding_amount ?? 0), 0)
+  bankStats.value = {
+    activeFacilities: (fac ?? []).length,
+    totalLimit: (fac ?? []).reduce((s,f) => s + Number(f.facility_limit ?? 0), 0),
+    totalOutstanding: (fac ?? []).reduce((s,f) => s + Number(f.outstanding ?? 0), 0),
+    interestEarned: (ar ?? []).reduce((s,a) => s + Number(a.interest_amount ?? 0), 0),
+    overdueAR: overdue,
+  }
+}
+
+function fmtRpDash(n: number) {
+  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(1)} M`
+  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(0)} jt`
+  return `Rp ${n.toLocaleString('id-ID')}`
+}
 const now = new Date()
 const hour = now.getHours()
 const greeting = hour < 5 ? 'Selamat Malam' : hour < 12 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 19 ? 'Selamat Sore' : 'Selamat Malam'
@@ -272,11 +331,185 @@ let insightTimer: ReturnType<typeof setInterval> | null = null
 const lowStock = ref<any[]>([])
 const expiryItems = ref<any[]>([])
 const supplierUpdates = ref<any[]>([])
+
+// Load sesuai role setelah role diketahui
+watch(portalType, (type) => {
+  if (type === 'mitra_ksm') loadKsmStats()
+  else if (type === 'distributor') loadDistStats()
+  else if (type === 'bank') loadBankStats()
+}, { immediate: true })
 </script>
 
 <template>
   <!-- Palette: Light theme — Surface #f5f5f5 · Border #e5e5e5 · Text #1a1a1a · Muted #666 · Accent #6b1525 -->
   <div class="min-h-full space-y-6">
+
+    <!-- ── KSM Portal Dashboard ───────────────────────────────── -->
+    <template v-if="isKSM">
+      <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-6 pb-6 rounded-b-2xl bg-[#6b1525]">
+        <div class="relative flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs text-white/60 mb-1">{{ greeting }},</p>
+            <h1 class="text-2xl font-bold text-white">{{ tenantName || 'KSM Portal' }}</h1>
+            <p class="text-sm text-white/60 mt-0.5">{{ todayStr }} · Mitra KSM Logistik</p>
+          </div>
+          <NuxtLink to="/dashboard/ksm/strategy/ecosystem" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-xs font-semibold transition-colors">
+            <UIcon name="i-lucide-globe" class="text-sm"/>
+            Lihat Ecosystem Value
+          </NuxtLink>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">PO Aktif</p>
+          <p class="text-2xl font-bold text-[#1a1a1a]">{{ ksmStats.pos }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">Purchase Orders</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/ar" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">AR Outstanding</p>
+          <p class="text-xl font-bold text-[#6b1525]">{{ fmtRpDash(ksmStats.arOutstanding) }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">Piutang belum lunas</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/scf" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">SCF Terpakai</p>
+          <p class="text-xl font-bold text-blue-700">{{ fmtRpDash(ksmStats.scfUsed) }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">dari limit {{ fmtRpDash(ksmStats.scfLimit) }}</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/notifications" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">Notifikasi RS</p>
+          <p class="text-2xl font-bold" :class="ksmStats.pendingNotif > 0 ? 'text-amber-600' : 'text-emerald-600'">{{ ksmStats.pendingNotif }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">Permintaan pending</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/rcm" class="bg-[#0d0d0d] rounded-xl p-4 hover:bg-[#1a1a1a] transition-colors">
+          <p class="text-[10px] text-white/50 uppercase mb-1">Revenue Cycle</p>
+          <p class="text-xl font-bold text-amber-400">RCM</p>
+          <p class="text-[10px] text-white/30 mt-0.5">Analisis cashflow</p>
+        </NuxtLink>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <NuxtLink v-for="s in [
+          { title:'Supply ke RS', sub:'Revenue Architecture + KFA Benchmark', to:'/dashboard/ksm/strategy/supply', icon:'i-lucide-target', color:'text-emerald-600', bg:'bg-emerald-50' },
+          { title:'Negosiasi Dist.', sub:'5 Scenario Term Sheet + NPV Analysis', to:'/dashboard/ksm/strategy/negotiation', icon:'i-lucide-handshake', color:'text-blue-600', bg:'bg-blue-50' },
+          { title:'Pitch ke Bank', sub:'Credit Memo · DSCR · Yield Model', to:'/dashboard/ksm/strategy/bank-pitch', icon:'i-lucide-landmark', color:'text-amber-700', bg:'bg-amber-50' },
+        ]" :key="s.title" :to="s.to"
+          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5 hover:border-[#6b1525]/40 transition-all group">
+          <div :class="[s.bg, 'w-10 h-10 rounded-xl flex items-center justify-center mb-3']">
+            <UIcon :name="s.icon" :class="[s.color, 'text-xl']"/>
+          </div>
+          <p class="text-sm font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ s.title }}</p>
+          <p class="text-[11px] text-[#999] mt-0.5">{{ s.sub }}</p>
+        </NuxtLink>
+      </div>
+    </template>
+
+    <!-- ── Distributor Portal Dashboard ─────────────────────── -->
+    <template v-else-if="isDistributor">
+      <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-6 pb-6 rounded-b-2xl bg-blue-900">
+        <div class="relative flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs text-white/60 mb-1">{{ greeting }},</p>
+            <h1 class="text-2xl font-bold text-white">{{ tenantName || 'Distributor Portal' }}</h1>
+            <p class="text-sm text-white/60 mt-0.5">{{ todayStr }} · Portal Distributor / PBF</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <NuxtLink v-for="card in [
+          { label:'PO Aktif', val: String(distStats.activePOs), sub:'Perlu diproses', to:'/dashboard/dist/purchase-orders', color:'text-[#1a1a1a]' },
+          { label:'Invoice Pending', val: String(distStats.pendingInvoices), sub:'Menunggu konfirmasi', to:'/dashboard/dist/invoices', color:'text-amber-600' },
+          { label:'Revenue (Delivered)', val: fmtRpDash(distStats.revenue), sub:'Dari PO selesai', to:'/dashboard/dist/analytics', color:'text-emerald-700' },
+          { label:'Referensi KFA', val: 'HAP/HET', sub:'Database harga Kemkes', to:'/dashboard/dist/kfa', color:'text-blue-700' },
+        ]" :key="card.label" :to="card.to"
+          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-blue-300 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">{{ card.label }}</p>
+          <p class="text-xl font-bold" :class="card.color">{{ card.val }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">{{ card.sub }}</p>
+        </NuxtLink>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <NuxtLink v-for="link in [
+          { title:'Kelola Purchase Orders', sub:'Terima dan proses PO dari KSM', to:'/dashboard/dist/purchase-orders', icon:'i-lucide-clipboard-list' },
+          { title:'Fulfillment & Pengiriman', sub:'Konfirmasi pemenuhan dan pengiriman', to:'/dashboard/dist/fulfillment', icon:'i-lucide-truck' },
+          { title:'Katalog Produk', sub:'Stok dan harga item distributor', to:'/dashboard/dist/catalog', icon:'i-lucide-layers' },
+          { title:'SCF Likuiditas', sub:'Cek status pencairan invoice via Bank', to:'/dashboard/dist/scf', icon:'i-lucide-landmark' },
+        ]" :key="link.title" :to="link.to"
+          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 flex items-center gap-4 hover:border-blue-300 transition-colors group">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+            <UIcon :name="link.icon" class="text-blue-600 text-xl"/>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-[#1a1a1a] group-hover:text-blue-700 transition-colors">{{ link.title }}</p>
+            <p class="text-[11px] text-[#999]">{{ link.sub }}</p>
+          </div>
+          <UIcon name="i-lucide-arrow-right" class="text-[#ccc] ml-auto group-hover:text-blue-600 transition-colors"/>
+        </NuxtLink>
+      </div>
+    </template>
+
+    <!-- ── Bank Portal Dashboard ──────────────────────────────── -->
+    <template v-else-if="isBank">
+      <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-6 pb-6 rounded-b-2xl bg-[#0d0d0d]">
+        <div class="relative flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs text-white/60 mb-1">{{ greeting }},</p>
+            <h1 class="text-2xl font-bold text-white">{{ tenantName || 'Bank Portal' }}</h1>
+            <p class="text-sm text-white/60 mt-0.5">{{ todayStr }} · Portal Bank / Fintech</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
+          <p class="text-[10px] text-[#999] uppercase mb-1">Fasilitas Aktif</p>
+          <p class="text-2xl font-bold text-[#1a1a1a]">{{ bankStats.activeFacilities }}</p>
+          <p class="text-[10px] text-[#aaa]">Debitur approved</p>
+        </div>
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
+          <p class="text-[10px] text-[#999] uppercase mb-1">Total Limit</p>
+          <p class="text-xl font-bold text-blue-700">{{ fmtRpDash(bankStats.totalLimit) }}</p>
+          <p class="text-[10px] text-[#aaa]">Fasilitas dikucurkan</p>
+        </div>
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
+          <p class="text-[10px] text-[#999] uppercase mb-1">Outstanding</p>
+          <p class="text-xl font-bold text-[#6b1525]">{{ fmtRpDash(bankStats.totalOutstanding) }}</p>
+          <p class="text-[10px] text-[#aaa]">Saldo terpakai</p>
+        </div>
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
+          <p class="text-[10px] text-[#999] uppercase mb-1">Bunga Diterima</p>
+          <p class="text-xl font-bold text-emerald-700">{{ fmtRpDash(bankStats.interestEarned) }}</p>
+          <p class="text-[10px] text-[#aaa]">Interest income</p>
+        </div>
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
+          <p class="text-[10px] text-[#999] uppercase mb-1">AR Overdue</p>
+          <p class="text-xl font-bold" :class="bankStats.overdueAR > 0 ? 'text-red-600' : 'text-emerald-600'">
+            {{ bankStats.overdueAR > 0 ? fmtRpDash(bankStats.overdueAR) : 'Clear' }}
+          </p>
+          <p class="text-[10px] text-[#aaa]">Risiko gagal bayar</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <NuxtLink v-for="link in [
+          { title:'Monitoring AR', sub:'Pantau piutang & aging seluruh debitur', to:'/dashboard/bank/ar-monitoring', icon:'i-lucide-activity', bg:'bg-amber-50', color:'text-amber-700' },
+          { title:'Fasilitas SCF', sub:'Kelola limit, outstanding, utilisasi', to:'/dashboard/bank/facilities', icon:'i-lucide-landmark', bg:'bg-blue-50', color:'text-blue-700' },
+          { title:'Monitoring BPJS', sub:'Cashflow quasi-government sebagai collateral', to:'/dashboard/bank/bpjs-monitoring', icon:'i-lucide-shield-check', bg:'bg-emerald-50', color:'text-emerald-700' },
+          { title:'Credit Risk', sub:'Scoring dan risk rating debitur KSM', to:'/dashboard/bank/credit-risk', icon:'i-lucide-shield-alert', bg:'bg-red-50', color:'text-red-700' },
+          { title:'Pencairan SCF', sub:'Riwayat dan status disbursement', to:'/dashboard/bank/disbursements', icon:'i-lucide-banknote', bg:'bg-purple-50', color:'text-purple-700' },
+          { title:'BPJS Bridging', sub:'Bridging loan atas klaim BPJS RS', to:'/dashboard/bank/bpjs-bridging', icon:'i-lucide-git-branch', bg:'bg-teal-50', color:'text-teal-700' },
+        ]" :key="link.title" :to="link.to"
+          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 flex items-center gap-4 hover:border-[#ccc] transition-colors group">
+          <div :class="[link.bg, 'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0']">
+            <UIcon :name="link.icon" :class="[link.color, 'text-xl']"/>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ link.title }}</p>
+            <p class="text-[11px] text-[#999]">{{ link.sub }}</p>
+          </div>
+          <UIcon name="i-lucide-arrow-right" class="text-[#ccc] ml-auto"/>
+        </NuxtLink>
+      </div>
+    </template>
+
+    <!-- ── RS / Default Dashboard ─────────────────────────────── -->
+    <template v-else>
 
     <!-- ── Hero Banner ──────────────────────────────────────── -->
     <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-6 pb-6 mb-0 rounded-b-2xl bg-[#6b1525]">
@@ -739,6 +972,8 @@ const supplierUpdates = ref<any[]>([])
         </NuxtLink>
       </div>
     </div>
+
+    </template><!-- end RS default -->
 
   </div>
 </template>

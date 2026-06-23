@@ -5,6 +5,7 @@
 .nitro
 .cache
 dist
+!app/pages/dashboard/dist/
 
 # Node dependencies
 node_modules
