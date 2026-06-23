@@ -176,7 +176,7 @@ function sparkArea(data: number[], w = 80, h = 28): string {
   return `${sparkLine(data, w, h)} L${w} ${h} L0 ${h} Z`
 }
 
-const CW = 560, CH = 190
+const CW = 560, CH = 260
 const PL = 50, PR = 12, PT = 10, PB = 30
 const PW = CW - PL - PR, PH = CH - PT - PB
 
@@ -406,7 +406,7 @@ const supplierUpdates = ref<any[]>([])
         </div>
 
         <div class="relative" @mouseleave="hovering = false">
-          <svg :viewBox="`0 0 ${CW} ${CH}`" class="w-full" style="height:300px;cursor:crosshair" @mousemove="onChartMove">
+          <svg :viewBox="`0 0 ${CW} ${CH}`" class="w-full h-auto" style="cursor:crosshair" @mousemove="onChartMove">
             <defs>
               <linearGradient id="ga-obat"  x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/><stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/></linearGradient>
               <linearGradient id="ga-alkes" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a78bfa" stop-opacity="0.2"/><stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/></linearGradient>
