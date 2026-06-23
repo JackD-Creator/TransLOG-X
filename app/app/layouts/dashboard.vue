@@ -4,7 +4,11 @@ const user = useSupabaseUser()
 const router = useRouter()
 const route = useRoute()
 
-const navGroups = [
+const { tenantName, isKSM, isDistributor, isBank } = useUserRole()
+
+// ── Nav per portal ─────────────────────────────────────────────────────────
+
+const navRS = [
   {
     label: 'MAIN MENU',
     items: [
@@ -49,6 +53,171 @@ const navGroups = [
   }
 ]
 
+const navKSM = [
+  {
+    label: 'MAIN MENU',
+    items: [
+      { label: 'Dashboard',      icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
+      { label: 'Notif Min Stok', icon: 'i-lucide-bell-ring',        to: '/dashboard/ksm/notifications' },
+      { label: 'Cek Supplier',   icon: 'i-lucide-search',           to: '/dashboard/ksm/supplier-check' },
+      { label: 'Purchase Order', icon: 'i-lucide-shopping-cart',    to: '/dashboard/ksm/purchase-orders' },
+      { label: 'Penerimaan',     icon: 'i-lucide-package-check',    to: '/dashboard/ksm/receiving' }
+    ]
+  },
+  {
+    label: 'KATALOG',
+    items: [
+      { label: 'Katalog Item',   icon: 'i-lucide-layers',           to: '/dashboard/ksm/catalog' },
+      { label: 'Masterdata KFA', icon: 'i-lucide-database',         to: '/dashboard/ksm/kfa' }
+    ]
+  },
+  {
+    label: 'KEUANGAN',
+    items: [
+      { label: 'AR & Tagihan',   icon: 'i-lucide-file-text',        to: '/dashboard/ksm/ar' },
+      { label: 'Fasilitas SCF',  icon: 'i-lucide-landmark',         to: '/dashboard/ksm/scf' },
+      { label: 'Pembayaran',     icon: 'i-lucide-banknote',         to: '/dashboard/ksm/payments' },
+      { label: 'Lap. Keuangan',  icon: 'i-lucide-trending-up',      to: '/dashboard/ksm/finance' },
+      { label: 'Revenue Cycle',  icon: 'i-lucide-refresh-cw',       to: '/dashboard/ksm/rcm' }
+    ]
+  },
+  {
+    label: 'STRATEGI',
+    items: [
+      { label: 'Strategi Bisnis',  icon: 'i-lucide-target',          to: '/dashboard/ksm/strategy' },
+      { label: 'Ekosistem (All)',  icon: 'i-lucide-globe',            to: '/dashboard/ksm/strategy/ecosystem' },
+      { label: 'Supply ke RS',     icon: 'i-lucide-package',         to: '/dashboard/ksm/strategy/supply' },
+      { label: 'Negosiasi Dist.',  icon: 'i-lucide-handshake',       to: '/dashboard/ksm/strategy/negotiation' },
+      { label: 'Pitch ke Bank',    icon: 'i-lucide-landmark',        to: '/dashboard/ksm/strategy/bank-pitch' }
+    ]
+  },
+  {
+    label: 'INTELIJEN',
+    items: [
+      { label: 'Analytics',      icon: 'i-lucide-bar-chart-2',      to: '/dashboard/ksm/analytics' },
+      { label: 'AI Assistant',   icon: 'i-lucide-brain',            to: '/dashboard/ai' }
+    ]
+  },
+  {
+    label: 'PLATFORM',
+    items: [
+      { label: 'User Management', icon: 'i-lucide-users',           to: '/dashboard/users' },
+      { label: 'Komunikasi',      icon: 'i-lucide-message-square',  to: '/dashboard/communication' },
+      { label: 'Pengaturan',      icon: 'i-lucide-settings',        to: '/dashboard/settings' }
+    ]
+  }
+]
+
+const navDistributor = [
+  {
+    label: 'MAIN MENU',
+    items: [
+      { label: 'Dashboard',      icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
+      { label: 'Purchase Order', icon: 'i-lucide-clipboard-list',   to: '/dashboard/dist/purchase-orders' },
+      { label: 'Pemenuhan',      icon: 'i-lucide-package-check',    to: '/dashboard/dist/fulfillment' },
+      { label: 'Pengiriman',     icon: 'i-lucide-truck',            to: '/dashboard/dist/delivery' },
+      { label: 'Retur',          icon: 'i-lucide-package-x',        to: '/dashboard/dist/returns' }
+    ]
+  },
+  {
+    label: 'KATALOG & STOK',
+    items: [
+      { label: 'Katalog Produk', icon: 'i-lucide-layers',           to: '/dashboard/dist/catalog' },
+      { label: 'Stok Gudang',    icon: 'i-lucide-warehouse',        to: '/dashboard/dist/warehouse' },
+      { label: 'Masterdata KFA', icon: 'i-lucide-database',         to: '/dashboard/dist/kfa' }
+    ]
+  },
+  {
+    label: 'KEUANGAN',
+    items: [
+      { label: 'Invoice',        icon: 'i-lucide-file-text',        to: '/dashboard/dist/invoices' },
+      { label: 'Pembayaran',     icon: 'i-lucide-banknote',         to: '/dashboard/dist/payments' },
+      { label: 'Fasilitas SCF',  icon: 'i-lucide-landmark',         to: '/dashboard/dist/scf' }
+    ]
+  },
+  {
+    label: 'INTELIJEN',
+    items: [
+      { label: 'Analytics',      icon: 'i-lucide-bar-chart-2',      to: '/dashboard/dist/analytics' },
+      { label: 'AI Assistant',   icon: 'i-lucide-brain',            to: '/dashboard/ai' }
+    ]
+  },
+  {
+    label: 'PLATFORM',
+    items: [
+      { label: 'User Management', icon: 'i-lucide-users',           to: '/dashboard/users' },
+      { label: 'Komunikasi',      icon: 'i-lucide-message-square',  to: '/dashboard/communication' },
+      { label: 'Pengaturan',      icon: 'i-lucide-settings',        to: '/dashboard/settings' }
+    ]
+  }
+]
+
+const navBank = [
+  {
+    label: 'MAIN MENU',
+    items: [
+      { label: 'Dashboard',        icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
+      { label: 'Notif Invoice',    icon: 'i-lucide-bell-ring',        to: '/dashboard/bank/notifications' },
+      { label: 'Aktivasi ToP',     icon: 'i-lucide-zap',              to: '/dashboard/bank/top-activation' },
+      { label: 'Pencairan Dana',   icon: 'i-lucide-banknote',         to: '/dashboard/bank/disbursements' },
+      { label: 'Monitoring AR',    icon: 'i-lucide-file-text',        to: '/dashboard/bank/ar-monitoring' }
+    ]
+  },
+  {
+    label: 'FASILITAS SCF',
+    items: [
+      { label: 'Fasilitas Aktif',   icon: 'i-lucide-landmark',         to: '/dashboard/bank/facilities' },
+      { label: 'Reverse Factoring', icon: 'i-lucide-arrow-left-right', to: '/dashboard/bank/reverse-factoring' },
+      { label: 'BPJS Bridging',     icon: 'i-lucide-stethoscope',      to: '/dashboard/bank/bpjs-bridging' }
+    ]
+  },
+  {
+    label: 'RISIKO & KEPATUHAN',
+    items: [
+      { label: 'Monitoring BPJS',  icon: 'i-lucide-bar-chart-2',      to: '/dashboard/bank/bpjs-monitoring' },
+      { label: 'Risiko Kredit',    icon: 'i-lucide-shield-alert',      to: '/dashboard/bank/credit-risk' },
+      { label: 'KYC Mitra',        icon: 'i-lucide-fingerprint',       to: '/dashboard/bank/kyc' },
+      { label: 'Kepatuhan',        icon: 'i-lucide-scale',             to: '/dashboard/compliance' }
+    ]
+  },
+  {
+    label: 'INTELIJEN',
+    items: [
+      { label: 'Analytics',        icon: 'i-lucide-bar-chart-2',      to: '/dashboard/bank/analytics' },
+      { label: 'AI Assistant',     icon: 'i-lucide-brain',            to: '/dashboard/ai' }
+    ]
+  },
+  {
+    label: 'PLATFORM',
+    items: [
+      { label: 'User Management',  icon: 'i-lucide-users',            to: '/dashboard/users' },
+      { label: 'Komunikasi',       icon: 'i-lucide-message-square',   to: '/dashboard/communication' },
+      { label: 'Pengaturan',       icon: 'i-lucide-settings',         to: '/dashboard/settings' }
+    ]
+  }
+]
+
+const navGroups = computed(() => {
+  if (isKSM.value)         return navKSM
+  if (isDistributor.value) return navDistributor
+  if (isBank.value)        return navBank
+  return navRS
+})
+
+const portalLabel = computed(() => {
+  if (isKSM.value)         return 'Mitra KSM Logistic'
+  if (isDistributor.value) return 'Distributor / Supplier'
+  if (isBank.value)        return 'Bank & Pembiayaan'
+  return 'Medical & Consumable Platform'
+})
+
+const roleTag = computed(() => {
+  if (isKSM.value)         return 'KSM'
+  if (isDistributor.value) return 'Distributor'
+  if (isBank.value)        return 'Bank'
+  return 'RS Admin'
+})
+
 function isActive(to: string) {
   if (to === '/dashboard') return route.path === '/dashboard'
   return route.path.startsWith(to)
@@ -70,7 +239,7 @@ async function logout() {
       <div class="flex items-center px-5 py-5">
         <div class="min-w-0">
           <p class="font-bold text-sm text-[#1a1a1a] leading-none">Trans<span class="text-[#6b1525]">LOG-X</span></p>
-          <p class="text-[10px] text-[#999] mt-0.5">Medical &amp; Consumable Platform</p>
+          <p class="text-[10px] text-[#999] mt-0.5">{{ portalLabel }}</p>
         </div>
       </div>
 
@@ -109,7 +278,7 @@ async function logout() {
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-xs font-medium text-[#1a1a1a] truncate">{{ user?.email?.split('@')[0] ?? 'Admin' }}</p>
-            <p class="text-[10px] text-[#999] truncate">RS Umum Demo</p>
+            <p class="text-[10px] text-[#999] truncate">{{ tenantName ?? 'TransLOG-X' }}</p>
           </div>
           <UTooltip text="Logout">
             <button class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[#f5f5f5]" @click="logout">
@@ -130,7 +299,7 @@ async function logout() {
         <div class="flex items-center gap-3">
           <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-[#e5e5e5] bg-[#f5f5f5] text-xs text-[#999] w-64">
             <UIcon name="i-lucide-search" class="text-sm"/>
-            <span>Search medicines, orders...</span>
+            <span>Cari item, order, transaksi...</span>
           </div>
           <div class="relative">
             <button class="w-9 h-9 rounded-full flex items-center justify-center border border-[#e5e5e5] hover:bg-[#f5f5f5] transition-colors">
@@ -144,7 +313,7 @@ async function logout() {
             </div>
             <div class="hidden md:block">
               <p class="text-xs font-medium text-[#1a1a1a]">{{ user?.email?.split('@')[0] ?? 'Admin' }}</p>
-              <p class="text-[10px] text-[#999]">Admin</p>
+              <p class="text-[10px] text-[#999]">{{ roleTag }}</p>
             </div>
           </div>
         </div>
