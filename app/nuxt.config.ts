@@ -7,6 +7,8 @@ export default defineNuxtConfig({
   ],
 
   supabase: {
+    url: process.env.SUPABASE_URL ?? 'https://eccermneumcskamtitqh.supabase.co',
+    key: process.env.SUPABASE_KEY ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjY2VybW5ldW1jc2thbXRpdHFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMzE0NzUsImV4cCI6MjA5NzcwNzQ3NX0.rXXQ7tRf7u7qqhZL1cxea4CJEljnwAX2cNPrhNdYR2A',
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
