@@ -36,7 +36,7 @@ const systems = [
     nama: 'Sistem Informasi RS (HIS)',
     provider: 'Internal',
     jenis: 'HIS',
-    icon: 'i-lucide-hospital',
+    icon: 'i-lucide-building-2',
     color: 'text-purple-600',
     bg: 'bg-purple-50',
     status: 'connected',

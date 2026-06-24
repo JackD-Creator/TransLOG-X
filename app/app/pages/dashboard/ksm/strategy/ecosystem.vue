@@ -54,7 +54,7 @@ const parties = computed(() => [
   {
     id: 'rs',
     name: 'Rumah Sakit',
-    icon: 'i-lucide-hospital',
+    icon: 'i-lucide-building-2',
     color: 'text-emerald-600', bg: 'bg-emerald-50', bar: 'bg-emerald-500',
     tagColor: 'bg-emerald-100 text-emerald-700',
     headline: fmtRp(calc.value.rsSavings) + '/thn',
@@ -74,7 +74,7 @@ const parties = computed(() => [
   {
     id: 'ksm',
     name: 'KSM (Agregator)',
-    icon: 'i-lucide-network',
+    icon: 'i-lucide-store',
     color: 'text-[#6b1525]', bg: 'bg-red-50', bar: 'bg-[#6b1525]',
     tagColor: 'bg-red-100 text-[#6b1525]',
     headline: fmtRp(calc.value.ksmGP) + '/thn',

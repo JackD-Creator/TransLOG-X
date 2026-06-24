@@ -214,7 +214,7 @@ onMounted(loadRealData)
             </div>
             <div class="flex flex-col items-center gap-1">
               <div class="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center">
-                <UIcon name="i-lucide-hospital" class="text-emerald-700 text-base"/>
+                <UIcon name="i-lucide-building-2" class="text-emerald-700 text-base"/>
               </div>
               <span class="text-[#777]">RS Mitra</span>
               <span class="text-emerald-700 font-bold">Pakai</span>
