@@ -259,29 +259,46 @@ onMounted(() => { if (tenantId.value) load() })
           </button>
         </div>
 
-        <!-- Shortfall info — Bank buka kredit untuk RS, bayar KSM langsung -->
+        <!-- Shortfall breakdown: 3 komponen pembayaran -->
         <div v-if="inv.shortfall_amount > 0 && inv.shortfall_covered_by_bank" class="px-5 pb-4">
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs">
-            <p class="font-bold text-amber-800 mb-2">Shortfall — Bank Buka Kredit untuk RS</p>
-            <div class="grid grid-cols-4 gap-3 text-[10px]">
-              <div>
-                <p class="text-amber-500">Kredit Bank ke KSM</p>
-                <p class="font-bold text-amber-800">{{ fmtRp(inv.shortfall_amount) }}</p>
+          <div class="bg-amber-50 border border-amber-200 rounded-lg overflow-hidden text-[10px]">
+            <div class="px-3 py-2 bg-amber-100 border-b border-amber-200">
+              <p class="font-bold text-amber-800 text-xs">Rincian Pembayaran ke KSM</p>
+            </div>
+            <!-- 1. Pembayaran RS -->
+            <div class="flex items-center justify-between px-3 py-2 border-b border-amber-100">
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div>
+                  <p class="font-semibold text-[#333]">1. Pembayaran RS</p>
+                  <p class="text-[#777]">BPJS cair ke RS → SI transfer ke KSM</p>
+                </div>
               </div>
-              <div>
-                <p class="text-amber-500">Bunga Harian Akrual</p>
-                <p class="font-bold text-amber-800">{{ fmtRp((interestByInvoice[inv.id] ?? 0) * 2) }}</p>
-                <p class="text-[9px] text-amber-400">Total (KSM+RS)</p>
+              <p class="font-bold text-blue-700">{{ fmtRp(inv.bpjs_amount) }}</p>
+            </div>
+            <!-- 2. Pembayaran Shortfall dari Bank -->
+            <div class="flex items-center justify-between px-3 py-2 border-b border-amber-100">
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <div>
+                  <p class="font-semibold text-[#333]">2. Pembayaran Shortfall dari Bank</p>
+                  <p class="text-[#777]">Bank buka kredit untuk RS → bayar KSM langsung</p>
+                </div>
               </div>
-              <div>
-                <p class="text-amber-500">Ditanggung KSM (50%)</p>
+              <p class="font-bold text-amber-700">{{ fmtRp(inv.shortfall_amount) }}</p>
+            </div>
+            <!-- 3. Bunga Shortfall (beban KSM 50%) -->
+            <div class="flex items-center justify-between px-3 py-2">
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#6b1525] flex-shrink-0"></div>
+                <div>
+                  <p class="font-semibold text-[#333]">3. Bunga Shortfall (50% KSM)</p>
+                  <p class="text-[#777]">Bunga harian akrual · KSM tanggung 50% karena hutang SCF</p>
+                </div>
+              </div>
+              <div class="text-right">
                 <p class="font-bold text-[#6b1525]">{{ fmtRp(interestByInvoice[inv.id] ?? 0) }}</p>
-                <p class="text-[9px] text-amber-400">karena hutang SCF</p>
-              </div>
-              <div>
-                <p class="text-amber-500">Ditanggung RS (50%)</p>
-                <p class="font-bold text-amber-800">{{ fmtRp(interestByInvoice[inv.id] ?? 0) }}</p>
-                <p class="text-[9px] text-amber-400">karena BPJS-nya kurang</p>
+                <p class="text-[8px] text-[#999]">RS tanggung: {{ fmtRp(interestByInvoice[inv.id] ?? 0) }}</p>
               </div>
             </div>
           </div>
