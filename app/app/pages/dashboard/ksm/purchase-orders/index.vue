@@ -6,6 +6,8 @@ const { tenantId } = useUserRole()
 
 const loading = ref(true)
 const orders = ref<any[]>([])
+const filterStatus = ref('')
+const filtered = computed(() => filterStatus.value ? orders.value.filter(o => o.status === filterStatus.value) : orders.value)
 
 const statusColor: Record<string, string> = {
   draft:             'bg-[#f0f0f0] text-[#999]',
@@ -54,24 +56,19 @@ onMounted(load)
       </NuxtLink>
     </div>
 
-    <!-- Stats row -->
+    <!-- Stats row — clickable filter -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
-        <p class="text-2xl font-bold text-[#1a1a1a]">{{ orders.filter(o => o.status === 'draft').length }}</p>
-        <p class="text-xs text-[#999] mt-1">Draft</p>
-      </div>
-      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
-        <p class="text-2xl font-bold text-amber-600">{{ orders.filter(o => o.status === 'sent_to_supplier').length }}</p>
-        <p class="text-xs text-[#999] mt-1">Terkirim ke Supplier</p>
-      </div>
-      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
-        <p class="text-2xl font-bold text-orange-600">{{ orders.filter(o => o.status === 'partially_received').length }}</p>
-        <p class="text-xs text-[#999] mt-1">Diterima Sebagian</p>
-      </div>
-      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
-        <p class="text-2xl font-bold text-emerald-600">{{ orders.filter(o => o.status === 'fully_received').length }}</p>
-        <p class="text-xs text-[#999] mt-1">Selesai</p>
-      </div>
+      <button v-for="s in [
+        { key: 'draft', label: 'Draft', color: 'text-[#1a1a1a]' },
+        { key: 'sent_to_supplier', label: 'Terkirim ke Supplier', color: 'text-amber-600' },
+        { key: 'partially_received', label: 'Diterima Sebagian', color: 'text-orange-600' },
+        { key: 'fully_received', label: 'Selesai', color: 'text-emerald-600' },
+      ]" :key="s.key" @click="filterStatus = filterStatus === s.key ? '' : s.key"
+        :class="['bg-[#faf7f3] rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
+          filterStatus === s.key ? 'border-[#6b1525] ring-1 ring-[#6b1525]/20' : 'border-[#e0d8d0]']">
+        <p :class="['text-2xl font-bold', s.color]">{{ orders.filter(o => o.status === s.key).length }}</p>
+        <p class="text-xs text-[#999] mt-1">{{ s.label }}</p>
+      </button>
     </div>
 
     <!-- Table -->
@@ -97,7 +94,7 @@ onMounted(load)
           </tr>
         </thead>
         <tbody class="divide-y divide-[#e5e5e5]">
-          <tr v-for="po in orders" :key="po.id" class="hover:bg-[#ebebeb] transition-colors">
+          <tr v-for="po in filtered" :key="po.id" class="hover:bg-[#ebebeb] transition-colors">
             <td class="px-4 py-3 font-mono text-[#1a1a1a]">
               <NuxtLink :to="`/dashboard/ksm/purchase-orders/${po.id}`" class="hover:text-[#6b1525]">{{ po.po_number }}</NuxtLink>
             </td>
