@@ -21,10 +21,24 @@ const lines = ref<{ kfa_code: string; item_name: string; catalog_type: string; u
 
 const suppliers = ref<{ id: string; name: string }[]>([])
 async function loadSuppliers() {
-  const { data } = await supabase.from('tenants')
-    .select('id, name').in('type', ['pbf', 'distributor', 'supplier_lain'])
-    .order('name')
-  suppliers.value = data ?? []
+  // Ambil distributor dari supplier_catalog_items (bisa diakses KSM via RLS)
+  const { data } = await supabase
+    .from('supplier_catalog_items')
+    .select('tenant_id, tenants:tenant_id(id, name)')
+    .eq('is_available', true)
+    .limit(200)
+
+  // Deduplicate by tenant_id
+  const seen = new Set<string>()
+  const list: { id: string; name: string }[] = []
+  for (const row of (data ?? [])) {
+    const t = row.tenants as any
+    if (t?.id && !seen.has(t.id)) {
+      seen.add(t.id)
+      list.push({ id: t.id, name: t.name })
+    }
+  }
+  suppliers.value = list.sort((a, b) => a.name.localeCompare(b.name))
 }
 
 let searchTimer: ReturnType<typeof setTimeout>
@@ -33,11 +47,32 @@ async function searchKFA() {
   if (!searchQ.value.trim()) { searchResults.value = []; return }
   searchTimer = setTimeout(async () => {
     searchLoading.value = true
-    const { data } = await supabase.from('kfa_drugs')
+    const q = searchQ.value.trim()
+
+    // Cari dari kfa_drugs (referensi Kemkes)
+    const { data: drugs } = await supabase.from('kfa_drugs')
       .select('kfa_code, name, dosage_form, strength, uom, fix_price')
-      .or(`name.ilike.%${searchQ.value}%,kfa_code.ilike.%${searchQ.value}%`)
-      .limit(10)
-    searchResults.value = data ?? []
+      .or(`name.ilike.%${q}%,nama_dagang.ilike.%${q}%,kfa_code.ilike.%${q}%`)
+      .limit(15)
+
+    // Jika ada distributor dipilih, cek harga distributor untuk item yang sama
+    let catalogPrices: Record<string, number> = {}
+    if (form.supplier_tenant_id && drugs && drugs.length > 0) {
+      const codes = drugs.map(d => d.kfa_code)
+      const { data: catItems } = await supabase
+        .from('supplier_catalog_items')
+        .select('kfa_code, sell_price')
+        .eq('tenant_id', form.supplier_tenant_id)
+        .in('kfa_code', codes)
+      for (const item of (catItems ?? [])) {
+        catalogPrices[item.kfa_code] = item.sell_price
+      }
+    }
+
+    searchResults.value = (drugs ?? []).map(d => ({
+      ...d,
+      catalog_price: catalogPrices[d.kfa_code] ?? null,
+    }))
     searchLoading.value = false
   }, 300)
 }
@@ -48,9 +83,9 @@ function addItem(drug: any) {
     kfa_code: drug.kfa_code,
     item_name: drug.name,
     catalog_type: 'obat',
-    uom: drug.uom ?? 'tablet',
+    uom: drug.dosage_form ?? drug.uom ?? 'tablet',
     ordered_qty: 1,
-    unit_price: Number(drug.fix_price ?? 0),
+    unit_price: Number(drug.catalog_price ?? drug.fix_price ?? 0),
   })
   searchQ.value = ''
   searchResults.value = []
@@ -145,7 +180,7 @@ const paymentOptions = [
                 <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
               </select>
               <p v-if="suppliers.length === 0" class="text-[11px] text-amber-600 mt-1">
-                Belum ada distributor terdaftar di sistem
+                Belum ada distributor yang memiliki katalog aktif. Distributor harus login dan menambahkan produk ke katalog mereka terlebih dahulu.
               </p>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -193,11 +228,13 @@ const paymentOptions = [
                   class="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#f5f5f5] transition-colors text-left border-b border-[#f0f0f0] last:border-0">
                   <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-[#1a1a1a] truncate">{{ drug.name }}</p>
-                    <p class="text-[10px] text-[#999]">{{ drug.kfa_code }} · {{ drug.dosage_form }} {{ drug.strength }}</p>
+                    <p class="text-[10px] text-[#999]">{{ drug.kfa_code }} · {{ drug.dosage_form ?? drug.uom }} {{ drug.strength }}</p>
                   </div>
-                  <span class="text-xs text-[#6b1525] font-semibold flex-shrink-0">
-                    {{ drug.fix_price ? fmtRp(drug.fix_price) : '-' }}
-                  </span>
+                  <div class="text-right flex-shrink-0">
+                    <p v-if="drug.catalog_price" class="text-xs text-[#6b1525] font-bold">{{ fmtRp(drug.catalog_price) }}</p>
+                    <p v-else-if="drug.fix_price" class="text-xs text-[#666] font-semibold">{{ fmtRp(drug.fix_price) }}</p>
+                    <p class="text-[10px] text-[#aaa]">{{ drug.catalog_price ? 'Harga Distributor' : 'HAP KFA' }}</p>
+                  </div>
                 </button>
               </div>
             </div>
