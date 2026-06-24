@@ -22,16 +22,15 @@ async function load() {
   const endDate = new Date(period.value.year, period.value.month, 0).toISOString().slice(0, 10)
 
   const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([
-    // Revenue = Invoice KSM ke RS
+    // Revenue = Invoice KSM ke RS (+ po_number untuk match AR)
     supabase.from('ksm_invoices')
-      .select('total_amount,subtotal,tax_amount,status,paid_amount')
+      .select('total_amount,subtotal,tax_amount,status,paid_amount,metadata')
       .eq('ksm_tenant_id', tenantId.value)
       .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    // Interest = dari AR accounts
+    // AR = disbursement Bank ke Distributor (matched per PO)
     supabase.from('ar_accounts')
-      .select('interest_amount')
-      .eq('ksm_tenant_id', tenantId.value)
-      .gte('disbursement_date', startDate).lte('disbursement_date', endDate),
+      .select('po_number,disbursed_amount,interest_amount')
+      .eq('ksm_tenant_id', tenantId.value),
     // Bunga harian shortfall (bagian KSM 50%)
     supabase.from('daily_interest_accruals')
       .select('ksm_share')
@@ -47,15 +46,25 @@ async function load() {
   const revenuePPN = invoices.reduce((s, i) => s + Number(i.tax_amount), 0)
   const revenueNetto = revenue - revenuePPN
 
-  // COGS = harga beli dari Distributor (~88% dari subtotal invoice, karena margin KSM ~12%)
-  const cogs = invoices.reduce((s, i) => s + Math.round(Number(i.subtotal) * 0.88), 0)
+  // COGS = disbursement Bank ke Distributor, matched per PO dari invoice
+  const arMap: Record<string, number> = {}
+  for (const a of arAccounts) { if (a.po_number) arMap[a.po_number] = Number(a.disbursed_amount ?? 0) }
+  const cogs = invoices.reduce((s, i) => {
+    const poNum = (i as any).metadata?.po_number
+    return s + (poNum && arMap[poNum] ? arMap[poNum] : 0)
+  }, 0)
 
   // Gross Profit = Revenue (netto PPN) - COGS
   const grossProfit = revenueNetto - cogs
   const grossMargin = revenueNetto > 0 ? (grossProfit / revenueNetto * 100) : 0
 
-  // Beban bunga SCF ke Bank
-  const scfInterest = arAccounts.reduce((s, a) => s + Number(a.interest_amount ?? 0), 0)
+  // Beban bunga SCF ke Bank (matched per PO dari invoice periode ini)
+  const arInterestMap: Record<string, number> = {}
+  for (const a of arAccounts) { if (a.po_number) arInterestMap[a.po_number] = Number(a.interest_amount ?? 0) }
+  const scfInterest = invoices.reduce((s, i) => {
+    const poNum = (i as any).metadata?.po_number
+    return s + (poNum && arInterestMap[poNum] ? arInterestMap[poNum] : 0)
+  }, 0)
 
   // Beban bunga harian shortfall (bagian KSM 50%)
   const shortfallInterestKSM = dailyInterest.reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
