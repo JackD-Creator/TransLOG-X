@@ -41,8 +41,12 @@ export function useUserRole() {
 
     state.value.loading = true
     try {
+      // Force refresh token to get latest app_metadata from server
+      await supabase.auth.refreshSession()
+
       // Read tenant info from app_metadata (set server-side, no RLS issue)
-      const meta = (user.value as any).app_metadata ?? {}
+      const { data: { user: freshUser } } = await supabase.auth.getUser()
+      const meta = (freshUser as any)?.app_metadata ?? (user.value as any).app_metadata ?? {}
       let tenantType: string | null = meta.tenant_type ?? null
       let tenantName: string | null = meta.tenant_name ?? null
       let tenantId: string | null   = meta.tenant_id   ?? null
