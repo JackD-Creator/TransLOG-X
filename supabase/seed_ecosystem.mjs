@@ -121,25 +121,94 @@ async function seed() {
     console.log('scf_facilities: ✅ Already exists')
   }
 
-  // 6. hospital_notifications — RS kirim notif min stok
-  const { data: existNotif } = await sb.from('hospital_notifications')
-    .select('id').eq('notif_number', 'NOTIF-2026-001').single()
+  // 6. hospital_notifications — RS kirim notif min stok (multiple RS & items)
+  const rsName = 'RS Permata Medika'
 
-  let notifId = existNotif?.id
-  if (!existNotif) {
-    const { data: notif, error: e5 } = await sb.from('hospital_notifications').insert({
-      rs_tenant_id: RS_ID,
-      ksm_tenant_id: KSM_ID,
+  const notifRecords = [
+    {
       notif_number: 'NOTIF-2026-001',
       notif_date: '2026-06-20',
       status: 'po_created',
-      notes: 'Stok beberapa item obat FORNAS di bawah minimum, perlu reorder segera'
-    }).select('id').single()
-    console.log('hospital_notifications:', e5 ? 'ERR: ' + e5.message : '✅ 1 notifikasi RS')
-    notifId = notif?.id
-  } else {
-    console.log('hospital_notifications: ✅ Already exists')
+      notes: 'Stok beberapa item obat FORNAS di bawah minimum, perlu reorder segera',
+      metadata: { rs_name: rsName, rs_address: 'Jl. Merdeka No. 45, Jakarta Selatan', urgency: 'high' },
+      itemSlice: [0, 5],
+    },
+    {
+      notif_number: 'NOTIF-2026-002',
+      notif_date: '2026-06-22',
+      status: 'acknowledged',
+      notes: 'Kebutuhan rutin bulanan — stok antibiotik & analgesik menipis',
+      metadata: { rs_name: rsName, rs_address: 'Jl. Merdeka No. 45, Jakarta Selatan', urgency: 'normal', supplier_check: 'confirmed' },
+      itemSlice: [5, 10],
+    },
+    {
+      notif_number: 'NOTIF-2026-003',
+      notif_date: '2026-06-24',
+      status: 'pending',
+      notes: 'Request urgent — stok habis untuk beberapa item kritis',
+      metadata: { rs_name: 'RS Harapan Bunda', rs_address: 'Jl. Gatot Subroto No. 12, Jakarta Pusat', urgency: 'critical' },
+      itemSlice: [10, 18],
+    },
+    {
+      notif_number: 'NOTIF-2026-004',
+      notif_date: '2026-06-23',
+      status: 'pending',
+      notes: 'Kebutuhan alkes rutin untuk unit bedah',
+      metadata: { rs_name: 'RS Bunda Sejahtera', rs_address: 'Jl. Ahmad Yani No. 78, Bekasi', urgency: 'normal' },
+      itemSlice: [18, 24],
+    },
+  ]
+
+  let notifId = null
+  for (const nr of notifRecords) {
+    const { data: exist } = await sb.from('hospital_notifications')
+      .select('id').eq('notif_number', nr.notif_number).single()
+
+    let nId = exist?.id
+    if (!exist) {
+      const { data: notif, error: ne } = await sb.from('hospital_notifications').insert({
+        rs_tenant_id: RS_ID,
+        ksm_tenant_id: KSM_ID,
+        notif_number: nr.notif_number,
+        notif_date: nr.notif_date,
+        status: nr.status,
+        notes: nr.notes,
+        metadata: nr.metadata,
+      }).select('id').single()
+      if (ne) { console.log('Notif error:', nr.notif_number, ne.message); continue }
+      nId = notif?.id
+      console.log('notification:', nr.notif_number, '✅')
+    } else {
+      // Update metadata if missing rs_name
+      await sb.from('hospital_notifications').update({ metadata: nr.metadata }).eq('id', nId)
+      console.log('notification:', nr.notif_number, '✅ exists, metadata updated')
+    }
+
+    if (nr.notif_number === 'NOTIF-2026-001') notifId = nId
+
+    // Add notification lines (items)
+    const { data: existLines } = await sb.from('hospital_notification_lines')
+      .select('id').eq('notification_id', nId).limit(1)
+    if ((existLines ?? []).length > 0) {
+      console.log('  lines: already seeded')
+      continue
+    }
+
+    const slicedDrugs = drugs.slice(nr.itemSlice[0], nr.itemSlice[1])
+    const lines = slicedDrugs.map(d => ({
+      notification_id: nId,
+      kfa_code: d.kfa_code,
+      item_name: d.name,
+      catalog_type: 'obat',
+      uom: d.uom || 'tablet',
+      current_stock: Math.floor(Math.random() * 20),
+      min_stock: 50 + Math.floor(Math.random() * 50),
+      requested_qty: 100 + Math.floor(Math.random() * 200),
+    }))
+    const { error: le } = await sb.from('hospital_notification_lines').insert(lines)
+    console.log('  lines:', le ? 'ERR: ' + le.message : `✅ ${lines.length} items`)
   }
+  console.log('hospital_notifications: ✅ 4 notifications with items')
 
   // 7. ksm_purchase_orders — 4 PO dengan nilai realistis dari harga KFA
   // Ambil 5 obat teratas untuk simulasi PO
