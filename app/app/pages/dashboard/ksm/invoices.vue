@@ -16,24 +16,27 @@ const interestByInvoice = ref<Record<string, number>>({})
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  const [{ data }, { data: diaData }] = await Promise.all([
+  const [{ data }, { data: scfData }] = await Promise.all([
     supabase
       .from('ksm_invoices')
       .select('id,invoice_number,invoice_date,due_date,subtotal,tax_amount,total_amount,paid_amount,outstanding,status,bpjs_amount,bpjs_received_date,bpjs_expected_date,shortfall_amount,shortfall_covered_by_bank,contract_payment_days,reviewed_at,sent_to_rs_at,metadata,po_id')
       .eq('ksm_tenant_id', tenantId.value)
       .order('invoice_date', { ascending: false })
       .limit(200),
-    // Bunga shortfall harian — sum ksm_share per invoice (inner join untuk filter tenant)
-    supabase
-      .from('daily_interest_accruals')
-      .select('invoice_id,ksm_share,ksm_invoices!inner(ksm_tenant_id)')
-      .eq('ksm_invoices.ksm_tenant_id', tenantId.value),
+    supabase.from('scf_facilities')
+      .select('interest_rate_pa')
+      .eq('borrower_tenant_id', tenantId.value)
+      .eq('status', 'approved')
+      .limit(1),
   ])
   allInvoices.value = data ?? []
-  // Aggregate ksm_share per invoice_id
+  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
+  // Bunga shortfall 50% KSM = shortfall_amount × (interest_rate_pa/365) × hari sejak invoice_date
   const map: Record<string, number> = {}
-  for (const d of diaData ?? []) {
-    if (d.invoice_id) map[d.invoice_id] = (map[d.invoice_id] ?? 0) + Number(d.ksm_share ?? 0)
+  for (const inv of allInvoices.value) {
+    if (!inv.shortfall_covered_by_bank || !Number(inv.shortfall_amount)) continue
+    const days = Math.max(0, Math.floor((Date.now() - new Date(inv.invoice_date).getTime()) / 86400000))
+    map[inv.id] = Number(inv.shortfall_amount) * (annualRate / 365) * days * 0.5
   }
   interestByInvoice.value = map
   loading.value = false

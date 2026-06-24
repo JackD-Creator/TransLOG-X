@@ -30,7 +30,7 @@ async function load() {
   const startDate = `${dataMonth.value.year}-${String(dataMonth.value.month).padStart(2,'0')}-01`
   const endDate = new Date(dataMonth.value.year, dataMonth.value.month, 0).toISOString().slice(0, 10)
 
-  const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([
+  const [{ data: invData }, { data: arData }, { data: scfData }] = await Promise.all([
     // Revenue = Invoice KSM ke RS (+ po_number untuk match AR)
     supabase.from('ksm_invoices')
       .select('total_amount,subtotal,tax_amount,status,paid_amount,metadata,shortfall_covered_by_bank')
@@ -41,16 +41,17 @@ async function load() {
       .select('disbursed_amount,interest_amount')
       .eq('ksm_tenant_id', tenantId.value)
       .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    // Bunga harian shortfall (bagian KSM 50%)
-    supabase.from('daily_interest_accruals')
-      .select('ksm_share, ksm_invoices!inner(ksm_tenant_id)')
-      .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
-      .gte('accrual_date', startDate).lte('accrual_date', endDate),
+    // Rate SCF untuk kalkulasi bunga
+    supabase.from('scf_facilities')
+      .select('interest_rate_pa')
+      .eq('borrower_tenant_id', tenantId.value)
+      .eq('status', 'approved')
+      .limit(1),
   ])
 
   const allInv = invData ?? []
   const arAccounts = arData ?? []
-  const dailyInterest = diaData ?? []
+  const annualRate = Number(diaData?.[0]?.interest_rate_pa ?? 0.11)
 
   // Revenue = invoice yang sudah dibayar RS ke KSM (paid atau partially_paid + shortfall covered = lunas)
   const invoices = allInv.filter((i: any) =>
@@ -76,8 +77,14 @@ async function load() {
     return s + (poNum && arInterestMap[poNum] ? arInterestMap[poNum] : 0)
   }, 0)
 
-  // Beban bunga harian shortfall (bagian KSM 50%)
-  const shortfallInterestKSM = dailyInterest.reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
+  // Bunga shortfall 50% KSM dalam periode = kalkulasi matematis
+  const periodEnd = new Date(endDate)
+  const shortfallInterestKSM = invoices.reduce((s: number, i: any) => {
+    if (!i.shortfall_covered_by_bank || !Number(i.shortfall_amount)) return s
+    const start = new Date(i.invoice_date)
+    const days = Math.max(0, Math.floor((periodEnd.getTime() - start.getTime()) / 86400000))
+    return s + Number(i.shortfall_amount) * (annualRate / 365) * days * 0.5
+  }, 0)
 
   const totalInterest = scfInterest + shortfallInterestKSM
 

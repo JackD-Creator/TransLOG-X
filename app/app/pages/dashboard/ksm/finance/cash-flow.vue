@@ -82,19 +82,19 @@ async function loadData() {
     .eq('ksm_tenant_id', tenantId.value)
     .gte('invoice_date', dateFrom)
 
-  // q3: Bunga shortfall harian 50% KSM dalam periode
-  let q3 = supabase.from('daily_interest_accruals')
-    .select('ksm_share, ksm_invoices!inner(ksm_tenant_id)')
-    .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
-    .gte('accrual_date', dateFrom)
-
   if (dateTo) {
     q1 = q1.lte('invoice_date', dateTo)
     q2 = q2.lte('invoice_date', dateTo)
-    q3 = q3.lte('accrual_date', dateTo)
   }
 
-  const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([q1, q2, q3])
+  const [{ data: invData }, { data: arData }, { data: scfData }] = await Promise.all([
+    q1, q2,
+    supabase.from('scf_facilities')
+      .select('interest_rate_pa')
+      .eq('borrower_tenant_id', tenantId.value)
+      .eq('status', 'approved')
+      .limit(1),
+  ])
 
   // ── Kas Masuk ──────────────────────────────────────────────────────────────
   // KSM terima dari DUA sumber:
@@ -111,7 +111,15 @@ async function loadData() {
   const arAccounts     = arData ?? []
   const scfPrincipal   = arAccounts.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
   const scfInterest    = arAccounts.reduce((s, a) => s + Number(a.interest_amount  ?? 0), 0)
-  const shortfallInterest = (diaData ?? []).reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
+  // Bunga shortfall 50% KSM = kalkulasi matematis dari invoice dalam periode
+  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
+  const periodEnd = dateTo ? new Date(dateTo) : new Date()
+  const shortfallInterest = (invData ?? []).reduce((s: number, i: any) => {
+    if (!i.shortfall_covered_by_bank || !Number(i.shortfall_amount)) return s
+    const start = new Date(i.invoice_date < dateFrom ? dateFrom : i.invoice_date)
+    const days = Math.max(0, Math.floor((periodEnd.getTime() - start.getTime()) / 86400000))
+    return s + Number(i.shortfall_amount) * (annualRate / 365) * days * 0.5
+  }, 0)
 
   operatingIn.value = [
     { label: 'SI dari Rekening RS (BPJS → transfer)', amount: bpjsTotal, sub: 'BPJS cair ke RS → RS transfer ke KSM via Standing Instruction' },

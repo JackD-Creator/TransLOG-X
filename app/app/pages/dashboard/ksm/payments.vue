@@ -12,20 +12,39 @@ const activeTab = ref<'bpjs' | 'shortfall' | 'interest'>('bpjs')
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  const [{ data: inv }, { data: dia }] = await Promise.all([
+  const [{ data: inv }, { data: scfData }] = await Promise.all([
     supabase.from('ksm_invoices')
       .select('id,invoice_number,invoice_date,due_date,total_amount,paid_amount,outstanding,status,bpjs_amount,bpjs_received_date,bpjs_expected_date,shortfall_amount,shortfall_covered_by_bank,metadata')
       .eq('ksm_tenant_id', tenantId.value)
       .in('status', ['sent_to_rs', 'payment_pending', 'partially_paid', 'overdue'])
       .order('due_date', { ascending: true }),
-    supabase.from('daily_interest_accruals')
-      .select('id,invoice_id,accrual_date,outstanding_principal,daily_rate,interest_amount,ksm_share,rs_share,ksm_invoices!inner(ksm_tenant_id)')
-      .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
-      .order('accrual_date', { ascending: false })
-      .limit(100),
+    supabase.from('scf_facilities')
+      .select('interest_rate_pa')
+      .eq('borrower_tenant_id', tenantId.value)
+      .eq('status', 'approved')
+      .limit(1),
   ])
   invoices.value = inv ?? []
-  interestData.value = dia ?? []
+  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
+  // Bunga harian shortfall: kalkulasi matematis per invoice
+  interestData.value = (inv ?? [])
+    .filter((i: any) => i.shortfall_covered_by_bank && Number(i.shortfall_amount) > 0)
+    .map((i: any) => {
+      const days = Math.max(0, Math.floor((Date.now() - new Date(i.invoice_date).getTime()) / 86400000))
+      const dailyRate = annualRate / 365
+      const interestAmount = Number(i.shortfall_amount) * dailyRate * days
+      return {
+        id: i.id,
+        invoice_id: i.id,
+        invoice_number: i.invoice_number,
+        accrual_date: new Date().toISOString().slice(0, 10),
+        outstanding_principal: Number(i.shortfall_amount),
+        daily_rate: dailyRate,
+        interest_amount: interestAmount,
+        ksm_share: interestAmount * 0.5,
+        rs_share: interestAmount * 0.5,
+      }
+    })
   loading.value = false
 }
 
