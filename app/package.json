@@ -15,8 +15,10 @@
     "@iconify-json/simple-icons": "^1.2.86",
     "@nuxt/ui": "^4.8.2",
     "@nuxtjs/supabase": "^2.0.9",
+    "apexcharts": "^5.15.2",
     "nuxt": "^4.4.8",
-    "tailwindcss": "^4.3.1"
+    "tailwindcss": "^4.3.1",
+    "vue3-apexcharts": "^1.11.1"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
