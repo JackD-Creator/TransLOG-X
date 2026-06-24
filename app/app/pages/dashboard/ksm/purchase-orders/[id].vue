@@ -258,9 +258,9 @@ onMounted(load)
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
       <!-- Item Lines -->
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-3">
         <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl overflow-hidden">
           <div class="px-5 py-3 border-b border-[#ebebeb] bg-[#ebebeb]">
             <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Item Pesanan ({{ lines.length }})</p>
