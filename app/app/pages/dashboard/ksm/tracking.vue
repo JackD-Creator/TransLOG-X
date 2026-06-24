@@ -64,30 +64,38 @@ onMounted(() => { if (tenantId.value) load() })
       <p class="text-sm text-[#999] mt-0.5">Lacak pengiriman barang dari Distributor langsung ke RS atas pesanan KSM</p>
     </div>
 
-    <!-- Stat Cards -->
+    <!-- Stat Cards — clickable filter -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
+      <button @click="filterStatus = filterStatus === 'active' ? 'all' : 'active'"
+        :class="['rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
+          filterStatus === 'active' ? 'border-[#6b1525] ring-1 ring-[#6b1525]/20 bg-[#faf7f3]' : 'bg-[#faf7f3] border-[#e0d8d0]']">
         <p class="text-[10px] text-[#999] uppercase mb-1">PO Aktif</p>
         <p class="text-2xl font-bold text-[#1a1a1a]">{{ activeCount }}</p>
         <p class="text-[10px] text-[#777] mt-1">Sedang diproses</p>
-      </div>
-      <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
+      </button>
+      <button @click="filterStatus = filterStatus === 'active' ? 'all' : 'active'"
+        :class="['rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
+          filterStatus === 'active' ? 'border-amber-400 ring-1 ring-amber-300 bg-amber-50' : 'bg-amber-50 border-amber-200']">
         <p class="text-[10px] text-amber-500 uppercase mb-1">Dalam Pengiriman</p>
         <p class="text-2xl font-bold text-amber-700">{{ inTransit }}</p>
         <p class="text-[10px] text-amber-500 mt-1">Dist. → RS</p>
-      </div>
-      <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
+      </button>
+      <button @click="filterStatus = filterStatus === 'active' ? 'all' : 'active'"
+        :class="['rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
+          'bg-blue-50 border-blue-200']">
         <p class="text-[10px] text-blue-500 uppercase mb-1">Tunggu Konfirmasi</p>
         <p class="text-2xl font-bold text-blue-700">{{ waitConfirm }}</p>
         <p class="text-[10px] text-blue-500 mt-1">Belum dikonfirmasi Dist.</p>
-      </div>
-      <div :class="['rounded-xl border p-4', overdueCount > 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200']">
-        <p :class="['text-[10px] uppercase mb-1', overdueCount > 0 ? 'text-red-400' : 'text-emerald-500']">Terlambat</p>
+      </button>
+      <button @click="filterStatus = filterStatus === 'active' ? 'all' : 'active'"
+        :class="['rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
+          overdueCount > 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200']">
+        <p :class="['text-[10px] uppercase mb-1', overdueCount > 0 ? 'text-red-500' : 'text-emerald-500']">Terlambat</p>
         <p :class="['text-2xl font-bold', overdueCount > 0 ? 'text-red-600' : 'text-emerald-700']">{{ overdueCount }}</p>
-        <p :class="['text-[10px] mt-1', overdueCount > 0 ? 'text-red-400' : 'text-emerald-500']">
+        <p :class="['text-[10px] mt-1', overdueCount > 0 ? 'text-red-500' : 'text-emerald-500']">
           {{ overdueCount > 0 ? 'Lewat estimasi' : 'Semua on schedule' }}
         </p>
-      </div>
+      </button>
     </div>
 
     <!-- Filter -->
