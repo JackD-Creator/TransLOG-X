@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Bunga Harian Shortfall' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 
 const loading = ref(true)
 const accruals = ref<any[]>([])
@@ -36,9 +37,8 @@ async function runAccrual() {
   accrueLoading.value = true
   accrueResult.value = null
   try {
-    const { data, error } = await supabase.rpc('accrue_daily_interest', { p_date: new Date().toISOString().slice(0, 10) })
-    if (error) throw error
-    accrueResult.value = `Berhasil: ${(data as any)?.invoices_accrued ?? 0} invoice di-accrue untuk ${(data as any)?.date}`
+    const data = await apiPost<{ invoices_accrued?: number; date?: string }>('/api/bank/interest', {})
+    accrueResult.value = `Berhasil: ${data?.invoices_accrued ?? 0} invoice di-accrue untuk ${data?.date}`
     await load()
   } catch (e: any) {
     accrueResult.value = 'Error: ' + (e.message ?? 'Gagal')

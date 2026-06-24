@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard' })
 
 const supabase = useSupabaseClient()
+const { apiGet } = useApi()
 const user = useSupabaseUser()
 const { portalType, tenantName, tenantId, isKSM, isDistributor, isBank, isRS, loading: roleLoading } = useUserRole()
 
@@ -29,12 +30,8 @@ async function loadDashboard() {
   loading.value = true
 
   if (isKSM.value) {
-    const [kpiRes, trendRes, fcRes, riskRes, demRes, { data: pos }, { data: ar }, { data: notifs }, { data: inv }] = await Promise.all([
-      supabase.rpc('get_ksm_dashboard_kpi', { p_ksm_tenant_id: tenantId.value }),
-      supabase.rpc('get_monthly_trends', { p_ksm_tenant_id: tenantId.value, p_months: 6 }),
-      supabase.rpc('forecast_next_months', { p_ksm_tenant_id: tenantId.value, p_forecast_months: 3 }),
-      supabase.rpc('get_rs_risk_scores', { p_ksm_tenant_id: tenantId.value }),
-      supabase.rpc('get_demand_analysis', { p_ksm_tenant_id: tenantId.value }),
+    const [dashData, { data: pos }, { data: ar }, { data: notifs }, { data: inv }] = await Promise.all([
+      apiGet<{ kpi: any; trends: any[]; forecast: any[]; risk_scores: any[]; demand_data: any[] }>('/api/ksm/dashboard'),
       supabase.from('ksm_purchase_orders').select('id,po_number,po_date,status,total_amount,metadata')
         .eq('ksm_tenant_id', tenantId.value).order('po_date', { ascending: false }).limit(5),
       supabase.from('ar_accounts').select('id,ar_number,disbursed_amount,outstanding_amount,due_date,status')
@@ -44,8 +41,8 @@ async function loadDashboard() {
       supabase.from('ksm_invoices').select('id,invoice_number,total_amount,outstanding,status,due_date,metadata')
         .eq('ksm_tenant_id', tenantId.value).order('invoice_date', { ascending: false }).limit(5),
     ])
-    kpi.value = kpiRes.data; trends.value = trendRes.data ?? []; forecast.value = fcRes.data ?? []
-    riskScores.value = riskRes.data ?? []; demandData.value = demRes.data ?? []
+    kpi.value = dashData.kpi; trends.value = dashData.trends ?? []; forecast.value = dashData.forecast ?? []
+    riskScores.value = dashData.risk_scores ?? []; demandData.value = dashData.demand_data ?? []
     recentPOs.value = pos ?? []; recentAR.value = ar ?? []; recentNotifs.value = notifs ?? []; recentInvoices.value = inv ?? []
   } else if (isBank.value) {
     const [{ data: fac }, { data: ar }, { data: inv }] = await Promise.all([

@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Konfirmasi Pengiriman KSM' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
@@ -50,12 +51,7 @@ async function approveConfirmation(notifId: string) {
       }
     }
 
-    const { error } = await supabase.rpc('rs_respond_to_ksm_confirmation', {
-      p_notif_id: notifId,
-      p_approved: true,
-      p_reason: '',
-    })
-    if (error) throw error
+    await apiPost('/api/rs/confirmations', { action: 'approve', notif_id: notifId, reason: '' })
     editingNotif.value = null
     await load()
   } catch (e: any) {

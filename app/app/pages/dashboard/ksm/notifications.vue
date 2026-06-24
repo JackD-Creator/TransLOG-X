@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Notifikasi Min Stok' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 const { tenantId } = useUserRole()
 const router = useRouter()
 
@@ -118,8 +119,7 @@ async function reviewAndCheckSupplier(notifId: string) {
   actionLoading.value = notifId
   actionError.value = null
   try {
-    const { data, error } = await supabase.rpc('notif_review_and_check_supplier', { p_notif_id: notifId })
-    if (error) throw error
+    await apiPost('/api/ksm/notifications', { action: 'review_check_supplier', notif_id: notifId })
     await load()
   } catch (e: any) {
     actionError.value = e.message ?? 'Gagal review notifikasi'
@@ -131,8 +131,7 @@ async function simulateSupplierConfirm(notifId: string) {
   actionLoading.value = notifId
   actionError.value = null
   try {
-    const { data, error } = await supabase.rpc('notif_supplier_confirm', { p_notif_id: notifId })
-    if (error) throw error
+    await apiPost('/api/ksm/notifications', { action: 'supplier_confirm', notif_id: notifId })
     await load()
   } catch (e: any) {
     actionError.value = e.message ?? 'Gagal konfirmasi supplier'
@@ -144,8 +143,7 @@ async function sendConfirmationToRS(notifId: string) {
   actionLoading.value = notifId
   actionError.value = null
   try {
-    const { data, error } = await supabase.rpc('ksm_send_delivery_confirmation', { p_notif_id: notifId })
-    if (error) throw error
+    await apiPost('/api/ksm/notifications', { action: 'send_confirmation_to_rs', notif_id: notifId })
     await load()
   } catch (e: any) {
     actionError.value = e.message ?? 'Gagal kirim konfirmasi ke RS'
@@ -157,8 +155,7 @@ async function createAutoPO(notifId: string) {
   actionLoading.value = notifId
   actionError.value = null
   try {
-    const { data, error } = await supabase.rpc('create_po_from_notification', { p_notif_id: notifId })
-    if (error) throw error
+    const data = await apiPost<{ po_id?: string }>('/api/ksm/notifications', { action: 'create_po', notif_id: notifId })
     await load()
     if (data?.po_id) router.push(`/dashboard/ksm/purchase-orders/${data.po_id}`)
   } catch (e: any) {

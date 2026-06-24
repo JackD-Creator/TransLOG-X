@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'RS Co-Guarantor' })
 
 const supabase = useSupabaseClient()
+const { apiGet } = useApi()
 
 const loading = ref(true)
 const riskScores = ref<any[]>([])
@@ -9,14 +10,13 @@ const facilities = ref<any[]>([])
 
 async function load() {
   loading.value = true
-  const ksmId = 'de0a6815-7098-45ce-b682-1c16def8e154'
-  const [riskRes, { data: fac }] = await Promise.all([
-    supabase.rpc('get_rs_risk_scores', { p_ksm_tenant_id: ksmId }),
+  const [dashData, { data: fac }] = await Promise.all([
+    apiGet<{ risk_scores: any[] }>('/api/ksm/dashboard'),
     supabase.from('scf_facilities')
       .select('id,facility_number,facility_limit,outstanding,available_limit,interest_rate_pa,status')
       .eq('status', 'approved'),
   ])
-  riskScores.value = riskRes.data ?? []
+  riskScores.value = dashData.risk_scores ?? []
   facilities.value = fac ?? []
   loading.value = false
 }

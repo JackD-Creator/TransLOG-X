@@ -2,14 +2,16 @@
 definePageMeta({ layout: 'dashboard', title: 'Ecosystem Value Proposition' })
 
 const supabase = useSupabaseClient()
+const { apiGet } = useApi()
 const { tenantId } = useUserRole()
 
 const realKPI = ref<any>(null)
 
 async function loadReal() {
   if (!tenantId.value) return
-  const { data } = await supabase.rpc('get_ksm_dashboard_kpi', { p_ksm_tenant_id: tenantId.value })
-  realKPI.value = data
+  const dashData = await apiGet<{ kpi: any }>('/api/ksm/dashboard')
+  realKPI.value = dashData.kpi
+  const data = dashData.kpi
   // Kalibrasi simulasi dari data real
   if (data) {
     if (Number(data.scf_limit) > 0) eco.facility_limit = Number(data.scf_limit)

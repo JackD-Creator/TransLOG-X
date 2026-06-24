@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Invoice ke RS' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
@@ -29,8 +30,7 @@ async function reviewAndSend(invoiceId: string) {
   actionLoading.value = invoiceId
   actionError.value = null
   try {
-    const { error } = await supabase.rpc('ksm_review_and_send_invoice', { p_invoice_id: invoiceId })
-    if (error) throw error
+    await apiPost('/api/ksm/invoices', { action: 'review_and_send', invoice_id: invoiceId })
     await load()
   } catch (e: any) {
     actionError.value = e.message ?? 'Gagal kirim invoice'

@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Detail PO' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 const route = useRoute()
 
 const po = ref<any>(null)
@@ -71,8 +72,7 @@ async function approvePO() {
   updating.value = true
   actionError.value = null
   try {
-    const { data, error } = await supabase.rpc('ksm_approve_po', { p_po_id: po.value.id })
-    if (error) throw error
+    await apiPost('/api/ksm/purchase-orders', { action: 'approve', po_id: po.value.id })
     await load()
   } catch (e: any) {
     actionError.value = e.message ?? 'Gagal approve PO'
@@ -86,8 +86,7 @@ async function requestCorrection() {
   updating.value = true
   actionError.value = null
   try {
-    const { data, error } = await supabase.rpc('ksm_request_po_correction', { p_po_id: po.value.id, p_reason: reason })
-    if (error) throw error
+    await apiPost('/api/ksm/purchase-orders', { action: 'request_correction', po_id: po.value.id, reason })
     await load()
   } catch (e: any) {
     actionError.value = e.message ?? 'Gagal kirim koreksi'
@@ -109,8 +108,7 @@ async function confirmReceive() {
   actionError.value = null
   try {
     const items = lines.value.map(l => ({ line_id: l.id, received_qty: receiveQtys.value[l.id] ?? 0 }))
-    const { data, error } = await supabase.rpc('rs_confirm_receipt', { p_po_id: po.value.id, p_received_items: items })
-    if (error) throw error
+    await apiPost('/api/ksm/purchase-orders', { action: 'confirm_receipt', po_id: po.value.id, received_items: items })
     receiveModal.value = false
     await load()
   } catch (e: any) {

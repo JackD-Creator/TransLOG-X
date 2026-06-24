@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'BPJS & SI Tracker' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 
 const loading = ref(true)
 const invoices = ref<any[]>([])
@@ -47,12 +48,11 @@ async function submitBPJSPayment() {
   bpjsLoading.value = true
   bpjsError.value = null
   try {
-    const { data, error } = await supabase.rpc('process_bpjs_payment', {
-      p_invoice_id: bpjsModal.value.id,
-      p_bpjs_amount: bpjsForm.value.amount,
-      p_bpjs_date: bpjsForm.value.date,
+    await apiPost('/api/bank/bpjs', {
+      invoice_id: bpjsModal.value.id,
+      amount: bpjsForm.value.amount,
+      date: bpjsForm.value.date,
     })
-    if (error) throw error
     bpjsModal.value = null
     await load()
   } catch (e: any) {

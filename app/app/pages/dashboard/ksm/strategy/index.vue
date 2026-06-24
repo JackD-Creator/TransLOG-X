@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Strategi Bisnis KSM' })
 
 const supabase = useSupabaseClient()
+const { apiGet } = useApi()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
@@ -10,8 +11,8 @@ const kpi = ref<any>(null)
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  const { data } = await supabase.rpc('get_ksm_dashboard_kpi', { p_ksm_tenant_id: tenantId.value })
-  kpi.value = data
+  const dashData = await apiGet<{ kpi: any }>('/api/ksm/dashboard')
+  kpi.value = dashData.kpi
   loading.value = false
 }
 

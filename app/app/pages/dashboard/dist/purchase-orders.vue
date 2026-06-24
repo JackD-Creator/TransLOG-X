@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Purchase Order Masuk' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
@@ -91,11 +92,10 @@ async function submitConfirmation() {
         note: l.note,
       }))
     }
-    const { error } = await supabase.rpc('supplier_confirm_po', {
-      p_po_id: confirmModal.value.id,
-      p_confirmation: confirmation,
+    await apiPost('/api/dist/confirm-po', {
+      po_id: confirmModal.value.id,
+      confirmation,
     })
-    if (error) throw error
     confirmModal.value = null
     await load()
   } catch (e: any) {

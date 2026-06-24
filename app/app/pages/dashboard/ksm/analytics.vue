@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Intelijen & Analytics' })
 
 const supabase = useSupabaseClient()
+const { apiGet } = useApi()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
@@ -18,19 +19,13 @@ async function loadAll() {
   if (!tenantId.value) return
   loading.value = true
 
-  const [kpiRes, trendRes, forecastRes, riskRes, demandRes] = await Promise.all([
-    supabase.rpc('get_ksm_dashboard_kpi', { p_ksm_tenant_id: tenantId.value }),
-    supabase.rpc('get_monthly_trends', { p_ksm_tenant_id: tenantId.value, p_months: 6 }),
-    supabase.rpc('forecast_next_months', { p_ksm_tenant_id: tenantId.value, p_forecast_months: 3 }),
-    supabase.rpc('get_rs_risk_scores', { p_ksm_tenant_id: tenantId.value }),
-    supabase.rpc('get_demand_analysis', { p_ksm_tenant_id: tenantId.value }),
-  ])
+  const dashData = await apiGet<{ kpi: any; trends: any[]; forecast: any[]; risk_scores: any[]; demand_data: any[] }>('/api/ksm/dashboard')
 
-  kpi.value = kpiRes.data
-  trends.value = trendRes.data ?? []
-  forecast.value = forecastRes.data ?? []
-  riskScores.value = riskRes.data ?? []
-  demandData.value = demandRes.data ?? []
+  kpi.value = dashData.kpi
+  trends.value = dashData.trends ?? []
+  forecast.value = dashData.forecast ?? []
+  riskScores.value = dashData.risk_scores ?? []
+  demandData.value = dashData.demand_data ?? []
   loading.value = false
 }
 

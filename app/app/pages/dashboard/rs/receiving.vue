@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Penerimaan Barang' })
 
 const supabase = useSupabaseClient()
+const { apiPost } = useApi()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
@@ -41,8 +42,7 @@ async function confirmReceipt(poId: string) {
       line_id: l.id,
       received_qty: receiveQtys.value[l.id] ?? 0,
     }))
-    const { error } = await supabase.rpc('rs_confirm_receipt', { p_po_id: poId, p_received_items: items })
-    if (error) throw error
+    await apiPost('/api/rs/receiving', { po_id: poId, received_items: items })
     receiveModal.value = null
     await load()
   } catch (e: any) {
