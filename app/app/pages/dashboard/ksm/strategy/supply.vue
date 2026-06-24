@@ -458,5 +458,30 @@ onMounted(loadBenchmarks)
       </div>
     </div>
 
+    <!-- Terminologi Revenue Architecture -->
+    <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5">
+      <p class="text-xs font-bold text-[#666] uppercase tracking-wide mb-3">Terminologi Revenue Architecture</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Revenue KSM:</strong> Total nilai invoice yang dikirim ke RS. Bukan PO value — karena revenue baru diakui saat invoice terbit (H+1 setelah barang diterima RS dengan benar).
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">COGS (Harga Pokok):</strong> Nilai disbursement Bank ke Distributor atas nama KSM. Ini harga beli KSM — bukan harga yang KSM bayar langsung, karena Bank yang bayar via SCF.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Gross Margin per Kategori:</strong> Margin berbeda per kategori: Obat FORNAS (8-12%, ketat karena HAP), BMHP (15-25%, lebih fleksibel), Alkes (10-20%, tergantung volume).
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">HAP vs HET Spread:</strong> HAP = harga beli ceiling (Kemkes). HET = harga jual ceiling (retail). Spread HET-HAP = ruang margin maksimum. KSM jual di antara HAP dan HET.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Sensitivity Analysis:</strong> Simulasi bagaimana perubahan jumlah RS, volume per RS, atau margin mempengaruhi total gross profit. Penting untuk pitch ke investor/bank.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Break-Even Volume:</strong> Volume minimum per bulan agar KSM menutupi biaya operasional (gaji, sewa, sistem). Biasanya tercapai di 2-3 RS mitra aktif.
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>

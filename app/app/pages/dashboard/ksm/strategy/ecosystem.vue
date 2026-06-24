@@ -1,14 +1,35 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'Ecosystem Value Proposition' })
 
-// ─── Shared financial assumptions ────────────────────────────────────────────
+const supabase = useSupabaseClient()
+const { tenantId } = useUserRole()
+
+const realKPI = ref<any>(null)
+
+async function loadReal() {
+  if (!tenantId.value) return
+  const { data } = await supabase.rpc('get_ksm_dashboard_kpi', { p_ksm_tenant_id: tenantId.value })
+  realKPI.value = data
+  // Kalibrasi simulasi dari data real
+  if (data) {
+    if (Number(data.scf_limit) > 0) eco.facility_limit = Number(data.scf_limit)
+    if (Number(data.revenue_total) > 0) {
+      eco.monthly_vol_per_rs = Math.round(Number(data.revenue_total) / 12 / eco.num_rs)
+    }
+  }
+}
+
+watch(tenantId, (id) => { if (id) loadReal() })
+onMounted(() => { if (tenantId.value) loadReal() })
+
+// ─── Shared financial assumptions (dikalibrasi dari data real) ──────────────
 const eco = reactive({
   num_rs: 5,
-  monthly_vol_per_rs: 500_000_000,   // Rp / RS / bulan
-  ksm_margin_pct: 12,                // margin bersih KSM
-  dist_margin_pct: 8,                // margin distributor ke KSM
-  bank_rate_pa: 11,                  // bunga SCF
-  rs_efficiency_pct: 8,              // penghematan RS dari optimasi
+  monthly_vol_per_rs: 500_000_000,
+  ksm_margin_pct: 12,
+  dist_margin_pct: 8,
+  bank_rate_pa: 11,
+  rs_efficiency_pct: 8,
   bpjs_monthly_per_rs: 2_000_000_000,
   facility_limit: 3_000_000_000,
 })
@@ -294,6 +315,25 @@ const totalEcoBar = computed(() => {
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Terminologi -->
+    <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5">
+      <p class="text-xs font-bold text-[#666] uppercase tracking-wide mb-3">Catatan Terminologi</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
+        <p class="p-2 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Gross Profit KSM:</strong> Selisih invoice ke RS (harga jual) dengan disbursement Bank ke Distributor (harga beli). Bank yang bayar Distributor atas nama KSM via SCF.
+        </p>
+        <p class="p-2 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Bank Revenue:</strong> Bunga SCF (p.a.) + admin fee. Self-liquidating karena dana mengikuti PO terverifikasi. BPJS sebagai collateral quasi-government.
+        </p>
+        <p class="p-2 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">RS Savings:</strong> Penghematan dari eliminasi stockout, compliance FORNAS (klaim BPJS lancar), dan efisiensi satu vendor untuk semua kategori.
+        </p>
+        <p class="p-2 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Distributor Benefit:</strong> Volume terjamin + pembayaran D+1 via SCF (bukan Net 45). Zero bad debt karena Bank + RS menjamin.
+        </p>
       </div>
     </div>
 

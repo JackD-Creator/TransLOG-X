@@ -355,5 +355,36 @@ onMounted(loadRealData)
       </div>
     </div>
 
+    <!-- Terminologi Credit Memo -->
+    <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5">
+      <p class="text-xs font-bold text-[#666] uppercase tracking-wide mb-3">Terminologi Credit & SCF untuk Bank</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">DSCR (Debt Service Coverage Ratio):</strong> Kemampuan KSM melunasi hutang. DSCR = Cashflow Operasional / (Pokok + Bunga). Target bankable: >1.25x. Dihitung dari revenue invoice RS dikurangi OpEx.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Self-Liquidating Loan:</strong> Kredit yang melunasi dirinya sendiri. Bank bayar Distributor → barang dikirim ke RS → RS bayar via BPJS+SI → KSM lunasi Bank. Siklus 30-45 hari.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">BPJS sebagai Collateral:</strong> Pembayaran BPJS ke RS adalah quasi-government cashflow — sangat predictable dan low-risk. Standing Instruction menjamin dana BPJS auto-transfer ke KSM.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">RS sebagai Co-Guarantor:</strong> RS ikut menjamin fasilitas SCF. Ini mengurangi risiko Bank karena ada 2 pihak yang bertanggung jawab (KSM + RS). Memungkinkan bunga lebih rendah.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Shortfall Mechanism:</strong> Jika BPJS tidak cover 100% invoice → Bank cover kekurangan sebagai kredit tambahan. Bunga dihitung harian, ditanggung 50% KSM + 50% RS.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Yield on Deployed Capital:</strong> Total return Bank dari fasilitas SCF: bunga pokok + admin fee + bunga shortfall. Dibandingkan dengan risk profile = risk-adjusted return yang attractive.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">LTV (Loan-to-Value):</strong> Rasio outstanding kredit terhadap nilai underlying asset (invoice RS + stok in-transit). Target sehat: <80%. Semakin rendah = semakin aman untuk Bank.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">POJK 57/2020:</strong> Peraturan OJK tentang SCF. Bank yang menyalurkan SCF ke sektor kesehatan mendapat apresiasi regulatori. Compliance dengan POJK = poin plus untuk approval komite kredit Bank.
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>

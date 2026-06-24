@@ -396,5 +396,30 @@ onMounted(loadKfa)
       </div>
     </div>
 
+    <!-- Terminologi Negosiasi -->
+    <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-5">
+      <p class="text-xs font-bold text-[#666] uppercase tracking-wide mb-3">Terminologi Procurement & Negosiasi</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">HNA (Harga Netto Apotek):</strong> Harga jual distributor ke apotek/RS. Biasanya HAP + 8-15% markup distributor. Ini yang dinegosiasi KSM — target: sedekat mungkin ke HAP.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Payment Terms (Net 30/45/60):</strong> Jangka waktu pembayaran. KSM pakai SCF Bank → distributor dibayar D+1 (bukan Net 45). Ini leverage negosiasi kuat — distributor dapat cash cepat.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Volume Rebate:</strong> Potongan harga retroaktif jika KSM capai target volume tahunan. Biasanya 2-4% dari total pembelian. Dihitung akhir tahun, dibayar sebagai credit note.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Early Payment Discount:</strong> Distributor beri diskon 1-3% jika dibayar < 7 hari. Dengan SCF Bank (D+1 payment), KSM selalu eligible — pure margin tambahan.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">Consignment:</strong> Distributor titip stok di gudang RS/KSM, baru bayar saat terpakai. Zero inventory cost untuk KSM, tapi margin lebih tipis. Cocok untuk item fast-moving.
+        </div>
+        <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
+          <strong class="text-[#1a1a1a]">NPV (Net Present Value):</strong> Nilai uang sekarang dari cashflow masa depan. Skenario dengan NPV tertinggi = paling menguntungkan. Discount rate = bunga SCF Bank.
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
