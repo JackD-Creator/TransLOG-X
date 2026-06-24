@@ -19,6 +19,50 @@ const filteredBench = computed(() =>
   (selectedCat.value ? benchmarks.value.filter(b => b.kelas_terapi === selectedCat.value) : benchmarks.value).slice(0, 20)
 )
 
+// ─── Actual DB data untuk kalibrasi model ────────────────────────────────────
+const actualDB = ref({
+  rsCount: 0, avgMonthlyVol: 0,
+  obatPct: 0, bmhpPct: 0, alkesPct: 0,
+  totalPOValue: 0, activePOs: 0,
+  loaded: false,
+})
+
+async function loadActualData() {
+  const [{ data: pos }, { data: lines, count: lineCount }] = await Promise.all([
+    supabase.from('ksm_purchase_orders').select('rs_tenant_id, total_amount, status'),
+    supabase.from('ksm_po_lines').select('catalog_type, line_total'),
+  ])
+  const allPOs = pos ?? []
+  const allLines = lines ?? []
+  const uniqueRS = new Set(allPOs.map((p: any) => p.rs_tenant_id).filter(Boolean))
+  const totalVol = allPOs.reduce((s: number, p: any) => s + Number(p.total_amount ?? 0), 0)
+  const rsCount = uniqueRS.size || 0
+  const avgMonthly = rsCount > 0 ? totalVol / 12 / rsCount : 0
+  const totalLineVal = allLines.reduce((s: number, l: any) => s + Number(l.line_total ?? 0), 0)
+  const obatVal  = allLines.filter((l: any) => l.catalog_type === 'obat').reduce((s: number, l: any) => s + Number(l.line_total ?? 0), 0)
+  const alkesVal = allLines.filter((l: any) => l.catalog_type === 'alkes').reduce((s: number, l: any) => s + Number(l.line_total ?? 0), 0)
+  const bmhpVal  = allLines.filter((l: any) => l.catalog_type === 'bmhp').reduce((s: number, l: any) => s + Number(l.line_total ?? 0), 0)
+
+  actualDB.value = {
+    rsCount,
+    avgMonthlyVol: avgMonthly,
+    obatPct:  totalLineVal > 0 ? Math.round(obatVal  / totalLineVal * 100) : 0,
+    alkesPct: totalLineVal > 0 ? Math.round(alkesVal / totalLineVal * 100) : 0,
+    bmhpPct:  totalLineVal > 0 ? Math.round(bmhpVal  / totalLineVal * 100) : 0,
+    totalPOValue: totalVol,
+    activePOs: allPOs.length,
+    loaded: true,
+  }
+  // Kalibrasi otomatis model jika ada data aktual
+  if (rsCount > 0) model.num_rs = rsCount
+  if (avgMonthly > 0) model.avg_monthly_vol_per_rs = Math.round(avgMonthly / 1e8) * 1e8
+  if (totalLineVal > 0) {
+    model.obat_share  = actualDB.value.obatPct  || 60
+    model.bmhp_share  = actualDB.value.bmhpPct  || 25
+    model.alkes_share = actualDB.value.alkesPct || 15
+  }
+}
+
 async function loadBenchmarks() {
   const { data } = await supabase.from('kfa_drugs').select('kfa_code,name,kelas_terapi,fix_price,het_price')
     .not('fix_price','is',null).not('het_price','is',null).gt('fix_price',1000).lt('fix_price',5000000).gt('het_price',0)
