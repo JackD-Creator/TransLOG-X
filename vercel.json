@@ -1,3 +1,11 @@
 {
-  "rootDirectory": "app"
+  "buildCommand": "nuxt build",
+  "outputDirectory": ".output",
+  "framework": "nuxtjs",
+  "routes": [
+    { "src": "/api/health", "dest": "/api/health/index.go" },
+    { "src": "/api/forecast", "dest": "/api/forecast/index.go" },
+    { "src": "/api/anomaly", "dest": "/api/anomaly/index.go" },
+    { "src": "/api/chat", "dest": "/api/chat/index.go" }
+  ]
 }
