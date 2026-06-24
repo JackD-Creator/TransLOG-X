@@ -6,7 +6,7 @@ const { apiPost } = useApi()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
-const invoices = ref<any[]>([])
+const allInvoices = ref<any[]>([])
 const filterStatus = ref('all')
 const actionLoading = ref<string | null>(null)
 const actionError = ref<string | null>(null)
@@ -14,17 +14,21 @@ const actionError = ref<string | null>(null)
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  let query = supabase
+  const { data } = await supabase
     .from('ksm_invoices')
     .select('id,invoice_number,invoice_date,due_date,subtotal,tax_amount,total_amount,paid_amount,outstanding,status,bpjs_amount,bpjs_received_date,bpjs_expected_date,shortfall_amount,shortfall_covered_by_bank,contract_payment_days,reviewed_at,sent_to_rs_at,metadata,po_id')
     .eq('ksm_tenant_id', tenantId.value)
     .order('invoice_date', { ascending: false })
-    .limit(100)
-  if (filterStatus.value !== 'all') query = query.eq('status', filterStatus.value)
-  const { data } = await query
-  invoices.value = data ?? []
+    .limit(200)
+  allInvoices.value = data ?? []
   loading.value = false
 }
+
+const invoices = computed(() => {
+  if (filterStatus.value === 'shortfall') return allInvoices.value.filter(i => i.shortfall_covered_by_bank)
+  if (filterStatus.value !== 'all') return allInvoices.value.filter(i => i.status === filterStatus.value)
+  return allInvoices.value
+})
 
 async function reviewAndSend(invoiceId: string) {
   actionLoading.value = invoiceId
@@ -83,14 +87,14 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 const today = new Date().toISOString().slice(0, 10)
 
-const totalDraft = computed(() => invoices.value.filter(i => i.status === 'draft').length)
-const totalSent = computed(() => invoices.value.filter(i => i.status === 'sent_to_rs').length)
-const totalOutstanding = computed(() => invoices.value.reduce((s, i) => s + Number(i.outstanding ?? 0), 0))
-const totalPaid = computed(() => invoices.value.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.total_amount), 0))
-const totalShortfall = computed(() => invoices.value.filter(i => i.shortfall_covered_by_bank).reduce((s, i) => s + Number(i.shortfall_amount), 0))
+// Stats selalu dari allInvoices, tidak terpengaruh filter
+const totalDraft = computed(() => allInvoices.value.filter(i => i.status === 'draft').length)
+const totalSent = computed(() => allInvoices.value.filter(i => i.status === 'sent_to_rs').length)
+const totalOutstanding = computed(() => allInvoices.value.filter(i => i.status !== 'paid').reduce((s, i) => s + Number(i.outstanding ?? 0), 0))
+const totalPaid = computed(() => allInvoices.value.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.total_amount), 0))
+const totalShortfall = computed(() => allInvoices.value.filter(i => i.shortfall_covered_by_bank).reduce((s, i) => s + Number(i.shortfall_amount), 0))
 
 watch(tenantId, (id) => { if (id) load() })
-watch(filterStatus, load)
 onMounted(() => { if (tenantId.value) load() })
 </script>
 
@@ -107,29 +111,37 @@ onMounted(() => { if (tenantId.value) load() })
       <button @click="actionError = null" class="text-red-300 hover:text-red-500"><UIcon name="i-lucide-x" class="text-xs"/></button>
     </div>
 
-    <!-- KPI -->
+    <!-- KPI — clickable filter -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-      <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
+      <button @click="filterStatus = filterStatus === 'draft' ? 'all' : 'draft'"
+        :class="['text-left rounded-xl border p-4 cursor-pointer hover:shadow-sm transition-all',
+          filterStatus === 'draft' ? 'bg-amber-100 border-amber-400 ring-1 ring-amber-300' : 'bg-amber-50 border-amber-200']">
         <p class="text-[10px] text-amber-500 uppercase mb-1">Perlu Review</p>
         <p class="text-2xl font-bold text-amber-700">{{ totalDraft }}</p>
-      </div>
-      <div class="bg-purple-50 rounded-xl border border-purple-200 p-4">
+      </button>
+      <button @click="filterStatus = filterStatus === 'sent_to_rs' ? 'all' : 'sent_to_rs'"
+        :class="['text-left rounded-xl border p-4 cursor-pointer hover:shadow-sm transition-all',
+          filterStatus === 'sent_to_rs' ? 'bg-purple-100 border-purple-400 ring-1 ring-purple-300' : 'bg-purple-50 border-purple-200']">
         <p class="text-[10px] text-purple-500 uppercase mb-1">Terkirim ke RS</p>
         <p class="text-2xl font-bold text-purple-700">{{ totalSent }}</p>
-      </div>
+      </button>
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Outstanding</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(totalOutstanding) }}</p>
       </div>
-      <div class="bg-emerald-50 rounded-xl border border-emerald-200 p-4">
+      <button @click="filterStatus = filterStatus === 'paid' ? 'all' : 'paid'"
+        :class="['text-left rounded-xl border p-4 cursor-pointer hover:shadow-sm transition-all',
+          filterStatus === 'paid' ? 'bg-emerald-100 border-emerald-400 ring-1 ring-emerald-300' : 'bg-emerald-50 border-emerald-200']">
         <p class="text-[10px] text-emerald-500 uppercase mb-1">Lunas</p>
         <p class="text-xl font-bold text-emerald-700">{{ fmtRp(totalPaid) }}</p>
-      </div>
-      <div v-if="totalShortfall > 0" class="bg-red-50 rounded-xl border border-red-200 p-4">
+      </button>
+      <button v-if="totalShortfall > 0" @click="filterStatus = filterStatus === 'shortfall' ? 'all' : 'shortfall'"
+        :class="['text-left rounded-xl border p-4 cursor-pointer hover:shadow-sm transition-all',
+          filterStatus === 'shortfall' ? 'bg-red-100 border-red-400 ring-1 ring-red-300' : 'bg-red-50 border-red-200']">
         <p class="text-[10px] text-red-400 uppercase mb-1">Shortfall Bank</p>
         <p class="text-xl font-bold text-red-600">{{ fmtRp(totalShortfall) }}</p>
         <p class="text-[9px] text-red-400 mt-0.5">Bunga harian 50/50</p>
-      </div>
+      </button>
     </div>
 
     <!-- Filter -->

@@ -5,29 +5,30 @@ const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
-const orders = ref<any[]>([])
+const allOrders = ref<any[]>([])
 const filterStatus = ref('active')
 
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  let query = supabase
+  const { data } = await supabase
     .from('ksm_purchase_orders')
     .select('id,po_number,po_date,expected_delivery,status,total_amount,payment_terms,metadata,ksm_po_lines(id,item_name,kfa_code,uom,ordered_qty,received_qty)')
     .eq('ksm_tenant_id', tenantId.value)
     .order('po_date', { ascending: false })
-    .limit(100)
-
-  if (filterStatus.value === 'active') {
-    query = query.in('status', ['submitted', 'approved', 'sent_to_supplier', 'partially_received'])
-  } else if (filterStatus.value === 'selesai') {
-    query = query.eq('status', 'fully_received')
-  }
-
-  const { data } = await query
-  orders.value = data ?? []
+    .limit(200)
+  allOrders.value = data ?? []
   loading.value = false
 }
+
+const orders = computed(() => {
+  if (filterStatus.value === 'active') return allOrders.value.filter(o => ['submitted','approved','sent_to_supplier','partially_received'].includes(o.status))
+  if (filterStatus.value === 'selesai') return allOrders.value.filter(o => o.status === 'fully_received')
+  if (filterStatus.value === 'transit') return allOrders.value.filter(o => o.status === 'sent_to_supplier')
+  if (filterStatus.value === 'wait') return allOrders.value.filter(o => o.status === 'submitted')
+  if (filterStatus.value === 'overdue_only') return allOrders.value.filter(o => o.status !== 'fully_received' && isOverdue(o.expected_delivery))
+  return allOrders.value
+})
 
 
 const statusConfig: Record<string, { label: string; color: string; icon: string; desc: string }> = {
@@ -46,14 +47,13 @@ function itemProgress(po: any) {
   return { totalOrdered, totalReceived, pct: totalOrdered > 0 ? Math.round(totalReceived / totalOrdered * 100) : 0 }
 }
 
-// Statistik
-const activeCount   = computed(() => orders.value.filter(o => ['submitted','approved','sent_to_supplier','partially_received'].includes(o.status)).length)
-const inTransit     = computed(() => orders.value.filter(o => o.status === 'sent_to_supplier').length)
-const waitConfirm   = computed(() => orders.value.filter(o => o.status === 'submitted').length)
-const overdueCount  = computed(() => orders.value.filter(o => o.status !== 'fully_received' && isOverdue(o.expected_delivery)).length)
+// Statistik — selalu dari allOrders, tidak terpengaruh filter
+const activeCount  = computed(() => allOrders.value.filter(o => ['submitted','approved','sent_to_supplier','partially_received'].includes(o.status)).length)
+const inTransit    = computed(() => allOrders.value.filter(o => o.status === 'sent_to_supplier').length)
+const waitConfirm  = computed(() => allOrders.value.filter(o => o.status === 'submitted').length)
+const overdueCount = computed(() => allOrders.value.filter(o => o.status !== 'fully_received' && isOverdue(o.expected_delivery)).length)
 
 watch(tenantId, (id) => { if (id) load() })
-watch(filterStatus, load)
 onMounted(() => { if (tenantId.value) load() })
 </script>
 
@@ -73,23 +73,24 @@ onMounted(() => { if (tenantId.value) load() })
         <p class="text-2xl font-bold text-[#1a1a1a]">{{ activeCount }}</p>
         <p class="text-[10px] text-[#777] mt-1">Sedang diproses</p>
       </button>
-      <button @click="filterStatus = filterStatus === 'active' ? 'all' : 'active'"
+      <button @click="filterStatus = filterStatus === 'transit' ? 'all' : 'transit'"
         :class="['rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
-          filterStatus === 'active' ? 'border-amber-400 ring-1 ring-amber-300 bg-amber-50' : 'bg-amber-50 border-amber-200']">
+          filterStatus === 'transit' ? 'border-amber-500 ring-1 ring-amber-300 bg-amber-50' : 'bg-amber-50 border-amber-200']">
         <p class="text-[10px] text-amber-500 uppercase mb-1">Dalam Pengiriman</p>
         <p class="text-2xl font-bold text-amber-700">{{ inTransit }}</p>
         <p class="text-[10px] text-amber-500 mt-1">Dist. → RS</p>
       </button>
-      <button @click="filterStatus = filterStatus === 'active' ? 'all' : 'active'"
+      <button @click="filterStatus = filterStatus === 'wait' ? 'all' : 'wait'"
         :class="['rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
-          'bg-blue-50 border-blue-200']">
+          filterStatus === 'wait' ? 'border-blue-500 ring-1 ring-blue-300 bg-blue-50' : 'bg-blue-50 border-blue-200']">
         <p class="text-[10px] text-blue-500 uppercase mb-1">Tunggu Konfirmasi</p>
         <p class="text-2xl font-bold text-blue-700">{{ waitConfirm }}</p>
         <p class="text-[10px] text-blue-500 mt-1">Belum dikonfirmasi Dist.</p>
       </button>
-      <button @click="filterStatus = filterStatus === 'active' ? 'all' : 'active'"
+      <button @click="filterStatus = filterStatus === 'overdue_only' ? 'all' : 'overdue_only'"
         :class="['rounded-xl border p-4 text-left cursor-pointer transition-all hover:shadow-sm',
-          overdueCount > 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200']">
+          filterStatus === 'overdue_only' ? (overdueCount > 0 ? 'border-red-500 ring-1 ring-red-300 bg-red-50' : 'border-emerald-500 ring-1 ring-emerald-300 bg-emerald-50') :
+          (overdueCount > 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200')]">
         <p :class="['text-[10px] uppercase mb-1', overdueCount > 0 ? 'text-red-500' : 'text-emerald-500']">Terlambat</p>
         <p :class="['text-2xl font-bold', overdueCount > 0 ? 'text-red-600' : 'text-emerald-700']">{{ overdueCount }}</p>
         <p :class="['text-[10px] mt-1', overdueCount > 0 ? 'text-red-500' : 'text-emerald-500']">
@@ -99,7 +100,7 @@ onMounted(() => { if (tenantId.value) load() })
     </div>
 
     <!-- Filter -->
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 flex-wrap">
       <button v-for="f in [
         { key: 'active', label: 'Aktif' },
         { key: 'selesai', label: 'Sudah Diterima RS' },
@@ -109,6 +110,9 @@ onMounted(() => { if (tenantId.value) load() })
           filterStatus === f.key ? 'bg-[#6b1525] text-white' : 'bg-[#ebebeb] text-[#666] hover:bg-[#e0e0e0]']">
         {{ f.label }}
       </button>
+      <span v-if="['transit','wait','overdue_only'].includes(filterStatus)" class="text-[10px] text-[#999] ml-1">
+        (filter dari card aktif — klik card lagi untuk reset)
+      </span>
     </div>
 
     <div v-if="loading" class="flex items-center justify-center py-16">

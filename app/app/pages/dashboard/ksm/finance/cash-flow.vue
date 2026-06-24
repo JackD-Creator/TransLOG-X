@@ -5,7 +5,11 @@ const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
-const period = ref('2026-03')
+
+// Default ke bulan ini; laporan bulan M = data bulan M-1
+const nowDate = new Date()
+const defaultPeriod = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2,'0')}`
+const period = ref(defaultPeriod)
 
 interface CashItem { label: string; amount: number; sub?: string }
 
@@ -15,11 +19,12 @@ const financingIn = ref<CashItem[]>([])
 const financingOut = ref<CashItem[]>([])
 
 const periodOptions = [
-  { value: '2026-01', label: 'Januari 2026' },
   { value: '2026-02', label: 'Februari 2026' },
   { value: '2026-03', label: 'Maret 2026' },
   { value: '2026-04', label: 'April 2026' },
   { value: '2026-05', label: 'Mei 2026' },
+  { value: '2026-06', label: 'Juni 2026' },
+  { value: '2026-07', label: 'Juli 2026' },
   { value: 'this_year', label: 'Tahun Ini (Kumulatif)' },
 ]
 
@@ -31,7 +36,10 @@ async function loadData() {
   if (period.value === 'this_year') {
     dateFrom = '2026-01-01'
   } else {
-    const [y, m] = period.value.split('-').map(Number)
+    // Offset -1 bulan: laporan bulan M = data bulan M-1
+    let [y, m] = period.value.split('-').map(Number)
+    m -= 1
+    if (m === 0) { m = 12; y -= 1 }
     dateFrom = `${y}-${String(m).padStart(2,'0')}-01`
     dateTo = new Date(y, m, 0).toISOString().slice(0, 10)
   }

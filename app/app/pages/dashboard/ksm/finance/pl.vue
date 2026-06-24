@@ -4,7 +4,8 @@ definePageMeta({ layout: 'dashboard', title: 'Laporan Laba Rugi KSM' })
 const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
 
-const period = ref({ year: 2026, month: 3 })
+const now = new Date()
+const period = ref({ year: now.getFullYear(), month: now.getMonth() + 1 })
 const loading = ref(false)
 const pl = ref<any>(null)
 
@@ -13,13 +14,21 @@ const months = [
   'Juli','Agustus','September','Oktober','November','Desember'
 ]
 
+// Laporan bulan M = data dari bulan M-1
+const dataMonth = computed(() => {
+  let m = period.value.month - 1
+  let y = period.value.year
+  if (m === 0) { m = 12; y -= 1 }
+  return { year: y, month: m }
+})
+
 async function load() {
   if (!tenantId.value) return
   loading.value = true
   pl.value = null
 
-  const startDate = `${period.value.year}-${String(period.value.month).padStart(2,'0')}-01`
-  const endDate = new Date(period.value.year, period.value.month, 0).toISOString().slice(0, 10)
+  const startDate = `${dataMonth.value.year}-${String(dataMonth.value.month).padStart(2,'0')}-01`
+  const endDate = new Date(dataMonth.value.year, dataMonth.value.month, 0).toISOString().slice(0, 10)
 
   const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([
     // Revenue = Invoice KSM ke RS (+ po_number untuk match AR)
@@ -153,7 +162,7 @@ onMounted(() => { if (tenantId.value) load() })
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
         <div class="px-5 py-4 border-b border-[#e5e5e5] bg-[#ebebeb]">
           <p class="text-sm font-bold text-[#1a1a1a]">Laporan Laba Rugi — {{ months[period.month - 1] }} {{ period.year }}</p>
-          <p class="text-[10px] text-[#999] mt-0.5">Alur: Bank bayar Dist (COGS) → RS bayar KSM (Revenue) → KSM lunasi Bank</p>
+          <p class="text-[10px] text-[#999] mt-0.5">Data invoice: {{ months[dataMonth.month - 1] }} {{ dataMonth.year }} · Alur: Bank bayar Dist (COGS) → RS bayar KSM (Revenue) → KSM lunasi Bank</p>
         </div>
         <div class="p-5 space-y-0 text-sm">
           <!-- Revenue -->

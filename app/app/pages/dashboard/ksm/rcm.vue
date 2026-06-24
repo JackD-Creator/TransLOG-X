@@ -4,7 +4,8 @@ definePageMeta({ layout: 'dashboard', title: 'Revenue Cycle Management KSM' })
 const supabase = useSupabaseClient()
 
 const loading = ref(true)
-const period = ref({ year: 2026, month: 2 })
+const nowRCM = new Date()
+const period = ref({ year: nowRCM.getFullYear(), month: nowRCM.getMonth() + 1 })
 
 const metrics = ref({
   // Revenue & Margin
@@ -40,11 +41,19 @@ const months = [
   'Juli','Agustus','September','Oktober','November','Desember'
 ]
 
+// Laporan bulan M = data bulan M-1
+const dataMonthRCM = computed(() => {
+  let m = period.value.month - 1
+  let y = period.value.year
+  if (m === 0) { m = 12; y -= 1 }
+  return { year: y, month: m }
+})
+
 async function load() {
   loading.value = true
 
-  const startDate = `${period.value.year}-${String(period.value.month).padStart(2,'0')}-01`
-  const endDate   = new Date(period.value.year, period.value.month, 0).toISOString().slice(0, 10)
+  const startDate = `${dataMonthRCM.value.year}-${String(dataMonthRCM.value.month).padStart(2,'0')}-01`
+  const endDate   = new Date(dataMonthRCM.value.year, dataMonthRCM.value.month, 0).toISOString().slice(0, 10)
   const today     = new Date().toISOString().slice(0, 10)
 
   const [{ data: invData }, { data: arData }, { data: poData }, { data: notifData }] = await Promise.all([
@@ -171,7 +180,7 @@ onMounted(load)
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
           <div class="px-5 py-4 border-b border-[#e5e5e5]">
             <p class="text-sm font-bold text-[#1a1a1a]">Revenue Waterfall</p>
-            <p class="text-xs text-[#999]">{{ months[period.month - 1] }} {{ period.year }}</p>
+            <p class="text-xs text-[#999]">{{ months[period.month - 1] }} {{ period.year }} <span class="text-[#bbb]">(data {{ months[dataMonthRCM.month - 1] }} {{ dataMonthRCM.year }})</span></p>
           </div>
           <div class="p-5 space-y-2 text-sm">
             <div class="flex justify-between py-2 border-b border-[#e5e5e5]">
