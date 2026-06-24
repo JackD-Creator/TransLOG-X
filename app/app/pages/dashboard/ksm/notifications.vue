@@ -225,10 +225,10 @@ onMounted(() => { if (tenantId.value) load() })
 
     <!-- RS Cards -->
     <div v-else class="space-y-4">
-      <div v-for="rs in rsGroups" :key="rs.rsName" class="bg-[#f5f5f5] rounded-2xl border border-[#e5e5e5] overflow-hidden">
+      <div v-for="rs in rsGroups" :key="rs.rsName" class="bg-[#faf7f3] rounded-2xl border border-[#e0d8d0] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
 
-        <!-- RS Header Card -->
-        <button @click="toggleRS(rs.rsName)" class="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-[#ebebeb] transition-colors cursor-pointer">
+        <!-- RS Header Card — KLIK UNTUK EXPAND -->
+        <button @click="toggleRS(rs.rsName)" class="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-[#f0ebe5] transition-colors cursor-pointer active:bg-[#e8e0d8]">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
               :class="rs.notifs.some(n => n.metadata?.urgency === 'critical') ? 'bg-red-100' :
@@ -259,7 +259,10 @@ onMounted(() => { if (tenantId.value) load() })
               <span v-for="n in rs.notifs" :key="n.id"
                 :class="['w-2 h-2 rounded-full', statusConfig[n.status]?.color?.split(' ')[0] ?? 'bg-[#ccc]']"/>
             </div>
-            <UIcon :name="expandedRS === rs.rsName ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="text-sm text-[#999]"/>
+            <div class="flex items-center gap-1.5">
+              <span v-if="expandedRS !== rs.rsName" class="text-[9px] text-[#999]">Klik untuk detail</span>
+              <UIcon :name="expandedRS === rs.rsName ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="text-sm text-[#999]"/>
+            </div>
           </div>
         </button>
 
