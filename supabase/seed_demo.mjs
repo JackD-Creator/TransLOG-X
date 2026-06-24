@@ -230,28 +230,71 @@ async function seed() {
 
         totalPOs++; totalValue += total; monthPOs++; monthVal += total
 
-        // AR untuk SCF + fully_received
-        if (isSCF && status === 'fully_received') {
-          const disbDate = new Date(new Date(poDate).getTime() + 2*86400000)
-          const dueDate = new Date(disbDate.getTime() + 30*86400000)
-          const interest = Math.round(total * 0.11 / 12)
-          const totalPayable = total + interest
-          let arStatus = 'disbursed', paid = 0
-          if (monthNum <= 2) { arStatus = 'paid'; paid = totalPayable }
-          else if (monthNum === 3 && Math.random() < 0.6) { arStatus = 'paid'; paid = totalPayable }
+        // Invoice + AR untuk fully_received
+        if (status === 'fully_received') {
+          const invDate = new Date(new Date(poDate).getTime() + 1*86400000) // H+1
+          const invDueDate = new Date(invDate.getTime() + 30*86400000)
+          const invNumber = `INV-KSM-2026-${String(poSeq).padStart(5,'0')}`
 
-          await sb.from('ar_accounts').insert({
-            bank_tenant_id: BANK_ID, ksm_tenant_id: KSM_ID,
-            ar_number: `AR-${poNumber.slice(-5)}`, po_number: poNumber,
-            invoice_ref: `INV-D-${poNumber.slice(-5)}`,
-            invoice_amount: total, disbursed_amount: total,
-            interest_amount: interest, total_payable: totalPayable, paid_amount: paid,
-            invoice_date: disbDate.toISOString().slice(0,10),
-            disbursement_date: disbDate.toISOString().slice(0,10),
-            due_date: dueDate.toISOString().slice(0,10),
-            paid_date: arStatus === 'paid' ? dueDate.toISOString().slice(0,10) : null,
-            status: arStatus,
+          // Tentukan status invoice & pembayaran berdasarkan bulan
+          let invStatus = 'sent_to_rs', invPaid = 0, bpjsAmt = null, bpjsDate = null, shortfall = 0, shortfallBank = false
+          if (monthNum <= 2) {
+            invStatus = 'paid'; invPaid = total
+            bpjsAmt = total; bpjsDate = new Date(invDate.getTime() + randInt(15,25)*86400000).toISOString().slice(0,10)
+          } else if (monthNum === 3) {
+            if (Math.random() < 0.5) {
+              invStatus = 'paid'; invPaid = total; bpjsAmt = total
+              bpjsDate = new Date(invDate.getTime() + randInt(15,25)*86400000).toISOString().slice(0,10)
+            } else if (Math.random() < 0.5) {
+              // Partially paid — BPJS kurang, ada shortfall
+              bpjsAmt = Math.round(total * rand(0.7, 0.9))
+              invPaid = bpjsAmt; shortfall = total - bpjsAmt; shortfallBank = true
+              invStatus = 'partially_paid'
+              bpjsDate = new Date(invDate.getTime() + randInt(20,30)*86400000).toISOString().slice(0,10)
+            } else {
+              invStatus = 'payment_pending'
+            }
+          } else if (monthNum === 4) {
+            invStatus = Math.random() < 0.4 ? 'payment_pending' : 'sent_to_rs'
+          }
+
+          // Buat ksm_invoices
+          await sb.from('ksm_invoices').insert({
+            ksm_tenant_id: KSM_ID, rs_tenant_id: rsIds[i], po_id: po.id,
+            invoice_number: invNumber, invoice_date: invDate.toISOString().slice(0,10),
+            due_date: invDueDate.toISOString().slice(0,10),
+            subtotal, tax_amount: tax, total_amount: total,
+            status: invStatus, paid_amount: invPaid, contract_payment_days: 30,
+            bpjs_amount: bpjsAmt, bpjs_received_date: bpjsDate,
+            shortfall_amount: shortfall, shortfall_covered_by_bank: shortfallBank,
+            reviewed_at: new Date(invDate.getTime() + 86400000).toISOString(),
+            sent_to_rs_at: invStatus !== 'draft' ? new Date(invDate.getTime() + 2*86400000).toISOString() : null,
+            metadata: { po_number: poNumber, rs_name: rs.name, supplier_name: DIST_LIST[distIdx].name, auto_generated: true }
           })
+
+          // AR (Bank→Distributor) untuk SCF POs
+          if (isSCF) {
+            const disbDate = new Date(new Date(poDate).getTime() + 2*86400000)
+            const arDueDate = new Date(disbDate.getTime() + 30*86400000)
+            const interest = Math.round(total * 0.11 / 12)
+            const totalPayable = total + interest
+            let arStatus = 'disbursed', arPaid = 0
+            if (monthNum <= 2) { arStatus = 'paid'; arPaid = totalPayable }
+            else if (monthNum === 3 && Math.random() < 0.6) { arStatus = 'paid'; arPaid = totalPayable }
+
+            await sb.from('ar_accounts').insert({
+              bank_tenant_id: BANK_ID, ksm_tenant_id: KSM_ID,
+              ar_number: `AR-${poNumber.slice(-5)}`, po_number: poNumber,
+              invoice_ref: invNumber,
+              invoice_amount: total, disbursed_amount: total,
+              interest_amount: interest, total_payable: totalPayable, paid_amount: arPaid,
+              invoice_date: disbDate.toISOString().slice(0,10),
+              disbursement_date: disbDate.toISOString().slice(0,10),
+              due_date: arDueDate.toISOString().slice(0,10),
+              paid_date: arStatus === 'paid' ? arDueDate.toISOString().slice(0,10) : null,
+              status: arStatus,
+            })
+          }
         }
       }
     }
