@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'Hutang SCF ke Bank' })
 
-const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
+const { apiGet } = useApi()
 
 const loading = ref(true)
 const facilities = ref<any[]>([])
@@ -11,20 +11,11 @@ const arList = ref<any[]>([])
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  const [{ data: fac }, { data: ar }] = await Promise.all([
-    supabase.from('scf_facilities')
-      .select('id,facility_number,financing_type,facility_limit,outstanding,available_limit,interest_rate_pa,tenor_days,payment_terms,status,facility_start,facility_end,standing_instruction_active')
-      .eq('borrower_tenant_id', tenantId.value)
-      .order('facility_start', { ascending: false }),
-    // Hutang KSM ke Bank = ar_accounts (Bank bayar Distributor atas nama KSM)
-    supabase.from('ar_accounts')
-      .select('id,ar_number,po_number,invoice_amount,disbursed_amount,interest_amount,total_payable,paid_amount,outstanding_amount,disbursement_date,due_date,status')
-      .eq('ksm_tenant_id', tenantId.value)
-      .order('due_date', { ascending: true })
-      .limit(50),
-  ])
-  facilities.value = fac ?? []
-  arList.value = ar ?? []
+  try {
+    const d = await apiGet<any>('/api/ksm/scf')
+    facilities.value = d.facilities ?? []
+    arList.value = d.ar_accounts ?? []
+  } catch (e) { console.error('scf:', e) }
   loading.value = false
 }
 

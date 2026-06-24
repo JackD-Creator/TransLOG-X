@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'Laporan Laba Rugi KSM' })
 
-const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
+const { apiGet } = useApi()
 
 const now = new Date()
 const period = ref({ year: now.getFullYear(), month: now.getMonth() + 1 })
@@ -30,82 +30,27 @@ async function load() {
   const startDate = `${dataMonth.value.year}-${String(dataMonth.value.month).padStart(2,'0')}-01`
   const endDate = new Date(dataMonth.value.year, dataMonth.value.month, 0).toISOString().slice(0, 10)
 
-  const [{ data: invData }, { data: arData }, { data: scfData }] = await Promise.all([
-    // Revenue = Invoice KSM ke RS (+ po_number untuk match AR)
-    supabase.from('ksm_invoices')
-      .select('total_amount,subtotal,tax_amount,status,paid_amount,metadata,shortfall_covered_by_bank')
-      .eq('ksm_tenant_id', tenantId.value)
-      .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    // COGS = disbursement Bank ke Distributor untuk PO dalam periode ini
-    supabase.from('ar_accounts')
-      .select('disbursed_amount,interest_amount')
-      .eq('ksm_tenant_id', tenantId.value)
-      .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    // Rate SCF untuk kalkulasi bunga
-    supabase.from('scf_facilities')
-      .select('interest_rate_pa')
-      .eq('borrower_tenant_id', tenantId.value)
-      .eq('status', 'approved')
-      .limit(1),
-  ])
-
-  const allInv = invData ?? []
-  const arAccounts = arData ?? []
-  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
-
-  // Revenue = invoice yang sudah dibayar RS ke KSM (paid atau partially_paid + shortfall covered = lunas)
-  const invoices = allInv.filter((i: any) =>
-    i.status === 'paid' || (i.status === 'partially_paid' && i.shortfall_covered_by_bank)
-  )
-
-  const revenue = invoices.reduce((s: number, i: any) => s + Number(i.total_amount), 0)
-  const revenuePPN = invoices.reduce((s: number, i: any) => s + Number(i.tax_amount), 0)
-  const revenueNetto = revenue - revenuePPN
-
-  // COGS = disbursement Bank ke Distributor per PO dalam periode (filter by invoice_date)
-  const cogs = arAccounts.reduce((s: number, a: any) => s + Number(a.disbursed_amount ?? 0), 0)
-
-  // Gross Profit = Revenue (netto PPN) - COGS
-  const grossProfit = revenueNetto - cogs
-  const grossMargin = revenueNetto > 0 ? (grossProfit / revenueNetto * 100) : 0
-
-  // Beban bunga SCF ke Bank (matched per PO dari invoice periode ini)
-  const arInterestMap: Record<string, number> = {}
-  for (const a of arAccounts) { if (a.po_number) arInterestMap[a.po_number] = Number(a.interest_amount ?? 0) }
-  const scfInterest = invoices.reduce((s, i) => {
-    const poNum = (i as any).metadata?.po_number
-    return s + (poNum && arInterestMap[poNum] ? arInterestMap[poNum] : 0)
-  }, 0)
-
-  // Bunga shortfall 50% KSM dalam periode = kalkulasi matematis
-  const periodEnd = new Date(endDate)
-  const shortfallInterestKSM = invoices.reduce((s: number, i: any) => {
-    if (!i.shortfall_covered_by_bank || !Number(i.shortfall_amount)) return s
-    const start = new Date(i.invoice_date)
-    const days = Math.max(0, Math.floor((periodEnd.getTime() - start.getTime()) / 86400000))
-    return s + Number(i.shortfall_amount) * (annualRate / 365) * days * 0.5
-  }, 0)
-
-  const totalInterest = scfInterest + shortfallInterestKSM
-
-  // OpEx estimasi (gaji, sewa, operasional)
-  const opex = revenueNetto * 0.04
-
-  const ebit = grossProfit - opex
-  const ebt = ebit - totalInterest
-  const tax = ebt > 0 ? ebt * 0.22 : 0
-  const netIncome = ebt - tax
-  const netMargin = revenueNetto > 0 ? (netIncome / revenueNetto * 100) : 0
-
-  pl.value = {
-    revenue, revenuePPN, revenueNetto,
-    cogs, grossProfit, grossMargin,
-    opex, ebit,
-    scfInterest, shortfallInterestKSM, totalInterest,
-    ebt, tax, netIncome, netMargin,
-    invoiceCount: invoices.length,
-    arCount: arAccounts.length,
-  }
+  try {
+    const d = await apiGet<any>(`/api/ksm/finance/pl?date_from=${startDate}&date_to=${endDate}`)
+    pl.value = {
+      revenue:              Number(d.revenue ?? 0),
+      revenuePPN:           Number(d.revenue_ppn ?? 0),
+      revenueNetto:         Number(d.revenue_netto ?? 0),
+      cogs:                 Number(d.cogs ?? 0),
+      grossProfit:          Number(d.gross_profit ?? 0),
+      grossMargin:          Number(d.gross_margin ?? 0),
+      opex:                 Number(d.opex ?? 0),
+      ebit:                 Number(d.ebit ?? 0),
+      scfInterest:          Number(d.scf_interest ?? 0),
+      shortfallInterestKSM: Number(d.shortfall_interest_ksm ?? 0),
+      totalInterest:        Number(d.total_interest ?? 0),
+      ebt:                  Number(d.ebt ?? 0),
+      tax:                  Number(d.tax ?? 0),
+      netIncome:            Number(d.net_income ?? 0),
+      netMargin:            Number(d.net_margin ?? 0),
+      invoiceCount: 0, arCount: 0,
+    }
+  } catch (e) { console.error('pl:', e) }
   loading.value = false
 }
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'Revenue Cycle Management KSM' })
 
-const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
+const { apiGet } = useApi()
 
 const loading = ref(true)
 const nowRCM = new Date()
@@ -51,107 +51,44 @@ const dataMonthRCM = computed(() => {
 })
 
 async function load() {
+  if (!tenantId.value) return
   loading.value = true
 
   const startDate = `${dataMonthRCM.value.year}-${String(dataMonthRCM.value.month).padStart(2,'0')}-01`
   const endDate   = new Date(dataMonthRCM.value.year, dataMonthRCM.value.month, 0).toISOString().slice(0, 10)
-  const today     = new Date().toISOString().slice(0, 10)
 
-  const [{ data: invData }, { data: arData }, { data: poData }, { data: notifData }] = await Promise.all([
-    supabase.from('ksm_invoices').select('total_amount,subtotal,tax_amount,status,paid_amount,due_date,metadata,shortfall_covered_by_bank')
-      .eq('ksm_tenant_id', tenantId.value)
-      .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    supabase.from('ar_accounts').select('disbursed_amount,interest_amount,status')
-      .eq('ksm_tenant_id', tenantId.value)
-      .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    supabase.from('ksm_purchase_orders').select('id,subtotal,total_amount,metadata')
-      .eq('ksm_tenant_id', tenantId.value)
-      .gte('po_date', startDate).lte('po_date', endDate),
-    supabase.from('hospital_notifications').select('*').gte('notif_date', startDate).lte('notif_date', endDate),
-  ])
-
-  const inv = invData ?? []
-  const ar = arData ?? []
-  const po = poData ?? []
-  const notif = notifData ?? []
-
-  // Revenue = invoice yang sudah dibayar RS ke KSM (paid atau partially_paid + shortfall covered = lunas)
-  const paidInv = inv.filter((i: any) =>
-    i.status === 'paid' || (i.status === 'partially_paid' && i.shortfall_covered_by_bank)
-  )
-  const totalRevenue = paidInv.reduce((s, i) => s + Number(i.total_amount ?? 0) - Number(i.tax_amount ?? 0), 0)
-
-  // HPP = disbursed_amount dari ar_accounts dalam periode (tidak pakai po_number matching yang sering gagal)
-  let totalCogs = ar.reduce((s: number, a: any) => s + Number(a.disbursed_amount ?? 0), 0)
-  let interestExp = ar.reduce((s: number, a: any) => s + Number(a.interest_amount ?? 0), 0)
-  // Fallback jika ar_accounts kosong
-  if (totalCogs === 0 && po.length > 0) {
-    totalCogs = po.reduce((s: number, p: any) => s + Number(p.subtotal ?? 0) * 0.88, 0)
-  }
-  const grossProfit    = totalRevenue - totalCogs
-  const grossMarginPct = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0
-  const netProfit      = grossProfit - interestExp
-  const netMarginPct   = totalRevenue > 0 ? (netProfit / totalRevenue * 100) : 0
-
-  // DSO: avg days dari invoice_date ke paid_date
-  const paidAR = ar.filter(a => a.status === 'paid' && a.paid_date && a.invoice_date)
-  const avgDSO = paidAR.length > 0
-    ? paidAR.reduce((s, a) => {
-        const diff = (new Date(a.paid_date).getTime() - new Date(a.invoice_date).getTime()) / 86400000
-        return s + diff
-      }, 0) / paidAR.length
-    : 0
-
-  // DPO: avg days dari po_date ke disbursement_date (Bank cair ke Distributor)
-  const disbAR = ar.filter(a => a.disbursement_date && a.invoice_date)
-  const avgDPO = disbAR.length > 0
-    ? disbAR.reduce((s, a) => {
-        const diff = (new Date(a.disbursement_date).getTime() - new Date(a.invoice_date).getTime()) / 86400000
-        return s + diff
-      }, 0) / disbAR.length
-    : 0
-
-  // Fulfilment rate: notif yang sudah completed / total notif
-  const completedNotif = notif.filter(n => n.status === 'completed').length
-  const fulfilmentRate = notif.length > 0 ? (completedNotif / notif.length * 100) : 0
-
-  // AR Aging — exclude partially_paid + shortfall_covered (= lunas untuk KSM)
-  const unpaidInv = inv.filter((i: any) => i.status !== 'paid' && !(i.status === 'partially_paid' && i.shortfall_covered_by_bank))
-  const arCurrent = unpaidInv.filter(i => {
-    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
-    return days <= 0
-  }).reduce((s, i) => s + Number(i.outstanding ?? i.total_amount - i.paid_amount), 0)
-  const ar30 = unpaidInv.filter(i => {
-    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
-    return days > 0 && days <= 30
-  }).reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
-  const ar60 = unpaidInv.filter(i => {
-    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
-    return days > 30 && days <= 60
-  }).reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
-  const ar90plus = unpaidInv.filter(i => {
-    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
-    return days > 60
-  }).reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
-
-  metrics.value = {
-    totalRevenue, totalCogs, grossProfit, grossMarginPct,
-    interestExpense: interestExp, netProfit, netMarginPct,
-    avgCycleTimeDays: 0, avgDSO, avgDPO,
-    cashConversionCycle: avgDSO - avgDPO,
-    totalPOs: po.length,
-    totalNotifications: notif.length,
-    fulfilmentRate,
-    arCurrent, ar30, ar60, ar90plus,
-    arOverdueCount: ar.filter(a => a.status === 'overdue').length,
-  }
-
+  try {
+    const d = await apiGet<any>(`/api/ksm/rcm?date_from=${startDate}&date_to=${endDate}`)
+    const aging = d.ar_aging ?? {}
+    metrics.value = {
+      totalRevenue:        Number(d.revenue ?? 0),
+      totalCogs:           Number(d.cogs ?? 0),
+      grossProfit:         Number(d.gross_profit ?? 0),
+      grossMarginPct:      Number(d.gross_margin_pct ?? 0),
+      interestExpense:     Number(d.scf_interest ?? 0) + Number(d.shortfall_interest_ksm ?? 0),
+      netProfit:           Number(d.net_profit ?? 0),
+      netMarginPct:        Number(d.net_margin_pct ?? 0),
+      avgCycleTimeDays:    0,
+      avgDSO:              Number(d.dso ?? 0),
+      avgDPO:              0,
+      cashConversionCycle: Number(d.dso ?? 0),
+      totalPOs:            0,
+      totalNotifications:  0,
+      fulfilmentRate:      Number(d.fulfilment_rate ?? 0),
+      arCurrent:           Number(aging.current ?? 0),
+      ar30:                Number(aging.d30 ?? 0),
+      ar60:                Number(aging.d60 ?? 0),
+      ar90plus:            Number(aging.d90 ?? 0),
+      arOverdueCount:      0,
+    }
+  } catch (e) { console.error('rcm:', e) }
   loading.value = false
 }
 
 
 
-onMounted(load)
+watch(tenantId, (id) => { if (id) load() })
+onMounted(() => { if (tenantId.value) load() })
 </script>
 
 <template>

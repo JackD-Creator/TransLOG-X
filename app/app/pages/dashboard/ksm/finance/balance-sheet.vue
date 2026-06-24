@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'Neraca Keuangan' })
 
-const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
+const { apiGet } = useApi()
 
 const loading = ref(true)
 
@@ -25,69 +25,18 @@ async function loadData() {
   if (!tenantId.value) return
   loading.value = true
 
-  const [{ data: inv }, { data: ar }, { data: pos }, { data: scfData }, { data: shortfallInv }] = await Promise.all([
-    // Piutang RS = invoice yang belum dibayar RS ke KSM
-    supabase.from('ksm_invoices')
-      .select('total_amount,paid_amount,status')
-      .eq('ksm_tenant_id', tenantId.value)
-      .not('status', 'in', '(paid,partially_paid)'),
-    // Hutang SCF ke Bank
-    supabase.from('ar_accounts')
-      .select('outstanding_amount,total_payable,paid_amount,disbursed_amount')
-      .eq('ksm_tenant_id', tenantId.value)
-      .not('status', 'in', '(paid,defaulted)'),
-    // PO in-transit
-    supabase.from('ksm_purchase_orders')
-      .select('total_amount')
-      .eq('ksm_tenant_id', tenantId.value)
-      .in('status', ['sent_to_supplier', 'partially_received']),
-    // Rate SCF untuk kalkulasi bunga
-    supabase.from('scf_facilities')
-      .select('interest_rate_pa')
-      .eq('borrower_tenant_id', tenantId.value)
-      .eq('status', 'approved')
-      .limit(1),
-    // Invoice dengan shortfall untuk kalkulasi bunga akrual
-    supabase.from('ksm_invoices')
-      .select('shortfall_amount,invoice_date,shortfall_covered_by_bank')
-      .eq('ksm_tenant_id', tenantId.value)
-      .eq('shortfall_covered_by_bank', true),
-  ])
-
-  // Piutang RS = invoice yang belum dibayar × total_amount (KSM terima penuh)
-  const arRS = (inv ?? []).reduce((s, i) => s + Number(i.total_amount ?? 0), 0)
-
-  // Hutang SCF = ar_accounts.outstanding_amount (total_payable - paid_amount per PO)
-  const hutangSCF = (ar ?? []).reduce((s, a) =>
-    s + Number(a.outstanding_amount ?? (a.total_payable - a.paid_amount)), 0)
-
-  const transit = (pos ?? []).reduce((s, p) => s + Number(p.total_amount) * 0.2, 0)
-
-  // Bunga shortfall akrual 50% KSM = kalkulasi matematis dari invoice data
-  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
-  const interestAccrual = (shortfallInv ?? []).reduce((s, i: any) => {
-    const days = Math.max(0, Math.floor((Date.now() - new Date(i.invoice_date).getTime()) / 86400000))
-    return s + Number(i.shortfall_amount) * (annualRate / 365) * days * 0.5
-  }, 0)
-
-  // Kas = total yang sudah diterima dari RS (semua SCF yang lunas) - total sudah dibayar ke Bank
-  const scfPaidToBank = (ar ?? []).reduce((s, a) => s + Number(a.paid_amount ?? 0), 0)
-  const scfDisbursed  = (ar ?? []).reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
-  const cashEst = Math.max(0, scfPaidToBank - (scfDisbursed * 0.88)) + 500_000_000
-
-  const totalAssets = cashEst + arRS + transit + 150_000_000
-  const totalLiab   = hutangSCF + interestAccrual
-  const equityCalc  = totalAssets - totalLiab
-
-  bs.value = {
-    cash: cashEst,
-    arRS,
-    inventoryTransit: transit,
-    fixedAssets: 150_000_000,
-    hutangSCF,
-    interestAccrual,
-    equity: equityCalc,
-  }
+  try {
+    const d = await apiGet<any>('/api/ksm/finance/balance-sheet')
+    bs.value = {
+      cash:             Number(d.cash ?? 0),
+      arRS:             Number(d.ar_rs ?? 0),
+      inventoryTransit: Number(d.inventory_transit ?? 0),
+      fixedAssets:      Number(d.fixed_assets ?? 150_000_000),
+      hutangSCF:        Number(d.hutang_scf ?? 0),
+      interestAccrual:  Number(d.interest_accrual ?? 0),
+      equity:           Number(d.equity ?? 0),
+    }
+  } catch (e) { console.error('balance-sheet:', e) }
   loading.value = false
 }
 

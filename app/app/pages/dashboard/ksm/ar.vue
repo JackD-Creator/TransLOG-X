@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'AR — Piutang dari RS' })
 
-const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
+const { apiGet } = useApi()
 
 const loading = ref(true)
 const invoices = ref<any[]>([])
@@ -11,17 +11,18 @@ const filterStatus = ref('all')
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  let query = supabase
-    .from('ksm_invoices')
-    .select('id,invoice_number,invoice_date,due_date,total_amount,paid_amount,outstanding,status,bpjs_amount,bpjs_received_date,shortfall_amount,shortfall_covered_by_bank,metadata')
-    .eq('ksm_tenant_id', tenantId.value)
-    .order('due_date', { ascending: true })
-    .limit(100)
-  if (filterStatus.value !== 'all') query = query.eq('status', filterStatus.value)
-  const { data } = await query
-  invoices.value = data ?? []
+  try {
+    const d = await apiGet<any>('/api/ksm/ar')
+    invoices.value = d.invoices ?? []
+  } catch (e) { console.error('ar:', e) }
   loading.value = false
 }
+
+const displayInvoices = computed(() =>
+  filterStatus.value === 'all'
+    ? invoices.value
+    : invoices.value.filter((i: any) => i.status === filterStatus.value)
+)
 
 const today = new Date().toISOString().slice(0, 10)
 
@@ -54,7 +55,6 @@ const totalOverdue = computed(() => {
 })
 
 watch(tenantId, (id) => { if (id) load() })
-watch(filterStatus, load)
 onMounted(() => { if (tenantId.value) load() })
 </script>
 
@@ -134,7 +134,7 @@ onMounted(() => { if (tenantId.value) load() })
             </tr>
           </thead>
           <tbody class="divide-y divide-[#e5e5e5]">
-            <tr v-for="inv in invoices" :key="inv.id" class="hover:bg-[#ebebeb] transition-colors">
+            <tr v-for="inv in displayInvoices" :key="inv.id" class="hover:bg-[#ebebeb] transition-colors">
               <td class="px-4 py-3 font-mono font-semibold text-[#1a1a1a]">{{ inv.invoice_number }}</td>
               <td class="px-4 py-3 text-[#666]">{{ inv.metadata?.rs_name ?? '-' }}</td>
               <td class="px-4 py-3 text-right font-bold text-[#1a1a1a]">{{ fmtRp(inv.total_amount) }}</td>

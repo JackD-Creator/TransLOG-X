@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'Pembayaran & BPJS' })
 
-const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
+const { apiGet } = useApi()
 
 const loading = ref(true)
 const invoices = ref<any[]>([])
@@ -12,39 +12,28 @@ const activeTab = ref<'bpjs' | 'shortfall' | 'interest'>('bpjs')
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  const [{ data: inv }, { data: scfData }] = await Promise.all([
-    supabase.from('ksm_invoices')
-      .select('id,invoice_number,invoice_date,due_date,total_amount,paid_amount,outstanding,status,bpjs_amount,bpjs_received_date,bpjs_expected_date,shortfall_amount,shortfall_covered_by_bank,metadata')
-      .eq('ksm_tenant_id', tenantId.value)
-      .in('status', ['sent_to_rs', 'payment_pending', 'partially_paid', 'overdue'])
-      .order('due_date', { ascending: true }),
-    supabase.from('scf_facilities')
-      .select('interest_rate_pa')
-      .eq('borrower_tenant_id', tenantId.value)
-      .eq('status', 'approved')
-      .limit(1),
-  ])
-  invoices.value = inv ?? []
-  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
-  // Bunga harian shortfall: kalkulasi matematis per invoice
-  interestData.value = (inv ?? [])
-    .filter((i: any) => i.shortfall_covered_by_bank && Number(i.shortfall_amount) > 0)
-    .map((i: any) => {
-      const days = Math.max(0, Math.floor((Date.now() - new Date(i.invoice_date).getTime()) / 86400000))
-      const dailyRate = annualRate / 365
-      const interestAmount = Number(i.shortfall_amount) * dailyRate * days
-      return {
-        id: i.id,
-        invoice_id: i.id,
-        invoice_number: i.invoice_number,
-        accrual_date: new Date().toISOString().slice(0, 10),
-        outstanding_principal: Number(i.shortfall_amount),
-        daily_rate: dailyRate,
-        interest_amount: interestAmount,
-        ksm_share: interestAmount * 0.5,
-        rs_share: interestAmount * 0.5,
-      }
-    })
+  try {
+    const d = await apiGet<any>('/api/ksm/payments')
+    const inv = d.invoices ?? []
+    const annualRate = Number(d.interest_rate_pa ?? 0.11)
+    invoices.value = inv
+    interestData.value = inv
+      .filter((i: any) => i.shortfall_covered_by_bank && Number(i.shortfall_amount) > 0)
+      .map((i: any) => {
+        const ksmInterest = Number(i.ksm_interest ?? 0)
+        return {
+          id: i.id,
+          invoice_id: i.id,
+          invoice_number: i.invoice_number,
+          accrual_date: new Date().toISOString().slice(0, 10),
+          outstanding_principal: Number(i.shortfall_amount),
+          daily_rate: annualRate / 365,
+          interest_amount: ksmInterest * 2,
+          ksm_share: ksmInterest,
+          rs_share: ksmInterest,
+        }
+      })
+  } catch (e) { console.error('payments:', e) }
   loading.value = false
 }
 

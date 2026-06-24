@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', title: 'Cash Flow' })
 
-const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
+const { apiGet } = useApi()
 
 const loading = ref(true)
 
@@ -36,121 +36,55 @@ async function loadData() {
   if (!tenantId.value) return
   loading.value = true
 
-  let dateFrom: string, dateTo: string | null = null
+  let dateFrom: string, dateTo: string
   if (period.value === 'this_year') {
     dateFrom = '2026-01-01'
+    dateTo   = new Date().toISOString().slice(0, 10)
   } else {
-    // Offset -1 bulan: laporan bulan M = data bulan M-1
     let [y, m] = period.value.split('-').map(Number)
     m -= 1
     if (m === 0) { m = 12; y -= 1 }
     dateFrom = `${y}-${String(m).padStart(2,'0')}-01`
-    dateTo = new Date(y, m, 0).toISOString().slice(0, 10)
+    dateTo   = new Date(y, m, 0).toISOString().slice(0, 10)
   }
 
-  // Saldo Awal = net cash dari semua periode SEBELUM dateFrom (mulai dari data awal Jan 2026 = Des 2025)
-  const DATA_START = '2025-12-01'
-  const [{ data: prevInvData }, { data: prevArData }] = await Promise.all([
-    supabase.from('ksm_invoices')
-      .select('bpjs_amount,shortfall_amount,shortfall_covered_by_bank,status')
-      .eq('ksm_tenant_id', tenantId.value)
-      .in('status', ['paid', 'partially_paid'])
-      .gte('invoice_date', DATA_START)
-      .lt('invoice_date', dateFrom),
-    supabase.from('ar_accounts')
-      .select('disbursed_amount,interest_amount')
-      .eq('ksm_tenant_id', tenantId.value)
-      .gte('invoice_date', DATA_START)
-      .lt('invoice_date', dateFrom),
-  ])
-  const prevIn   = (prevInvData ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0) + ((i as any).shortfall_covered_by_bank ? Number((i as any).shortfall_amount ?? 0) : 0), 0)
-  const prevOut  = (prevArData ?? []).reduce((s, a) => s + Number(a.disbursed_amount ?? 0) + Number(a.interest_amount ?? 0), 0)
-  const prevOpex = prevIn * 0.04
-  saldoAwal.value = Math.max(0, prevIn - prevOut - prevOpex)
+  try {
+    const d = await apiGet<any>(`/api/ksm/finance/cashflow?date_from=${dateFrom}&date_to=${dateTo}`)
 
-  // q1: Kas masuk — RS bayar KSM PENUH (Bank jamin shortfall untuk RS, KSM tidak pernah kurang bayar)
-  let q1 = supabase.from('ksm_invoices')
-    .select('total_amount,tax_amount,bpjs_amount,shortfall_amount,shortfall_covered_by_bank,status')
-    .eq('ksm_tenant_id', tenantId.value)
-    .in('status', ['paid', 'partially_paid'])
-    .gte('invoice_date', dateFrom)
+    const bpjsTotal          = Number(d.kas_masuk_bpjs ?? 0)
+    const bankShortfallDirect = Number(d.kas_masuk_shortfall ?? 0)
+    const rsPayments          = bpjsTotal + bankShortfallDirect
+    const scfPrincipal        = Number(d.scf_principal ?? 0)
+    const scfInterest         = Number(d.scf_interest ?? 0)
+    const shortfallInterest   = Number(d.shortfall_interest_ksm ?? 0)
 
-  // q2: Kas keluar — AR accounts (SCF) yang dibuka dalam periode ini (by invoice_date)
-  // Tidak pakai matching po_number — filter langsung by tanggal
-  let q2 = supabase.from('ar_accounts')
-    .select('disbursed_amount,interest_amount,status')
-    .eq('ksm_tenant_id', tenantId.value)
-    .gte('invoice_date', dateFrom)
+    shortfallCoveredAmt.value = bankShortfallDirect
+    saldoAwal.value           = Number(d.saldo_awal ?? 0)
 
-  if (dateTo) {
-    q1 = q1.lte('invoice_date', dateTo)
-    q2 = q2.lte('invoice_date', dateTo)
-  }
+    operatingIn.value = [
+      { label: 'SI dari Rekening RS (BPJS → transfer)', amount: bpjsTotal, sub: 'BPJS cair ke RS → RS transfer ke KSM via Standing Instruction' },
+      ...(bankShortfallDirect > 0 ? [{
+        label: 'Kredit Bank Langsung ke KSM (Shortfall)',
+        amount: bankShortfallDirect,
+        sub: 'Bank buka kredit untuk RS → langsung bayar KSM (bukan lewat rekening RS)',
+        highlight: 'bank' as const,
+      }] : []),
+    ]
+    operatingOut.value = [
+      { label: 'Biaya operasional & SDM (est. 4%)', amount: rsPayments * 0.04 },
+    ]
+    financingIn.value = [
+      { label: 'Bank cair ke Distributor (atas nama KSM)', amount: scfPrincipal, sub: 'Tidak masuk kas KSM — langsung ke Distributor' },
+    ]
+    financingOut.value = [
+      { label: 'Pelunasan pokok SCF ke Bank', amount: scfPrincipal, sub: 'Dari dana RS yang diterima' },
+      { label: 'Bunga fasilitas SCF ke Bank', amount: scfInterest },
+      { label: 'Bunga harian shortfall (bagian KSM 50%)', amount: shortfallInterest },
+    ]
 
-  const [{ data: invData }, { data: arData }, { data: scfData }] = await Promise.all([
-    q1, q2,
-    supabase.from('scf_facilities')
-      .select('interest_rate_pa')
-      .eq('borrower_tenant_id', tenantId.value)
-      .eq('status', 'approved')
-      .limit(1),
-  ])
-
-  // ── Kas Masuk ──────────────────────────────────────────────────────────────
-  // KSM terima dari DUA sumber:
-  // 1. SI dari rekening RS: BPJS yang sudah cair ke RS → RS transfer ke KSM via SI
-  // 2. Langsung dari Bank: shortfall → Bank buka kredit untuk RS → transfer langsung ke KSM
-  const bpjsTotal           = (invData ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
-  const bankShortfallDirect = (invData ?? []).reduce((s, i) =>
-    (i as any).shortfall_covered_by_bank ? s + Number((i as any).shortfall_amount ?? 0) : s, 0)
-  const rsPayments = bpjsTotal + bankShortfallDirect
-  shortfallCoveredAmt.value = bankShortfallDirect
-
-  // ── Kas Keluar ─────────────────────────────────────────────────────────────
-  // SCF: Bank cairkan ke Distributor atas nama KSM → KSM wajib lunasi ke Bank
-  const arAccounts     = arData ?? []
-  let scfPrincipal   = arAccounts.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
-  let scfInterest    = arAccounts.reduce((s, a) => s + Number(a.interest_amount  ?? 0), 0)
-  // Fallback: kalau ar_accounts kosong, estimasi dari invoice (COGS = subtotal × 88%, bunga = 11%/12)
-  if (scfPrincipal === 0 && (invData ?? []).length > 0) {
-    const fallbackSubtotal = (invData ?? []).reduce((s: number, i: any) => s + Number(i.total_amount ?? 0) / 1.11, 0)
-    scfPrincipal = fallbackSubtotal * 0.88
-    scfInterest  = scfPrincipal * (annualRate / 12)
-  }
-  // Bunga shortfall 50% KSM = kalkulasi matematis dari invoice dalam periode
-  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
-  const periodEnd = dateTo ? new Date(dateTo) : new Date()
-  const shortfallInterest = (invData ?? []).reduce((s: number, i: any) => {
-    if (!i.shortfall_covered_by_bank || !Number(i.shortfall_amount)) return s
-    const start = new Date(i.invoice_date < dateFrom ? dateFrom : i.invoice_date)
-    const days = Math.max(0, Math.floor((periodEnd.getTime() - start.getTime()) / 86400000))
-    return s + Number(i.shortfall_amount) * (annualRate / 365) * days * 0.5
-  }, 0)
-
-  operatingIn.value = [
-    { label: 'SI dari Rekening RS (BPJS → transfer)', amount: bpjsTotal, sub: 'BPJS cair ke RS → RS transfer ke KSM via Standing Instruction' },
-    ...(bankShortfallDirect > 0 ? [{
-      label: 'Kredit Bank Langsung ke KSM (Shortfall)',
-      amount: bankShortfallDirect,
-      sub: 'Bank buka kredit untuk RS → langsung bayar KSM (bukan lewat rekening RS)',
-      highlight: 'bank' as const,
-    }] : []),
-  ]
-  operatingOut.value = [
-    { label: 'Biaya operasional & SDM (est. 4%)', amount: rsPayments * 0.04 },
-  ]
-  financingIn.value = [
-    { label: 'Bank cair ke Distributor (atas nama KSM)', amount: scfPrincipal, sub: 'Tidak masuk kas KSM — langsung ke Distributor' },
-  ]
-  financingOut.value = [
-    { label: 'Pelunasan pokok SCF ke Bank', amount: scfPrincipal, sub: 'Dari dana RS yang diterima' },
-    { label: 'Bunga fasilitas SCF ke Bank', amount: scfInterest },
-    { label: 'Bunga harian shortfall (bagian KSM 50%)', amount: shortfallInterest },
-  ]
-
-  // Saldo Akhir = Saldo Awal + Net Cash Flow periode ini
-  const netPeriod = rsPayments - (rsPayments * 0.04) - scfPrincipal - scfInterest - shortfallInterest
-  saldoAkhir.value = saldoAwal.value + netPeriod
+    const netPeriod = rsPayments - (rsPayments * 0.04) - scfPrincipal - scfInterest - shortfallInterest
+    saldoAkhir.value = saldoAwal.value + netPeriod
+  } catch (e) { console.error('cashflow:', e) }
 
   loading.value = false
 }

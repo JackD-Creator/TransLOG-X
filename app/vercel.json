@@ -6,6 +6,14 @@
     { "src": "/api/health", "dest": "/api/health/index.go" },
     { "src": "/api/forecast", "dest": "/api/forecast/index.go" },
     { "src": "/api/anomaly", "dest": "/api/anomaly/index.go" },
-    { "src": "/api/chat", "dest": "/api/chat/index.go" }
+    { "src": "/api/chat", "dest": "/api/chat/index.go" },
+    { "src": "/api/ksm/dashboard", "dest": "/api/ksm/dashboard/index.go" },
+    { "src": "/api/ksm/finance/cashflow", "dest": "/api/ksm/finance/cashflow/index.go" },
+    { "src": "/api/ksm/finance/pl", "dest": "/api/ksm/finance/pl/index.go" },
+    { "src": "/api/ksm/finance/balance-sheet", "dest": "/api/ksm/finance/balance-sheet/index.go" },
+    { "src": "/api/ksm/payments", "dest": "/api/ksm/payments/index.go" },
+    { "src": "/api/ksm/ar", "dest": "/api/ksm/ar/index.go" },
+    { "src": "/api/ksm/rcm", "dest": "/api/ksm/rcm/index.go" },
+    { "src": "/api/ksm/scf", "dest": "/api/ksm/scf/index.go" }
   ]
 }
