@@ -21,21 +21,23 @@ const lines = ref<{ kfa_code: string; item_name: string; catalog_type: string; u
 
 const suppliers = ref<{ id: string; name: string }[]>([])
 async function loadSuppliers() {
-  // Ambil distributor dari supplier_catalog_items (bisa diakses KSM via RLS)
+  // Ambil distributor dari metadata supplier_catalog_items (nama disimpan saat onboarding)
   const { data } = await supabase
     .from('supplier_catalog_items')
-    .select('tenant_id, tenants:tenant_id(id, name)')
+    .select('tenant_id, metadata')
     .eq('is_available', true)
-    .limit(200)
+    .not('metadata->>distributor_name', 'is', null)
+    .limit(500)
 
-  // Deduplicate by tenant_id
   const seen = new Set<string>()
   const list: { id: string; name: string }[] = []
   for (const row of (data ?? [])) {
-    const t = row.tenants as any
-    if (t?.id && !seen.has(t.id)) {
-      seen.add(t.id)
-      list.push({ id: t.id, name: t.name })
+    const meta = row.metadata as any
+    const name = meta?.distributor_name
+    const id = row.tenant_id
+    if (id && name && !seen.has(id)) {
+      seen.add(id)
+      list.push({ id, name })
     }
   }
   suppliers.value = list.sort((a, b) => a.name.localeCompare(b.name))

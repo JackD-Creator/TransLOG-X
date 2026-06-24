@@ -48,12 +48,16 @@ async function seed() {
   console.log('ksm_catalog_items:', e1 ? 'ERR: ' + e1.message : `✅ ${ksmItems.length} items`)
 
   // 3. supplier_catalog_items — Distributor jual 25 item, HNA = HAP x 1.10
+  // Ambil nama distributor dari tenants untuk disimpan di metadata
+  const { data: distTenant } = await sb.from('tenants').select('name').eq('id', DIST_ID).single()
+  const distName = distTenant?.name ?? 'PT Distributor Farma Demo'
+
   const distItems = drugs.slice(0, 25).map(d => ({
     tenant_id: DIST_ID,
     kfa_code: d.kfa_code,
     catalog_type: 'obat',
     name: d.name,
-    manufacturer: 'PT Kimia Farma Tbk',
+    manufacturer: d.manufacturer ?? 'PT Kimia Farma Tbk',
     uom: d.uom || 'tablet',
     hna_price: d.fix_price ? Math.round(Number(d.fix_price) * 1.10) : null,
     sell_price: d.fix_price ? Math.round(Number(d.fix_price) * 1.10) : 10000,
@@ -61,7 +65,8 @@ async function seed() {
     stock_available: 200 + Math.floor(Math.random() * 800),
     lead_time_days: 3,
     is_available: true,
-    payment_terms: 'net_30'
+    payment_terms: 'net_30',
+    metadata: { distributor_name: distName, distributor_id: DIST_ID }
   }))
 
   const { error: e2 } = await sb.from('supplier_catalog_items')
