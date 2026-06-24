@@ -36,19 +36,39 @@ async function loadData() {
     dateTo = new Date(y, m, 0).toISOString().slice(0, 10)
   }
 
-  let q1 = supabase.from('ksm_invoices').select('paid_amount,bpjs_amount,total_amount').eq('ksm_tenant_id', tenantId.value).in('status', ['paid', 'partially_paid']).gte('invoice_date', dateFrom)
-  let q2 = supabase.from('ar_accounts').select('paid_amount,interest_amount,total_payable').eq('ksm_tenant_id', tenantId.value).eq('status', 'paid').gte('paid_date', dateFrom)
-  let q3 = supabase.from('ar_accounts').select('disbursed_amount').eq('ksm_tenant_id', tenantId.value).not('disbursement_date', 'is', null).gte('disbursement_date', dateFrom)
-  let q4 = supabase.from('daily_interest_accruals').select('ksm_share').gte('accrual_date', dateFrom)
-  if (dateTo) { q1 = q1.lte('invoice_date', dateTo); q2 = q2.lte('paid_date', dateTo); q3 = q3.lte('disbursement_date', dateTo); q4 = q4.lte('accrual_date', dateTo) }
+  // Query invoices dalam periode + ALL AR accounts (untuk match per PO)
+  let q1 = supabase.from('ksm_invoices').select('total_amount,paid_amount,bpjs_amount,status,metadata').eq('ksm_tenant_id', tenantId.value).gte('invoice_date', dateFrom)
+  let q2 = supabase.from('ar_accounts').select('po_number,disbursed_amount,interest_amount,paid_amount').eq('ksm_tenant_id', tenantId.value)
+  let q3 = supabase.from('daily_interest_accruals').select('ksm_share').gte('accrual_date', dateFrom)
+  if (dateTo) { q1 = q1.lte('invoice_date', dateTo); q3 = q3.lte('accrual_date', dateTo) }
 
-  const [{ data: invPaid }, { data: arPaid }, { data: arDisb }, { data: diaData }] = await Promise.all([q1, q2, q3, q4])
+  const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([q1, q2, q3])
 
-  const rsPayments = (invPaid ?? []).reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
-  const bpjsTotal = (invPaid ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
-  const ksmToBank = (arPaid ?? []).reduce((s, a) => s + Number(a.paid_amount ?? 0), 0)
-  const bankInterest = (arPaid ?? []).reduce((s, a) => s + Number(a.interest_amount ?? 0), 0)
-  const bankToDist = (arDisb ?? []).reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
+  const invoices = invData ?? []
+  const arMap: Record<string, any> = {}
+  for (const a of arData ?? []) { if (a.po_number) arMap[a.po_number] = a }
+
+  // Kas masuk = invoice yang sudah dibayar RS dalam periode
+  const paidInvoices = invoices.filter(i => ['paid', 'partially_paid'].includes(i.status))
+  const rsPayments = paidInvoices.reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
+  const bpjsTotal = paidInvoices.reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
+
+  // Kas keluar = pelunasan SCF ke Bank UNTUK invoice yang sama (matched per PO)
+  let ksmToBank = 0, bankInterest = 0, bankToDist = 0
+  for (const inv of paidInvoices) {
+    const poNum = (inv as any).metadata?.po_number
+    const ar = poNum ? arMap[poNum] : null
+    if (ar) {
+      ksmToBank += Number(ar.disbursed_amount ?? 0)
+      bankInterest += Number(ar.interest_amount ?? 0)
+    }
+  }
+  // Bank→Dist = total disbursement untuk SEMUA invoice periode ini (bukan hanya paid)
+  for (const inv of invoices) {
+    const poNum = (inv as any).metadata?.po_number
+    const ar = poNum ? arMap[poNum] : null
+    if (ar) bankToDist += Number(ar.disbursed_amount ?? 0)
+  }
   const shortfallInterest = (diaData ?? []).reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
 
   operatingIn.value = [

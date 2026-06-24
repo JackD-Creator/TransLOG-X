@@ -48,8 +48,8 @@ async function load() {
   const today     = new Date().toISOString().slice(0, 10)
 
   const [{ data: invData }, { data: arData }, { data: poData }, { data: notifData }] = await Promise.all([
-    supabase.from('ksm_invoices').select('*').gte('invoice_date', startDate).lte('invoice_date', endDate),
-    supabase.from('ar_accounts').select('*').gte('disbursement_date', startDate).lte('disbursement_date', endDate),
+    supabase.from('ksm_invoices').select('total_amount,subtotal,tax_amount,status,paid_amount,due_date,metadata').gte('invoice_date', startDate).lte('invoice_date', endDate),
+    supabase.from('ar_accounts').select('po_number,disbursed_amount,interest_amount,invoice_date,paid_date,status'),
     supabase.from('ksm_purchase_orders').select('*').gte('po_date', startDate).lte('po_date', endDate),
     supabase.from('hospital_notifications').select('*').gte('notif_date', startDate).lte('notif_date', endDate),
   ])
@@ -59,10 +59,21 @@ async function load() {
   const po = poData ?? []
   const notif = notifData ?? []
 
-  // Revenue = Invoice KSM ke RS, HPP = Bank bayar Distributor (disbursed)
-  const totalRevenue   = inv.reduce((s, i) => s + Number(i.total_amount ?? 0), 0)
-  const totalCogs      = ar.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
-  const interestExp    = ar.reduce((s, a) => s + Number(a.interest_amount ?? 0), 0)
+  // Revenue = Invoice KSM ke RS (netto PPN)
+  const totalRevenue = inv.reduce((s, i) => s + Number(i.total_amount ?? 0) - Number(i.tax_amount ?? 0), 0)
+
+  // HPP + Interest = matched per PO number dari invoice
+  const arMap: Record<string, any> = {}
+  for (const a of ar) { if (a.po_number) arMap[a.po_number] = a }
+  let totalCogs = 0, interestExp = 0
+  for (const i of inv) {
+    const poNum = (i as any).metadata?.po_number
+    const matched = poNum ? arMap[poNum] : null
+    if (matched) {
+      totalCogs += Number(matched.disbursed_amount ?? 0)
+      interestExp += Number(matched.interest_amount ?? 0)
+    }
+  }
   const grossProfit    = totalRevenue - totalCogs
   const grossMarginPct = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0
   const netProfit      = grossProfit - interestExp
