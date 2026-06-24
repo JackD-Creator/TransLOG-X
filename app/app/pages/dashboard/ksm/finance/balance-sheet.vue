@@ -8,73 +8,74 @@ const loading = ref(true)
 
 interface BSData {
   cash: number
-  arRS: number          // Piutang dari RS (ksm_invoices outstanding)
+  arRS: number            // Piutang dari RS — invoice yang belum dibayar RS ke KSM
   inventoryTransit: number
   fixedAssets: number
-  scfOutstanding: number  // Hutang ke Bank (ar_accounts + scf_facilities)
-  arBankHutang: number    // ar_accounts outstanding
-  interestAccrual: number // Bunga shortfall akrual 50% KSM (bukan pokok — pokok hutang RS ke Bank)
+  hutangSCF: number       // Hutang KSM ke Bank per ar_accounts (satu sumber, tidak double count)
+  interestAccrual: number // Bunga shortfall akrual 50% KSM
   equity: number
 }
 
 const bs = ref<BSData>({
   cash: 0, arRS: 0, inventoryTransit: 0, fixedAssets: 150_000_000,
-  scfOutstanding: 0, arBankHutang: 0, interestAccrual: 0, equity: 0,
+  hutangSCF: 0, interestAccrual: 0, equity: 0,
 })
 
 async function loadData() {
   if (!tenantId.value) return
   loading.value = true
 
-  const [{ data: inv }, { data: ar }, { data: scf }, { data: pos }, { data: dia }] = await Promise.all([
-    // Piutang dari RS = ksm_invoices outstanding
+  const [{ data: inv }, { data: ar }, { data: pos }, { data: dia }] = await Promise.all([
+    // Piutang RS = invoice yang belum dibayar RS ke KSM (status bukan paid/partially_paid)
+    // KSM selalu terima penuh saat RS bayar — piutang = total_amount invoice yang pending
     supabase.from('ksm_invoices')
-      .select('outstanding,total_amount,paid_amount')
-      .eq('ksm_tenant_id', tenantId.value),
-    // Hutang ke Bank = ar_accounts outstanding
+      .select('total_amount,paid_amount,status')
+      .eq('ksm_tenant_id', tenantId.value)
+      .not('status', 'in', '(paid,partially_paid)'),
+    // Hutang SCF ke Bank = ar_accounts outstanding (SATU sumber, tidak double count dengan scf_facilities)
     supabase.from('ar_accounts')
-      .select('outstanding_amount,total_payable,paid_amount')
-      .eq('ksm_tenant_id', tenantId.value),
-    // SCF facility outstanding
-    supabase.from('scf_facilities')
-      .select('outstanding,facility_limit')
-      .eq('borrower_tenant_id', tenantId.value)
-      .eq('status', 'approved'),
-    // PO in-transit (belum diterima RS)
+      .select('outstanding_amount,total_payable,paid_amount,disbursed_amount')
+      .eq('ksm_tenant_id', tenantId.value)
+      .not('status', 'in', '(paid,defaulted)'),
+    // PO in-transit
     supabase.from('ksm_purchase_orders')
       .select('total_amount')
       .eq('ksm_tenant_id', tenantId.value)
       .in('status', ['sent_to_supplier', 'partially_received']),
-    // Bunga shortfall akrual — hanya 50% bagian KSM yang belum dibayar
+    // Bunga shortfall akrual 50% KSM (pokok shortfall = hutang RS ke Bank, bukan KSM)
     supabase.from('daily_interest_accruals')
       .select('ksm_share, ksm_invoices!inner(ksm_tenant_id)')
       .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
       .eq('status', 'accrued'),
   ])
 
-  const arRS = (inv ?? []).reduce((s, i) => s + Number(i.outstanding ?? i.total_amount - i.paid_amount), 0)
-  const arBankHutang = (ar ?? []).reduce((s, a) => s + Number(a.outstanding_amount ?? a.total_payable - a.paid_amount), 0)
-  const scfOut = (scf ?? []).reduce((s, f) => s + Number(f.outstanding), 0)
+  // Piutang RS = invoice yang belum dibayar × total_amount (KSM terima penuh)
+  const arRS = (inv ?? []).reduce((s, i) => s + Number(i.total_amount ?? 0), 0)
+
+  // Hutang SCF = ar_accounts.outstanding_amount (total_payable - paid_amount per PO)
+  const hutangSCF = (ar ?? []).reduce((s, a) =>
+    s + Number(a.outstanding_amount ?? (a.total_payable - a.paid_amount)), 0)
+
   const transit = (pos ?? []).reduce((s, p) => s + Number(p.total_amount) * 0.2, 0)
-  // Hanya bunga harian 50% KSM yang menjadi kewajiban KSM — pokok shortfall adalah hutang RS ke Bank
+
+  // Bunga shortfall akrual 50% KSM
   const interestAccrual = (dia ?? []).reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
 
-  // Kas = estimasi (piutang terlunasi - hutang terbayar)
-  const invPaid = (inv ?? []).reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
-  const arPaid = (ar ?? []).reduce((s, a) => s + Number(a.paid_amount ?? 0), 0)
-  const cashEst = Math.max(0, invPaid - arPaid) + 200_000_000
+  // Kas = total yang sudah diterima dari RS (semua SCF yang lunas) - total sudah dibayar ke Bank
+  const scfPaidToBank = (ar ?? []).reduce((s, a) => s + Number(a.paid_amount ?? 0), 0)
+  const scfDisbursed  = (ar ?? []).reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
+  const cashEst = Math.max(0, scfPaidToBank - (scfDisbursed * 0.88)) + 500_000_000
 
   const totalAssets = cashEst + arRS + transit + 150_000_000
-  const totalLiab = arBankHutang + scfOut + interestAccrual
-  const equityCalc = totalAssets - totalLiab
+  const totalLiab   = hutangSCF + interestAccrual
+  const equityCalc  = totalAssets - totalLiab
 
   bs.value = {
     cash: cashEst,
     arRS,
     inventoryTransit: transit,
     fixedAssets: 150_000_000,
-    scfOutstanding: scfOut,
-    arBankHutang,
+    hutangSCF,
     interestAccrual,
     equity: equityCalc,
   }
@@ -84,7 +85,7 @@ async function loadData() {
 const totalCurrentAssets = computed(() => bs.value.cash + bs.value.arRS + bs.value.inventoryTransit)
 const totalNonCurrentAssets = computed(() => bs.value.fixedAssets)
 const totalAssets = computed(() => totalCurrentAssets.value + totalNonCurrentAssets.value)
-const totalCurrentLiab = computed(() => bs.value.arBankHutang + bs.value.scfOutstanding + bs.value.interestAccrual)
+const totalCurrentLiab = computed(() => bs.value.hutangSCF + bs.value.interestAccrual)
 const totalNonCurrentLiab = computed(() => 0)
 const totalLiabilities = computed(() => totalCurrentLiab.value + totalNonCurrentLiab.value)
 const totalEquity = computed(() => bs.value.equity)
@@ -186,14 +187,14 @@ onMounted(() => { if (tenantId.value) loadData() })
           <div class="flex justify-between py-1.5 border-b border-[#ececec]">
             <div>
               <span class="text-[#555]">Hutang SCF ke Bank</span>
-              <p class="text-[10px] text-[#777]">Bank bayar Distributor → KSM hutang ke Bank</p>
+              <p class="text-[10px] text-[#777]">Sisa pokok SCF per PO yang belum dilunasi KSM</p>
             </div>
-            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.arBankHutang) }}</span>
+            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.hutangSCF) }}</span>
           </div>
           <div v-if="bs.interestAccrual > 0" class="flex justify-between py-1.5 border-b border-[#ececec]">
             <div>
               <span class="text-[#555]">Bunga Shortfall Akrual (50% KSM)</span>
-              <p class="text-[10px] text-[#777]">Pokok shortfall = hutang RS ke Bank, bukan hutang KSM</p>
+              <p class="text-[10px] text-[#777]">Hanya bunga — pokok shortfall = hutang RS ke Bank (bukan KSM)</p>
             </div>
             <span class="font-semibold text-amber-700">{{ fmtRp(bs.interestAccrual) }}</span>
           </div>
