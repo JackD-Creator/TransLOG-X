@@ -65,10 +65,6 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  if (n < 0) return `(${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Math.abs(n))})`
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
 
 onMounted(load)
 </script>

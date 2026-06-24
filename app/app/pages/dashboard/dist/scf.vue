@@ -26,11 +26,6 @@ const avgTenor = computed(() => {
   return Math.round(avg)
 })
 
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(2)} M`
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  return `Rp ${n.toLocaleString('id-ID')}`
-}
 
 onMounted(loadData)
 </script>

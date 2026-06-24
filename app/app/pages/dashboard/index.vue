@@ -57,11 +57,7 @@ async function loadBankStats() {
   }
 }
 
-function fmtRpDash(n: number) {
-  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(1)} M`
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(0)} jt`
-  return `Rp ${n.toLocaleString('id-ID')}`
-}
+const fmtRpDash = fmtRp
 const now = new Date()
 const hour = now.getHours()
 const greeting = hour < 5 ? 'Selamat Malam' : hour < 12 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 19 ? 'Selamat Sore' : 'Selamat Malam'
@@ -149,10 +145,10 @@ async function fetchDashboard() {
       label: catLabels[cat] ?? 'Lainnya',
       pct: totalV > 0 ? Math.round((val/totalV)*100) : 0,
       color: catColors[cat] ?? '#64748b',
-      val: val >= 1e9 ? `Rp ${(val/1e9).toFixed(1)}M` : val >= 1e6 ? `Rp ${(val/1e6).toFixed(0)}Jt` : `Rp ${Math.round(val).toLocaleString('id-ID')}`
+      val: fmtRp(val)
     }))
     .sort((a,b) => b.pct - a.pct)
-  donutTotal.value = totalV >= 1e9 ? `Rp ${(totalV/1e9).toFixed(2).replace('.',',')}M` : `Rp ${(totalV/1e6).toFixed(0)}Jt`
+  donutTotal.value = fmtRp(totalV)
 
   // Activity feed dari movements
   const mvMap: Record<string,{icon:string;color:string;bg:string}> = {
@@ -215,11 +211,11 @@ onMounted(async () => {
 onUnmounted(() => { if (insightTimer) clearInterval(insightTimer) })
 
 const kpis = [
-  { id: 'stok',    label: 'Nilai Stok Total',       sub: 'Live update',           icon: 'i-lucide-package-2',     grad: 'from-blue-500 to-cyan-400',     color: '#38bdf8', trend: +5.2,  spark: [72,78,74,82,85,81,88,91,87,93,90,96],           displayFn: () => `Rp ${(ctrs.stok/1000).toFixed(2).replace('.',',')}M` },
+  { id: 'stok',    label: 'Nilai Stok Total',       sub: 'Live update',           icon: 'i-lucide-package-2',     grad: 'from-blue-500 to-cyan-400',     color: '#38bdf8', trend: +5.2,  spark: [72,78,74,82,85,81,88,91,87,93,90,96],           displayFn: () => `Rp ${(ctrs.stok/1000).toFixed(1)} M` },
   { id: 'trx',     label: 'Transaksi Hari Ini',      sub: 'GRN · DO · Adjst',     icon: 'i-lucide-activity',       grad: 'from-emerald-500 to-teal-400',   color: '#34d399', trend: +12,   spark: [95,110,88,125,112,130,145,118,155,142,168,184],  displayFn: () => String(ctrs.trx) },
   { id: 'pending', label: 'PR / PO Pending',         sub: 'Perlu persetujuan',     icon: 'i-lucide-clock-alert',    grad: 'from-amber-500 to-yellow-400',   color: '#fbbf24', trend: -2,    spark: [12,9,14,8,11,7,13,9,8,11,9,7],                  displayFn: () => String(ctrs.pending) },
   { id: 'alert',   label: 'Alert Stok Kritis',       sub: 'Di bawah min stok',     icon: 'i-lucide-triangle-alert', grad: 'from-rose-500 to-pink-400',      color: '#fb7185', trend: -3,    spark: [18,15,20,14,17,13,16,14,15,13,14,12],            displayFn: () => String(ctrs.alert) },
-  { id: 'bpjs',    label: 'Klaim BPJS Bulan Ini',    sub: 'Total nilai pengajuan', icon: 'i-lucide-heart-pulse',    grad: 'from-violet-500 to-purple-400',  color: '#a78bfa', trend: +8.4,  spark: [880,920,950,990,1050,1080,1100,1120,1150,1180,1210,1240], displayFn: () => `Rp ${ctrs.bpjs.toLocaleString('id-ID')}Jt` },
+  { id: 'bpjs',    label: 'Klaim BPJS Bulan Ini',    sub: 'Total nilai pengajuan', icon: 'i-lucide-heart-pulse',    grad: 'from-violet-500 to-purple-400',  color: '#a78bfa', trend: +8.4,  spark: [880,920,950,990,1050,1080,1100,1120,1150,1180,1210,1240], displayFn: () => `Rp ${ctrs.bpjs} jt` },
   { id: 'fill',    label: 'Fill Rate Logistik',      sub: 'Pemenuhan permintaan',  icon: 'i-lucide-target',         grad: 'from-teal-500 to-emerald-400',   color: '#2dd4bf', trend: +1.1,  spark: [900,920,910,935,940,945,938,952,955,958,960,962], displayFn: () => `${(ctrs.fill/10).toFixed(1)}%` },
 ]
 
@@ -289,12 +285,12 @@ const R = 54, CIRC = 2 * Math.PI * R
 const donutLoaded = ref(false)
 const hoveredSeg = ref<number | null>(null)
 const donutData = ref([
-  { label: 'Obat', pct: 58, color: '#38bdf8', val: 'Rp 1,65M' },
-  { label: 'Alkes', pct: 24, color: '#a78bfa', val: 'Rp 680Jt' },
-  { label: 'BMHP', pct: 10, color: '#fbbf24', val: 'Rp 285Jt' },
-  { label: 'Reagensia', pct: 5, color: '#34d399', val: 'Rp 142Jt' },
+  { label: 'Obat', pct: 58, color: '#38bdf8', val: 'Rp 1,65 M' },
+  { label: 'Alkes', pct: 24, color: '#a78bfa', val: 'Rp 680 jt' },
+  { label: 'BMHP', pct: 10, color: '#fbbf24', val: 'Rp 285 jt' },
+  { label: 'Reagensia', pct: 5, color: '#34d399', val: 'Rp 142 jt' },
 ])
-const donutTotal = ref('Rp 2,84M')
+const donutTotal = ref('Rp 2,84 M')
 const donutSegs = computed(() => {
   let offset = 0
   return donutData.value.map((d, i) => {
@@ -314,7 +310,7 @@ const topItems = [
   { nama: 'Infus Set Dewasa',      kat: 'Alkes', qty: 1200, val: 10200000, pct: 61,  color: '#a78bfa' },
   { nama: 'Alkohol 70% 1L',        kat: 'BMHP',  qty: 650,  val: 3250000,  pct: 48,  color: '#fbbf24' },
 ]
-function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
+const rp = fmtRp
 
 const activities = ref<any[]>([])
 

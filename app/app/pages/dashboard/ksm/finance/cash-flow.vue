@@ -75,11 +75,6 @@ const netFin    = computed(() => totFinIn.value - totFinOut.value)
 
 const netCash   = computed(() => netOp.value + netFin.value)
 
-function fmtRp(n: number) {
-  if (Math.abs(n) >= 1e9) return `Rp ${(n/1e9).toFixed(2)} M`
-  if (Math.abs(n) >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n)
-}
 
 watch(period, loadData)
 onMounted(loadData)

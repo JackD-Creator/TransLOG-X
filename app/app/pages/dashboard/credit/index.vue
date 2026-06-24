@@ -36,9 +36,8 @@ async function fetchData() {
     }
   })
 
-  const rpFmt = (n: number) => n >= 1e9 ? `Rp ${(n/1e9).toFixed(1).replace('.',',')}M` : `Rp ${Math.round(n/1e6)}Jt`
-  stats.value[0].value = rpFmt(totalLimit)
-  stats.value[1].value = rpFmt(totalUsed)
+  stats.value[0].value = fmtRp(totalLimit)
+  stats.value[1].value = fmtRp(totalUsed)
   stats.value[2].value = rows.length > 0 ? (rows[0].credit_assessments as any)?.risk_grade ?? '-' : '-'
   stats.value[3].value = String(alertsRes.count ?? 0)
 }
@@ -50,7 +49,7 @@ function riskBadge(r: string) {
 }
 function riskLabel(r: string) { return { low: 'Rendah', medium: 'Sedang', high: 'Tinggi' }[r] ?? r }
 function usedPct(terpakai: number, limit: number) { return Math.round((terpakai / limit) * 100) }
-function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
+const rp = fmtRp
 </script>
 <template>
   <div class="space-y-5">

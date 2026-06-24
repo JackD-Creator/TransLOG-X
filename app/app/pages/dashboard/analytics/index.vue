@@ -55,7 +55,7 @@ async function fetchData() {
     .map(([cat, val]) => ({
       kategori: cat.charAt(0).toUpperCase() + cat.slice(1),
       pct: totalCat > 0 ? Math.round((val / totalCat) * 100) : 0,
-      nilai: val >= 1e9 ? `Rp ${(val/1e9).toFixed(1)}M` : `Rp ${Math.round(val/1e6)}Jt`,
+      nilai: fmtRp(val),
       color: catColors[cat] ?? 'bg-gray-500'
     }))
 
@@ -67,11 +67,11 @@ async function fetchData() {
   kpis.value[0].value = `${turnover}x`
   kpis.value[1].value = summaries.length > 0 ? `${Math.round((summaries.filter(s => Number(s.qty_on_hand) > 0).length / summaries.length) * 100)}%` : '-'
   kpis.value[2].value = String(productsRes.count ?? 0)
-  kpis.value[3].value = totalVal >= 1e9 ? `Rp ${(totalVal/1e9).toFixed(2).replace('.',',')}M` : `Rp ${Math.round(totalVal/1e6)}Jt`
+  kpis.value[3].value = fmtRp(totalVal)
 }
 
 onMounted(fetchData)
-function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
+const rp = fmtRp
 </script>
 <template>
   <div class="space-y-5">

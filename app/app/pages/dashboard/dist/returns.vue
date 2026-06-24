@@ -14,7 +14,6 @@ async function loadData() {
   loading.value = false
 }
 
-function fmtRp(n: number) { return `Rp ${(n/1e6).toFixed(1)} jt` }
 
 onMounted(loadData)
 </script>

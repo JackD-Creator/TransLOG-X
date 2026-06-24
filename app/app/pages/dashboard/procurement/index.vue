@@ -32,12 +32,7 @@ const priorityMap: Record<string, { label: string; color: string }> = {
   critical: { label: 'Kritis',  color: 'text-rose-600' },
 }
 
-function rp(n: number) {
-  if (!n) return 'Rp 0'
-  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(1)}M`
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(1)}Jt`
-  return 'Rp ' + n.toLocaleString('id-ID')
-}
+const rp = fmtRp
 
 // ── PR State ─────────────────────────────────────────────────────
 const prLoading  = ref(true)

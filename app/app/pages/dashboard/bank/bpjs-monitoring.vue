@@ -17,11 +17,6 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  if (!n) return '-'
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(1)} M`
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
 
 const months = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
 

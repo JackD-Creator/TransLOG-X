@@ -23,11 +23,6 @@ const avgUtilization   = computed(() => totalLimit.value > 0 ? (totalOutstanding
 const totalAR          = computed(() => arItems.value.reduce((s,a) => s + Number(a.invoice_amount ?? 0), 0))
 const totalInterest    = computed(() => arItems.value.reduce((s,a) => s + Number(a.interest_amount ?? 0), 0))
 
-function fmtRp(n: number) {
-  if (Math.abs(n) >= 1e9) return `Rp ${(n/1e9).toFixed(2)} M`
-  if (Math.abs(n) >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n)
-}
 function agingBadge(status: string) {
   const map: Record<string, string> = { paid: 'bg-emerald-100 text-emerald-700', active: 'bg-blue-100 text-blue-700', overdue: 'bg-red-100 text-red-700', disbursed: 'bg-amber-100 text-amber-700' }
   return map[status] ?? 'bg-gray-100 text-gray-700'

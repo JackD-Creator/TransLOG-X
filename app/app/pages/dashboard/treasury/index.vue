@@ -47,15 +47,14 @@ async function fetchData() {
     }
   })
 
-  const rpFmt = (n: number) => n >= 1e9 ? `Rp ${(n/1e9).toFixed(2).replace('.',',')}M` : `Rp ${Math.round(n/1e6)}Jt`
-  stats.value[0].value = rpFmt(totalSaldo)
-  stats.value[1].value = (weekNet >= 0 ? '+' : '') + rpFmt(Math.abs(weekNet))
+  stats.value[0].value = fmtRp(totalSaldo)
+  stats.value[1].value = (weekNet >= 0 ? '+' : '') + fmtRp(Math.abs(weekNet))
   stats.value[2].value = String(accs.length)
   stats.value[3].value = String(txTodayRes.count ?? 0)
 }
 
 onMounted(fetchData)
-function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
+const rp = fmtRp
 </script>
 <template>
   <div class="space-y-5">

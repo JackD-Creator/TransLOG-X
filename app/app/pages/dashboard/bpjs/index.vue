@@ -41,7 +41,7 @@ async function fetchData() {
   const totalVal = monthClaims.reduce((s, c) => s + Number(c.claimed_amount), 0)
 
   stats.value[0].value = monthClaims.length.toLocaleString('id-ID')
-  stats.value[1].value = totalVal >= 1e9 ? `Rp ${(totalVal/1e9).toFixed(2).replace('.',',')}M` : `Rp ${Math.round(totalVal/1e6)}Jt`
+  stats.value[1].value = fmtRp(totalVal)
   stats.value[2].value = String(pendingRes.count ?? 0)
   stats.value[3].value = String(rejectedRes.count ?? 0)
 }
