@@ -12,10 +12,10 @@ const updating = ref(false)
 const STATUS_STEPS = [
   { key: 'draft',             label: 'Draft',               icon: 'i-lucide-file-edit',       desc: 'PO dibuat KSM' },
   { key: 'submitted',         label: 'Diajukan',            icon: 'i-lucide-send',            desc: 'PO dikirim ke Distributor' },
-  { key: 'approved',          label: 'Dikonfirmasi Dist.',  icon: 'i-lucide-check-circle',    desc: 'Distributor setuju' },
-  { key: 'sent_to_supplier',  label: 'Dalam Pengiriman',    icon: 'i-lucide-truck',           desc: 'Distributor kirim ke RS' },
-  { key: 'partially_received',label: 'Diterima Sebagian',   icon: 'i-lucide-package-open',    desc: 'RS terima sebagian' },
-  { key: 'fully_received',    label: 'Diterima Penuh',      icon: 'i-lucide-package-check',   desc: 'RS konfirmasi lengkap' },
+  { key: 'approved',          label: 'Dist. Konfirmasi',    icon: 'i-lucide-check-circle',    desc: 'Distributor setuju & siapkan' },
+  { key: 'sent_to_supplier',  label: 'Dikirim ke RS',       icon: 'i-lucide-truck',           desc: 'Dist. kirim langsung ke RS' },
+  { key: 'partially_received',label: 'RS Terima Sebagian',  icon: 'i-lucide-package-open',    desc: 'RS terima sebagian item' },
+  { key: 'fully_received',    label: 'RS Terima Lengkap',   icon: 'i-lucide-package-check',   desc: 'RS konfirmasi semua diterima' },
 ]
 
 const STATUS_ORDER = STATUS_STEPS.map(s => s.key)
@@ -89,9 +89,9 @@ const statusColor: Record<string, string> = {
   cancelled: 'bg-red-100 text-red-700',
 }
 const statusLabel: Record<string, string> = {
-  draft: 'Draft', submitted: 'Diajukan ke Dist.', approved: 'Dikonfirmasi',
-  sent_to_supplier: 'Dalam Pengiriman', partially_received: 'Terima Sebagian',
-  fully_received: 'Diterima Penuh', cancelled: 'Dibatalkan',
+  draft: 'Draft', submitted: 'Diajukan ke Dist.', approved: 'Dist. Konfirmasi',
+  sent_to_supplier: 'Dikirim ke RS', partially_received: 'RS Terima Sebagian',
+  fully_received: 'RS Terima Lengkap', cancelled: 'Dibatalkan',
 }
 
 function fmtDate(d: string | null) {
@@ -177,7 +177,7 @@ onMounted(load)
         </button>
         <button v-if="po.status === 'sent_to_supplier'" @click="openReceiveModal" :disabled="updating"
           class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2">
-          <UIcon name="i-lucide-package-check" class="text-sm"/> RS Konfirmasi Penerimaan
+          <UIcon name="i-lucide-package-check" class="text-sm"/> Input Info Penerimaan RS
         </button>
         <button v-if="['fully_received'].includes(po.status)"
           class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
@@ -202,7 +202,7 @@ onMounted(load)
               <tr class="text-left">
                 <th class="px-4 py-3 font-semibold text-[#999]">Item</th>
                 <th class="px-3 py-3 font-semibold text-[#999] text-center">Pesan</th>
-                <th class="px-3 py-3 font-semibold text-[#999] text-center">Terima</th>
+                <th class="px-3 py-3 font-semibold text-[#999] text-center">Diterima RS</th>
                 <th class="px-3 py-3 font-semibold text-[#999] text-right">Harga</th>
                 <th class="px-3 py-3 font-semibold text-[#999] text-right">Total</th>
               </tr>
@@ -284,12 +284,12 @@ onMounted(load)
       </div>
     </div>
 
-    <!-- Modal Konfirmasi Penerimaan RS -->
+    <!-- Modal Input Info Penerimaan dari RS -->
     <div v-if="receiveModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
         <div class="px-6 py-4 border-b border-[#f0f0f0]">
-          <h3 class="font-bold text-[#1a1a1a]">Konfirmasi Penerimaan RS</h3>
-          <p class="text-xs text-[#999] mt-0.5">RS {{ rsName }} mengkonfirmasi item yang diterima dari {{ supplierName }}</p>
+          <h3 class="font-bold text-[#1a1a1a]">Info Penerimaan dari RS</h3>
+          <p class="text-xs text-[#999] mt-0.5">RS <strong>{{ rsName }}</strong> mengirim info barang yang diterima dari {{ supplierName }}</p>
         </div>
         <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
           <div v-for="line in lines" :key="line.id"
@@ -310,7 +310,7 @@ onMounted(load)
         <div class="px-6 py-4 border-t border-[#f0f0f0] flex gap-3">
           <button @click="confirmReceive" :disabled="updating"
             class="flex-1 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-colors">
-            {{ updating ? 'Menyimpan...' : 'Konfirmasi Diterima' }}
+            {{ updating ? 'Menyimpan...' : 'Simpan Info Penerimaan RS' }}
           </button>
           <button @click="receiveModal = false"
             class="px-5 py-2.5 border border-[#e5e5e5] text-[#666] text-sm rounded-xl hover:bg-[#f5f5f5] transition-colors">

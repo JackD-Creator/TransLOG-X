@@ -61,7 +61,7 @@ const navKSM = [
       { label: 'Notif Min Stok', icon: 'i-lucide-bell-ring',        to: '/dashboard/ksm/notifications' },
       { label: 'Cek Supplier',   icon: 'i-lucide-search',           to: '/dashboard/ksm/supplier-check' },
       { label: 'Purchase Order', icon: 'i-lucide-shopping-cart',    to: '/dashboard/ksm/purchase-orders' },
-      { label: 'Penerimaan',     icon: 'i-lucide-package-check',    to: '/dashboard/ksm/receiving' }
+      { label: 'Tracking Kirim',  icon: 'i-lucide-truck',            to: '/dashboard/ksm/tracking' }
     ]
   },
   {
