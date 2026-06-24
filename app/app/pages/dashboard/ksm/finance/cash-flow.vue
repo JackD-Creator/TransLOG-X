@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard', title: 'Arus Kas' })
+definePageMeta({ layout: 'dashboard', title: 'Cash Flow' })
 
 const supabase = useSupabaseClient()
 const loading = ref(true)
@@ -31,7 +31,7 @@ async function loadData() {
       .eq('status','paid').gte('paid_date', dateFrom),
     // Kas keluar ke distributor (PO yang sudah delivered)
     supabase.from('ksm_purchase_orders').select('total_amount')
-      .in('status',['delivered','completed']).gte('created_at', dateFrom),
+      .in('status',['fully_received','approved']).gte('created_at', dateFrom),
     // Kas masuk dari pencairan SCF
     supabase.from('ar_accounts').select('invoice_amount')
       .not('disbursement_date','is',null).gte('disbursement_date', dateFrom),
@@ -93,7 +93,7 @@ onMounted(loadData)
           <UIcon name="i-lucide-arrow-left" class="text-sm"/>
         </NuxtLink>
         <div>
-          <h1 class="text-xl font-bold text-[#1a1a1a]">Laporan Arus Kas</h1>
+          <h1 class="text-xl font-bold text-[#1a1a1a]">Cash Flow</h1>
           <p class="text-sm text-[#999] mt-0.5">Cash flow dari aktivitas operasional dan pembiayaan KSM</p>
         </div>
       </div>
@@ -116,10 +116,10 @@ onMounted(loadData)
         <p class="text-xl font-bold" :class="netFin >= 0 ? 'text-blue-700' : 'text-amber-600'">{{ fmtRp(netFin) }}</p>
         <p class="text-[10px] text-[#999] mt-0.5">Pembiayaan SCF</p>
       </div>
-      <div class="bg-[#0d0d0d] rounded-xl p-4 text-center">
-        <p class="text-[10px] text-white/50 uppercase mb-1">NET CASH FLOW</p>
-        <p class="text-xl font-bold" :class="netCash >= 0 ? 'text-emerald-400' : 'text-red-400'">{{ fmtRp(netCash) }}</p>
-        <p class="text-[10px] text-white/40 mt-0.5">{{ netCash >= 0 ? 'Positif ✓' : 'Negatif ⚠' }}</p>
+      <div class="rounded-xl p-4 text-center" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 100%)">
+        <p class="text-[10px] text-white/60 uppercase mb-1">NET CASH FLOW</p>
+        <p class="text-xl font-bold" :class="netCash >= 0 ? 'text-amber-300' : 'text-red-300'">{{ fmtRp(netCash) }}</p>
+        <p class="text-[10px] text-white/50 mt-0.5">{{ netCash >= 0 ? 'Positif ✓' : 'Negatif ⚠' }}</p>
       </div>
     </div>
 

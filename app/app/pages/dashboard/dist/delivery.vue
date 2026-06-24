@@ -9,7 +9,7 @@ async function loadData() {
   loading.value = true
   const { data } = await supabase.from('ksm_purchase_orders')
     .select('id,po_number,total_amount,status,expected_delivery')
-    .in('status',['confirmed','processing','delivered'])
+    .in('status',['sent_to_supplier','partially_received','approved'])
     .order('expected_delivery', { ascending: true }).limit(30)
   items.value = data ?? []
   loading.value = false

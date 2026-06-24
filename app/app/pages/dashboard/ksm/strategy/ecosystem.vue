@@ -134,14 +134,14 @@ const totalEcoBar = computed(() => {
       <div class="flex-1">
         <div class="flex items-center gap-3 flex-wrap">
           <h1 class="text-xl font-bold text-[#1a1a1a]">Ecosystem Value Proposition</h1>
-          <span class="text-[10px] px-2.5 py-1 rounded-full bg-[#0d0d0d] text-white font-bold tracking-widest">ALL STAKEHOLDERS</span>
+          <span class="text-[10px] px-2.5 py-1 rounded-full bg-[#6b1525] text-white font-bold tracking-widest">ALL STAKEHOLDERS</span>
         </div>
         <p class="text-sm text-[#777] mt-0.5">Analisis keuntungan finansial konkret untuk setiap pihak dalam ekosistem e-Logistik — RS, KSM, Distributor, dan Bank</p>
       </div>
     </div>
 
     <!-- Total Ecosystem Value -->
-    <div class="bg-[#0d0d0d] rounded-xl p-6 text-white">
+    <div class="rounded-xl p-6 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 60%, #1a1a1a 100%)">
       <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-2">Total Ecosystem Value Created — Annual</p>
       <div class="flex items-end gap-4 mb-5">
         <p class="text-3xl font-bold text-white">{{ fmtM(calc.totalEcoValue) }}</p>
@@ -200,10 +200,10 @@ const totalEcoBar = computed(() => {
 
         <!-- Card header -->
         <div class="px-5 py-4 flex items-center justify-between"
-          :class="p.id === 'ksm' ? 'bg-[#6b1525]' : p.id === 'bank' ? 'bg-[#0d0d0d]' : 'bg-white border-b border-[#e5e5e5]'">
+          :class="p.id === 'ksm' ? 'bg-[#6b1525]' : p.id === 'bank' ? 'bg-amber-700' : 'bg-white border-b border-[#e5e5e5]'">
           <div class="flex items-center gap-3">
             <div :class="[p.id === 'ksm' || p.id === 'bank' ? 'bg-white/10' : p.bg, 'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0']">
-              <UIcon :name="p.icon" :class="[p.id === 'ksm' ? 'text-white' : p.id === 'bank' ? 'text-amber-400' : p.color, 'text-xl']"/>
+              <UIcon :name="p.icon" :class="[p.id === 'ksm' || p.id === 'bank' ? 'text-white' : p.color, 'text-xl']"/>
             </div>
             <div>
               <p :class="['text-sm font-bold', p.id === 'ksm' || p.id === 'bank' ? 'text-white' : 'text-[#1a1a1a]']">{{ p.name }}</p>
@@ -282,7 +282,7 @@ const totalEcoBar = computed(() => {
                 </span>
               </td>
             </tr>
-            <tr class="bg-[#0d0d0d] text-white">
+            <tr style="background: linear-gradient(135deg, #6b1525 0%, #1a1a1a 100%)" class="text-white">
               <td class="py-3 pr-4 rounded-bl-xl">
                 <p class="font-bold text-sm">TOTAL EKOSISTEM</p>
               </td>

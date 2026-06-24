@@ -21,7 +21,7 @@ const filteredBench = computed(() =>
 
 async function loadBenchmarks() {
   const { data } = await supabase.from('kfa_drugs').select('kfa_code,name,kelas_terapi,fix_price,het_price')
-    .eq('is_fornas', true).not('fix_price','is',null).not('het_price','is',null).gt('het_price',0)
+    .not('fix_price','is',null).not('het_price','is',null).gt('fix_price',1000).lt('fix_price',5000000).gt('het_price',0)
     .order('fix_price', { ascending: false }).limit(100)
   benchmarks.value = (data ?? []).map(d => {
     const fix = Number(d.fix_price), het = Number(d.het_price)
@@ -113,7 +113,7 @@ onMounted(loadBenchmarks)
     </div>
 
     <!-- Executive Summary KPIs -->
-    <div class="bg-[#0d0d0d] rounded-xl p-5 text-white">
+    <div class="rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 60%, #1a1a1a 100%)">
       <p class="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-4">Executive Summary — Revenue Potential</p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
@@ -346,7 +346,7 @@ onMounted(loadBenchmarks)
 
     <!-- Deal Structure Framework -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-[#0d0d0d] text-white rounded-xl p-5">
+      <div class="bg-[#1a1a1a] text-white rounded-xl p-5">
         <p class="text-[10px] uppercase tracking-widest text-white/50 mb-3">Structure I — Spot Supply</p>
         <p class="text-base font-bold text-white mb-3">Transaction-Based Model</p>
         <div class="space-y-2 text-[11px] text-white/70">

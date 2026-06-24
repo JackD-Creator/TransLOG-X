@@ -43,7 +43,7 @@ onMounted(loadData)
     </div>
 
     <!-- How it works -->
-    <div class="bg-[#0d0d0d] text-white rounded-xl p-5">
+    <div class="rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #1a4a6b 0%, #0f2540 100%)">
       <p class="text-[10px] uppercase tracking-widest text-white/40 mb-3">Mekanisme SCF — Reverse Factoring</p>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-[11px] text-center">
         <div v-for="step in [

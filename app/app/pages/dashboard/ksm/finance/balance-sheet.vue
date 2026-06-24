@@ -36,7 +36,7 @@ async function loadData() {
 
   const arTotal = (ar ?? []).reduce((s,a) => s + Number(a.outstanding_amount ?? a.invoice_amount ?? 0), 0)
   const scfOut  = (scf ?? []).reduce((s,f) => s + Number(f.outstanding ?? 0), 0)
-  const pendingPO = (pos ?? []).filter(p => ['submitted','confirmed','delivered'].includes(p.status))
+  const pendingPO = (pos ?? []).filter(p => ['submitted','approved','sent_to_supplier'].includes(p.status))
     .reduce((s,p) => s + Number(p.total_amount ?? 0) * 0.20, 0) // ~20% nilai PO sebagai estimasi inventory on-transit
 
   const totalAssets   = 200_000_000 + arTotal + pendingPO + 150_000_000 // cash est + AR + inventory + fixed
@@ -126,7 +126,7 @@ onMounted(loadData)
 
       <!-- ASET -->
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
-        <div class="bg-[#0d0d0d] px-5 py-3">
+        <div class="px-5 py-3" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 100%)">
           <p class="text-xs font-bold text-white">ASET</p>
         </div>
         <div class="p-5 space-y-1 text-xs">

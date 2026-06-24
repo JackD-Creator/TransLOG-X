@@ -11,7 +11,7 @@ const { portalType, tenantName, isKSM, isDistributor, isBank, loading: roleLoadi
 const ksmStats = ref({ pos: 0, arOutstanding: 0, scfUsed: 0, scfLimit: 0, pendingNotif: 0 })
 async function loadKsmStats() {
   const [{ data: pos, count: poCount }, { data: ar }, { data: scf }, { count: notifCount }] = await Promise.all([
-    supabase.from('ksm_purchase_orders').select('total_amount', { count:'exact' }).in('status',['submitted','confirmed','delivered']),
+    supabase.from('ksm_purchase_orders').select('total_amount', { count:'exact' }).in('status',['submitted','approved','sent_to_supplier','fully_received']),
     supabase.from('ar_accounts').select('outstanding_amount').neq('status','paid'),
     supabase.from('scf_facilities').select('outstanding,facility_limit').eq('status','approved'),
     supabase.from('hospital_notifications').select('*', { count:'exact', head:true }).eq('status','pending'),
@@ -29,8 +29,8 @@ async function loadKsmStats() {
 const distStats = ref({ activePOs: 0, pendingInvoices: 0, revenue: 0, stockItems: 0 })
 async function loadDistStats() {
   const [{ data: pos, count: poCount }, { data: inv }] = await Promise.all([
-    supabase.from('ksm_purchase_orders').select('total_amount,status', { count:'exact' }).in('status',['confirmed','processing']),
-    supabase.from('ksm_purchase_orders').select('total_amount').eq('status','delivered'),
+    supabase.from('ksm_purchase_orders').select('total_amount,status', { count:'exact' }).in('status',['approved','sent_to_supplier']),
+    supabase.from('ksm_purchase_orders').select('total_amount').eq('status','fully_received'),
   ])
   distStats.value = {
     activePOs: poCount ?? 0,
@@ -346,59 +346,135 @@ watch(portalType, (type) => {
 
     <!-- ── KSM Portal Dashboard ───────────────────────────────── -->
     <template v-if="isKSM">
-      <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-6 pb-6 rounded-b-2xl bg-[#6b1525]">
-        <div class="relative flex items-center justify-between gap-4">
-          <div>
-            <p class="text-xs text-white/60 mb-1">{{ greeting }},</p>
-            <h1 class="text-2xl font-bold text-white">{{ tenantName || 'KSM Portal' }}</h1>
-            <p class="text-sm text-white/60 mt-0.5">{{ todayStr }} · Mitra KSM Logistik</p>
+
+      <!-- Hero -->
+      <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-7 pb-7 rounded-b-2xl"
+        style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 60%, #a02040 100%)">
+        <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg,white 0,white 1px,transparent 0,transparent 50%); background-size: 20px 20px;"/>
+        <div class="relative">
+          <div class="flex items-start justify-between gap-4 mb-5">
+            <div>
+              <p class="text-xs text-white/50 mb-1 uppercase tracking-widest">{{ greeting }},</p>
+              <h1 class="text-2xl font-bold text-white leading-tight">{{ tenantName || 'Mitra KSM' }}</h1>
+              <p class="text-sm text-white/50 mt-0.5">{{ todayStr }} · Mitra KSM Logistik</p>
+            </div>
+            <NuxtLink to="/dashboard/ksm/strategy/ecosystem"
+              class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all">
+              <UIcon name="i-lucide-globe" class="text-sm text-amber-300"/>
+              Ecosystem Value
+            </NuxtLink>
           </div>
-          <NuxtLink to="/dashboard/ksm/strategy/ecosystem" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-xs font-semibold transition-colors">
-            <UIcon name="i-lucide-globe" class="text-sm"/>
-            Lihat Ecosystem Value
-          </NuxtLink>
+          <!-- Mini KPIs in hero -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+              <p class="text-[10px] text-white/50 uppercase mb-1">PO Aktif</p>
+              <p class="text-xl font-bold text-white">{{ ksmStats.pos }}</p>
+              <p class="text-[10px] text-white/40">Purchase Orders</p>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+              <p class="text-[10px] text-white/50 uppercase mb-1">AR Outstanding</p>
+              <p class="text-lg font-bold text-amber-300">{{ fmtRpDash(ksmStats.arOutstanding) }}</p>
+              <p class="text-[10px] text-white/40">Piutang ke Bank</p>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+              <p class="text-[10px] text-white/50 uppercase mb-1">SCF Terpakai</p>
+              <p class="text-lg font-bold text-sky-300">{{ fmtRpDash(ksmStats.scfUsed) }}</p>
+              <p class="text-[10px] text-white/40">dari {{ fmtRpDash(ksmStats.scfLimit) }}</p>
+              <div class="mt-1.5 h-1 rounded-full bg-white/10">
+                <div class="h-full rounded-full bg-sky-400 transition-all"
+                  :style="{ width: ksmStats.scfLimit > 0 ? Math.min(100, ksmStats.scfUsed/ksmStats.scfLimit*100).toFixed(1)+'%' : '0%' }"/>
+              </div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+              <p class="text-[10px] text-white/50 uppercase mb-1">Notif RS</p>
+              <p class="text-xl font-bold" :class="ksmStats.pendingNotif > 0 ? 'text-amber-300' : 'text-emerald-300'">
+                {{ ksmStats.pendingNotif }}
+              </p>
+              <p class="text-[10px] text-white/40">Permintaan pending</p>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
-          <p class="text-[10px] text-[#999] uppercase mb-1">PO Aktif</p>
-          <p class="text-2xl font-bold text-[#1a1a1a]">{{ ksmStats.pos }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">Purchase Orders</p>
-        </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/ar" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
-          <p class="text-[10px] text-[#999] uppercase mb-1">AR Outstanding</p>
-          <p class="text-xl font-bold text-[#6b1525]">{{ fmtRpDash(ksmStats.arOutstanding) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">Piutang belum lunas</p>
-        </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/scf" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
-          <p class="text-[10px] text-[#999] uppercase mb-1">SCF Terpakai</p>
-          <p class="text-xl font-bold text-blue-700">{{ fmtRpDash(ksmStats.scfUsed) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">dari limit {{ fmtRpDash(ksmStats.scfLimit) }}</p>
-        </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/notifications" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 hover:border-[#6b1525]/30 transition-colors">
-          <p class="text-[10px] text-[#999] uppercase mb-1">Notifikasi RS</p>
-          <p class="text-2xl font-bold" :class="ksmStats.pendingNotif > 0 ? 'text-amber-600' : 'text-emerald-600'">{{ ksmStats.pendingNotif }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">Permintaan pending</p>
-        </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/rcm" class="bg-[#0d0d0d] rounded-xl p-4 hover:bg-[#1a1a1a] transition-colors">
-          <p class="text-[10px] text-white/50 uppercase mb-1">Revenue Cycle</p>
-          <p class="text-xl font-bold text-amber-400">RCM</p>
-          <p class="text-[10px] text-white/30 mt-0.5">Analisis cashflow</p>
+
+      <!-- Quick Actions -->
+      <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+        <NuxtLink v-for="q in [
+          { label:'Purchase Order', icon:'i-lucide-clipboard-list', to:'/dashboard/ksm/purchase-orders', color:'text-[#6b1525]', bg:'bg-[#6b1525]/8' },
+          { label:'Cek Supplier', icon:'i-lucide-search', to:'/dashboard/ksm/supplier-check', color:'text-blue-700', bg:'bg-blue-50' },
+          { label:'AR & Tagihan', icon:'i-lucide-receipt', to:'/dashboard/ksm/ar', color:'text-amber-700', bg:'bg-amber-50' },
+          { label:'Fasilitas SCF', icon:'i-lucide-landmark', to:'/dashboard/ksm/scf', color:'text-sky-700', bg:'bg-sky-50' },
+          { label:'Katalog Item', icon:'i-lucide-layers', to:'/dashboard/ksm/catalog', color:'text-emerald-700', bg:'bg-emerald-50' },
+          { label:'Lap. Keuangan', icon:'i-lucide-trending-up', to:'/dashboard/ksm/finance/pl', color:'text-violet-700', bg:'bg-violet-50' },
+        ]" :key="q.label" :to="q.to"
+          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-3 flex flex-col items-center gap-2 hover:border-[#6b1525]/30 transition-all group">
+          <div :class="[q.bg, 'w-9 h-9 rounded-lg flex items-center justify-center']">
+            <UIcon :name="q.icon" :class="[q.color, 'text-lg']"/>
+          </div>
+          <p class="text-[10px] font-medium text-[#666] group-hover:text-[#1a1a1a] text-center leading-tight">{{ q.label }}</p>
         </NuxtLink>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <NuxtLink v-for="s in [
-          { title:'Supply ke RS', sub:'Revenue Architecture + KFA Benchmark', to:'/dashboard/ksm/strategy/supply', icon:'i-lucide-target', color:'text-emerald-600', bg:'bg-emerald-50' },
-          { title:'Negosiasi Dist.', sub:'5 Scenario Term Sheet + NPV Analysis', to:'/dashboard/ksm/strategy/negotiation', icon:'i-lucide-handshake', color:'text-blue-600', bg:'bg-blue-50' },
-          { title:'Pitch ke Bank', sub:'Credit Memo · DSCR · Yield Model', to:'/dashboard/ksm/strategy/bank-pitch', icon:'i-lucide-landmark', color:'text-amber-700', bg:'bg-amber-50' },
-        ]" :key="s.title" :to="s.to"
-          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5 hover:border-[#6b1525]/40 transition-all group">
-          <div :class="[s.bg, 'w-10 h-10 rounded-xl flex items-center justify-center mb-3']">
-            <UIcon :name="s.icon" :class="[s.color, 'text-xl']"/>
+
+      <!-- Strategy + Finance Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <!-- Strategy Section -->
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-[#e5e5e5] flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-[#1a1a1a]">Strategi Bisnis</p>
+              <p class="text-[11px] text-[#999]">JP Morgan-level financial modeling</p>
+            </div>
+            <NuxtLink to="/dashboard/ksm/strategy" class="text-xs text-[#6b1525] hover:underline">Lihat semua →</NuxtLink>
           </div>
-          <p class="text-sm font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ s.title }}</p>
-          <p class="text-[11px] text-[#999] mt-0.5">{{ s.sub }}</p>
-        </NuxtLink>
+          <div class="divide-y divide-[#e5e5e5]">
+            <NuxtLink v-for="s in [
+              { title:'Supply ke RS', sub:'Revenue Architecture + KFA Benchmark', to:'/dashboard/ksm/strategy/supply', icon:'i-lucide-target', color:'text-emerald-700', bg:'bg-emerald-100' },
+              { title:'Negosiasi Distributor', sub:'5 Scenario NPV + Term Sheet', to:'/dashboard/ksm/strategy/negotiation', icon:'i-lucide-handshake', color:'text-blue-700', bg:'bg-blue-100' },
+              { title:'Pitch ke Bank', sub:'Credit Memo · DSCR · Yield Model', to:'/dashboard/ksm/strategy/bank-pitch', icon:'i-lucide-building-2', color:'text-amber-700', bg:'bg-amber-100' },
+              { title:'Ecosystem Value', sub:'Win-win semua stakeholder', to:'/dashboard/ksm/strategy/ecosystem', icon:'i-lucide-globe', color:'text-violet-700', bg:'bg-violet-100' },
+            ]" :key="s.title" :to="s.to"
+              class="px-5 py-3.5 flex items-center gap-3 hover:bg-white transition-colors group">
+              <div :class="[s.bg, 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0']">
+                <UIcon :name="s.icon" :class="[s.color, 'text-base']"/>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ s.title }}</p>
+                <p class="text-[10px] text-[#999]">{{ s.sub }}</p>
+              </div>
+              <UIcon name="i-lucide-chevron-right" class="text-[#ccc] group-hover:text-[#6b1525] text-sm transition-colors flex-shrink-0"/>
+            </NuxtLink>
+          </div>
+        </div>
+
+        <!-- Finance Overview -->
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-[#e5e5e5] flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-[#1a1a1a]">Ringkasan Keuangan</p>
+              <p class="text-[11px] text-[#999]">P&L · Neraca · Arus Kas</p>
+            </div>
+            <NuxtLink to="/dashboard/ksm/finance/pl" class="text-xs text-[#6b1525] hover:underline">Lihat P&L →</NuxtLink>
+          </div>
+          <div class="divide-y divide-[#e5e5e5]">
+            <NuxtLink v-for="f in [
+              { title:'Laporan P&L', sub:'Laba Rugi periode berjalan', to:'/dashboard/ksm/finance/pl', icon:'i-lucide-bar-chart-2', color:'text-[#6b1525]', bg:'bg-[#6b1525]/10' },
+              { title:'Neraca', sub:'Aset, Kewajiban, Ekuitas', to:'/dashboard/ksm/finance/balance-sheet', icon:'i-lucide-scale', color:'text-blue-700', bg:'bg-blue-100' },
+              { title:'Cash Flow', sub:'Kas operasional & pembiayaan SCF', to:'/dashboard/ksm/finance/cash-flow', icon:'i-lucide-trending-up', color:'text-emerald-700', bg:'bg-emerald-100' },
+              { title:'Revenue Cycle', sub:'Analisis cashflow & aging AR', to:'/dashboard/ksm/rcm', icon:'i-lucide-refresh-cw', color:'text-amber-700', bg:'bg-amber-100' },
+            ]" :key="f.title" :to="f.to"
+              class="px-5 py-3.5 flex items-center gap-3 hover:bg-white transition-colors group">
+              <div :class="[f.bg, 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0']">
+                <UIcon :name="f.icon" :class="[f.color, 'text-base']"/>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ f.title }}</p>
+                <p class="text-[10px] text-[#999]">{{ f.sub }}</p>
+              </div>
+              <UIcon name="i-lucide-chevron-right" class="text-[#ccc] group-hover:text-[#6b1525] text-sm transition-colors flex-shrink-0"/>
+            </NuxtLink>
+          </div>
+        </div>
+
       </div>
     </template>
 
@@ -448,7 +524,7 @@ watch(portalType, (type) => {
 
     <!-- ── Bank Portal Dashboard ──────────────────────────────── -->
     <template v-else-if="isBank">
-      <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-6 pb-6 rounded-b-2xl bg-[#0d0d0d]">
+      <div class="relative overflow-hidden -mx-6 -mt-6 px-6 pt-6 pb-6 rounded-b-2xl" style="background: linear-gradient(135deg, #1a4a6b 0%, #1e3a5f 60%, #0f2540 100%)">
         <div class="relative flex items-center justify-between gap-4">
           <div>
             <p class="text-xs text-white/60 mb-1">{{ greeting }},</p>

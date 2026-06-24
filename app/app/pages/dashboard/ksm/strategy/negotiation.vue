@@ -11,7 +11,7 @@ const selectedItem = ref<any>(null)
 async function loadKfa() {
   const { data } = await supabase.from('kfa_drugs')
     .select('kfa_code,name,fix_price,het_price,kelas_terapi,is_fornas')
-    .not('fix_price','is',null).not('het_price','is',null).eq('is_fornas',true)
+    .not('fix_price','is',null).not('het_price','is',null).gt('fix_price',1000).lt('fix_price',5000000)
     .order('fix_price',{ ascending: false }).limit(25)
   kfaItems.value = data ?? []
   if (kfaItems.value.length) selectItem(kfaItems.value[0])
@@ -183,7 +183,7 @@ onMounted(loadKfa)
         </div>
       </div>
 
-      <div class="lg:col-span-2 bg-[#0d0d0d] text-white rounded-xl p-5">
+      <div class="lg:col-span-2 rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)">
         <p class="text-[10px] uppercase tracking-widest text-white/40 mb-4">Selected Item — KFA Benchmark</p>
         <div v-if="selectedItem" class="space-y-3">
           <p class="text-base font-bold text-white">{{ selectedItem.name }}</p>
@@ -344,7 +344,7 @@ onMounted(loadKfa)
     </div>
 
     <!-- Negotiation Term Sheet Template -->
-    <div class="bg-[#0d0d0d] text-white rounded-xl p-6">
+    <div class="rounded-xl p-6 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #3d0d16 100%)">
       <div class="flex items-center gap-3 mb-5">
         <p class="text-[10px] uppercase tracking-widest text-white/40">Term Sheet Template</p>
         <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">Annual Contract Structure</span>

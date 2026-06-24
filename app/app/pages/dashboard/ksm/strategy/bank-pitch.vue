@@ -107,7 +107,7 @@ onMounted(loadRealData)
     </div>
 
     <!-- Executive Summary Bar -->
-    <div class="bg-[#0d0d0d] rounded-xl p-5 text-white">
+    <div class="rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 60%, #1a1a1a 100%)">
       <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4">Executive Summary — Credit Application</p>
       <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
         <div class="md:col-span-2">
@@ -196,7 +196,7 @@ onMounted(loadRealData)
         </div>
 
         <!-- Cash Flow Cycle Diagram -->
-        <div class="bg-[#0d0d0d] text-white rounded-xl p-4">
+        <div class="bg-[#1a1a1a] text-white rounded-xl p-4">
           <p class="text-[10px] uppercase tracking-widest text-white/40 mb-3">Self-Liquidating Cash Cycle</p>
           <div class="flex items-center justify-between text-[10px] text-center">
             <div class="flex flex-col items-center gap-1">
@@ -269,7 +269,7 @@ onMounted(loadRealData)
     </div>
 
     <!-- Term Sheet Proposal -->
-    <div class="bg-[#0d0d0d] text-white rounded-xl p-6">
+    <div class="rounded-xl p-6 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #3d0d16 100%)">
       <p class="text-[10px] uppercase tracking-widest text-white/40 mb-5">Proposed Term Sheet — Supply Chain Finance Facility</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
