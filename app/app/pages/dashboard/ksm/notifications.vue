@@ -231,7 +231,7 @@ onMounted(() => { if (tenantId.value) load() })
       <div v-for="rs in rsGroups" :key="rs.rsName" class="bg-[#f5f5f5] rounded-2xl border border-[#e5e5e5] overflow-hidden">
 
         <!-- RS Header Card -->
-        <button @click="toggleRS(rs.rsName)" class="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-[#ebebeb] transition-colors">
+        <button @click="toggleRS(rs.rsName)" class="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-[#ebebeb] transition-colors cursor-pointer">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
               :class="rs.notifs.some(n => n.metadata?.urgency === 'critical') ? 'bg-red-100' :

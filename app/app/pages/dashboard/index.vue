@@ -236,38 +236,38 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
         </div>
       </div>
 
-      <!-- Financial Dark Cards -->
+      <!-- Financial Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="bg-[#1a1a1a] rounded-xl p-4">
+        <NuxtLink to="/dashboard/ksm/scf" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] text-[#555] uppercase">Hutang SCF Bank</p>
-            <div class="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center"><UIcon name="i-lucide-landmark" class="text-blue-400 text-[10px]"/></div>
+            <p class="text-[9px] text-[#999] uppercase">Hutang SCF Bank</p>
+            <div class="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center"><UIcon name="i-lucide-landmark" class="text-blue-600 text-[10px]"/></div>
           </div>
-          <p class="text-white text-lg font-bold">{{ fmtRp(kpi.hutang_bank) }}</p>
-          <p class="text-[9px] text-[#444] mt-1">Bank→Dist: {{ fmtRp(kpi.bank_to_dist_total) }}</p>
-        </div>
-        <div class="bg-[#1a1a1a] rounded-xl p-4">
+          <p class="text-[#1a1a1a] text-lg font-bold">{{ fmtRp(kpi.hutang_bank) }}</p>
+          <p class="text-[9px] text-[#bbb] mt-1">Bank→Dist: {{ fmtRp(kpi.bank_to_dist_total) }}</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/ar" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] text-[#555] uppercase">Overdue</p>
-            <div class="w-5 h-5 rounded-full bg-red-500/10 flex items-center justify-center"><UIcon name="i-lucide-alert-circle" class="text-red-400 text-[10px]"/></div>
+            <p class="text-[9px] text-[#999] uppercase">Overdue</p>
+            <div class="w-5 h-5 rounded-full bg-red-500/10 flex items-center justify-center"><UIcon name="i-lucide-alert-circle" class="text-red-600 text-[10px]"/></div>
           </div>
-          <p :class="['text-lg font-bold', Number(kpi.overdue_amount) > 0 ? 'text-red-400' : 'text-emerald-400']">{{ fmtRp(kpi.overdue_amount) }}</p>
-          <p class="text-[9px] text-[#444] mt-1">{{ kpi.overdue_invoices }} invoice</p>
-        </div>
-        <div class="bg-[#1a1a1a] rounded-xl p-4">
+          <p :class="['text-lg font-bold', Number(kpi.overdue_amount) > 0 ? 'text-red-600' : 'text-emerald-600']">{{ fmtRp(kpi.overdue_amount) }}</p>
+          <p class="text-[9px] text-[#bbb] mt-1">{{ kpi.overdue_invoices }} invoice</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] text-[#555] uppercase">Total PO Value</p>
-            <div class="w-5 h-5 rounded-full bg-purple-500/10 flex items-center justify-center"><UIcon name="i-lucide-shopping-cart" class="text-purple-400 text-[10px]"/></div>
+            <p class="text-[9px] text-[#999] uppercase">Total PO Value</p>
+            <div class="w-5 h-5 rounded-full bg-purple-500/10 flex items-center justify-center"><UIcon name="i-lucide-shopping-cart" class="text-purple-600 text-[10px]"/></div>
           </div>
-          <p class="text-white text-lg font-bold">{{ fmtRp(kpi.po_total_value) }}</p>
-        </div>
-        <div class="bg-[#1a1a1a] rounded-xl p-4">
+          <p class="text-[#1a1a1a] text-lg font-bold">{{ fmtRp(kpi.po_total_value) }}</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/payments" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] text-[#555] uppercase">Bunga KSM 50%</p>
-            <div class="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center"><UIcon name="i-lucide-percent" class="text-amber-400 text-[10px]"/></div>
+            <p class="text-[9px] text-[#999] uppercase">Bunga KSM 50%</p>
+            <div class="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center"><UIcon name="i-lucide-percent" class="text-amber-600 text-[10px]"/></div>
           </div>
-          <p class="text-amber-400 text-lg font-bold">{{ fmtRp(kpi.total_daily_interest_ksm) }}</p>
-        </div>
+          <p class="text-amber-600 text-lg font-bold">{{ fmtRp(kpi.total_daily_interest_ksm) }}</p>
+        </NuxtLink>
       </div>
 
       <!-- Risk + Demand + Forecast -->

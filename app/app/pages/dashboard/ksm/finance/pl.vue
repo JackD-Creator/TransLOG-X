@@ -4,7 +4,7 @@ definePageMeta({ layout: 'dashboard', title: 'Laporan Laba Rugi KSM' })
 const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
 
-const period = ref({ year: new Date().getFullYear(), month: new Date().getMonth() + 1 })
+const period = ref({ year: 2026, month: 5 })
 const loading = ref(false)
 const pl = ref<any>(null)
 

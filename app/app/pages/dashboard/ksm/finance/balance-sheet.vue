@@ -59,7 +59,7 @@ async function loadData() {
   const cashEst = Math.max(0, invPaid - arPaid) + 200_000_000 // base cash + net flow
 
   const totalAssets = cashEst + arRS + transit + 150_000_000
-  const totalLiab = arBankHutang + scfOut + shortfallDebt
+  const totalLiab = arBankHutang + shortfallDebt
   const equityCalc = totalAssets - totalLiab
 
   bs.value = {

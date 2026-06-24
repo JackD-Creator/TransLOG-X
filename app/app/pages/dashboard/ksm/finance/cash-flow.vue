@@ -5,7 +5,7 @@ const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
-const period = ref('this_month')
+const period = ref('this_year')
 
 interface CashItem { label: string; amount: number; sub?: string }
 
