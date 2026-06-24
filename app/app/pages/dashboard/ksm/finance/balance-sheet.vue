@@ -7,78 +7,87 @@ const { tenantId } = useUserRole()
 const loading = ref(true)
 
 interface BSData {
-  // Aset Lancar
   cash: number
-  ar_total: number
-  inventory_est: number
-  // Aset Tidak Lancar
-  fixed_assets_est: number
-  // Kewajiban Lancar
-  ap_total: number
-  scf_outstanding: number
-  // Kewajiban Jangka Panjang
-  ltl_est: number
-  // Ekuitas
-  equity_est: number
+  arRS: number          // Piutang dari RS (ksm_invoices outstanding)
+  inventoryTransit: number
+  fixedAssets: number
+  scfOutstanding: number  // Hutang ke Bank (ar_accounts + scf_facilities)
+  arBankHutang: number    // ar_accounts outstanding
+  shortfallDebt: number   // Shortfall yang dicover bank
+  equity: number
 }
 
 const bs = ref<BSData>({
-  cash: 0, ar_total: 0, inventory_est: 0, fixed_assets_est: 150_000_000,
-  ap_total: 0, scf_outstanding: 0, ltl_est: 0, equity_est: 0,
+  cash: 0, arRS: 0, inventoryTransit: 0, fixedAssets: 150_000_000,
+  scfOutstanding: 0, arBankHutang: 0, shortfallDebt: 0, equity: 0,
 })
 
 async function loadData() {
   if (!tenantId.value) return
   loading.value = true
-  const [{ data: ar }, { data: scf }, { data: pos }] = await Promise.all([
-    supabase.from('ar_accounts').select('outstanding_amount, invoice_amount').eq('ksm_tenant_id', tenantId.value),
-    supabase.from('scf_facilities').select('outstanding, facility_limit').eq('borrower_tenant_id', tenantId.value).eq('status','approved'),
-    supabase.from('ksm_purchase_orders').select('total_amount, status').eq('ksm_tenant_id', tenantId.value),
+
+  const [{ data: inv }, { data: ar }, { data: scf }, { data: pos }] = await Promise.all([
+    // Piutang dari RS = ksm_invoices outstanding
+    supabase.from('ksm_invoices')
+      .select('outstanding,total_amount,paid_amount,shortfall_amount,shortfall_covered_by_bank')
+      .eq('ksm_tenant_id', tenantId.value),
+    // Hutang ke Bank = ar_accounts outstanding
+    supabase.from('ar_accounts')
+      .select('outstanding_amount,total_payable,paid_amount')
+      .eq('ksm_tenant_id', tenantId.value),
+    // SCF facility outstanding
+    supabase.from('scf_facilities')
+      .select('outstanding,facility_limit')
+      .eq('borrower_tenant_id', tenantId.value)
+      .eq('status', 'approved'),
+    // PO in-transit (belum diterima RS)
+    supabase.from('ksm_purchase_orders')
+      .select('total_amount')
+      .eq('ksm_tenant_id', tenantId.value)
+      .in('status', ['sent_to_supplier', 'partially_received']),
   ])
 
-  const arTotal = (ar ?? []).reduce((s,a) => s + Number(a.outstanding_amount ?? a.invoice_amount ?? 0), 0)
-  const scfOut  = (scf ?? []).reduce((s,f) => s + Number(f.outstanding ?? 0), 0)
-  const pendingPO = (pos ?? []).filter(p => ['submitted','approved','sent_to_supplier'].includes(p.status))
-    .reduce((s,p) => s + Number(p.total_amount ?? 0) * 0.20, 0) // ~20% nilai PO sebagai estimasi inventory on-transit
+  const arRS = (inv ?? []).reduce((s, i) => s + Number(i.outstanding ?? i.total_amount - i.paid_amount), 0)
+  const shortfallDebt = (inv ?? []).filter(i => i.shortfall_covered_by_bank).reduce((s, i) => s + Number(i.shortfall_amount ?? 0), 0)
+  const arBankHutang = (ar ?? []).reduce((s, a) => s + Number(a.outstanding_amount ?? a.total_payable - a.paid_amount), 0)
+  const scfOut = (scf ?? []).reduce((s, f) => s + Number(f.outstanding), 0)
+  const transit = (pos ?? []).reduce((s, p) => s + Number(p.total_amount) * 0.2, 0)
 
-  const totalAssets   = 200_000_000 + arTotal + pendingPO + 150_000_000 // cash est + AR + inventory + fixed
-  const totalLiab     = pendingPO * 0.8 + scfOut  // AP est + SCF
-  const equityCalc    = totalAssets - totalLiab
+  // Kas = estimasi (piutang terlunasi - hutang terbayar)
+  const invPaid = (inv ?? []).reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
+  const arPaid = (ar ?? []).reduce((s, a) => s + Number(a.paid_amount ?? 0), 0)
+  const cashEst = Math.max(0, invPaid - arPaid) + 200_000_000 // base cash + net flow
+
+  const totalAssets = cashEst + arRS + transit + 150_000_000
+  const totalLiab = arBankHutang + scfOut + shortfallDebt
+  const equityCalc = totalAssets - totalLiab
 
   bs.value = {
-    cash: 200_000_000,
-    ar_total: arTotal,
-    inventory_est: pendingPO,
-    fixed_assets_est: 150_000_000,
-    ap_total: pendingPO * 0.8,
-    scf_outstanding: scfOut,
-    ltl_est: 0,
-    equity_est: equityCalc,
+    cash: cashEst,
+    arRS,
+    inventoryTransit: transit,
+    fixedAssets: 150_000_000,
+    scfOutstanding: scfOut,
+    arBankHutang,
+    shortfallDebt,
+    equity: equityCalc,
   }
   loading.value = false
 }
 
-const totalCurrentAssets    = computed(() => bs.value.cash + bs.value.ar_total + bs.value.inventory_est)
-const totalNonCurrentAssets = computed(() => bs.value.fixed_assets_est)
-const totalAssets            = computed(() => totalCurrentAssets.value + totalNonCurrentAssets.value)
-const totalCurrentLiab       = computed(() => bs.value.ap_total + bs.value.scf_outstanding)
-const totalNonCurrentLiab    = computed(() => bs.value.ltl_est)
-const totalLiabilities       = computed(() => totalCurrentLiab.value + totalNonCurrentLiab.value)
-const totalEquity             = computed(() => bs.value.equity_est)
-const totalLiabEquity         = computed(() => totalLiabilities.value + totalEquity.value)
+const totalCurrentAssets = computed(() => bs.value.cash + bs.value.arRS + bs.value.inventoryTransit)
+const totalNonCurrentAssets = computed(() => bs.value.fixedAssets)
+const totalAssets = computed(() => totalCurrentAssets.value + totalNonCurrentAssets.value)
+const totalCurrentLiab = computed(() => bs.value.arBankHutang + bs.value.shortfallDebt)
+const totalNonCurrentLiab = computed(() => bs.value.scfOutstanding > bs.value.arBankHutang ? bs.value.scfOutstanding - bs.value.arBankHutang : 0)
+const totalLiabilities = computed(() => totalCurrentLiab.value + totalNonCurrentLiab.value)
+const totalEquity = computed(() => bs.value.equity)
+const totalLiabEquity = computed(() => totalLiabilities.value + totalEquity.value)
 
-// Rasio keuangan
-const currentRatio   = computed(() => totalCurrentLiab.value > 0 ? totalCurrentAssets.value / totalCurrentLiab.value : 0)
-const debtToEquity   = computed(() => totalEquity.value > 0 ? totalLiabilities.value / totalEquity.value : 0)
-const equityRatio    = computed(() => totalAssets.value > 0 ? (totalEquity.value / totalAssets.value) * 100 : 0)
+const currentRatio = computed(() => totalCurrentLiab.value > 0 ? totalCurrentAssets.value / totalCurrentLiab.value : 0)
+const debtToEquity = computed(() => totalEquity.value > 0 ? totalLiabilities.value / totalEquity.value : 0)
 
-function fmtRp(n: number) {
-  if (Math.abs(n) >= 1e9) return `Rp ${(n/1e9).toFixed(2)} M`
-  if (Math.abs(n) >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n)
-}
-
-const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+const today = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
 
 watch(tenantId, (id) => { if (id) loadData() })
 onMounted(() => { if (tenantId.value) loadData() })
@@ -92,18 +101,18 @@ onMounted(() => { if (tenantId.value) loadData() })
       </NuxtLink>
       <div>
         <h1 class="text-xl font-bold text-[#1a1a1a]">Neraca Keuangan</h1>
-        <p class="text-sm text-[#999] mt-0.5">Per {{ today }} · Posisi aset, kewajiban, dan ekuitas KSM</p>
+        <p class="text-sm text-[#999] mt-0.5">Per {{ today }} · Aset (piutang RS) vs Kewajiban (hutang SCF Bank)</p>
       </div>
     </div>
 
     <!-- Key Ratios -->
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 gap-4">
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4 text-center">
         <p class="text-[10px] text-[#999] uppercase mb-1">Current Ratio</p>
         <p class="text-2xl font-bold" :class="currentRatio >= 2 ? 'text-emerald-700' : currentRatio >= 1 ? 'text-amber-600' : 'text-red-600'">
           {{ currentRatio.toFixed(2) }}x
         </p>
-        <p class="text-[10px] mt-0.5" :class="currentRatio >= 2 ? 'text-emerald-600' : 'text-[#999]'">
+        <p class="text-[10px] mt-0.5" :class="currentRatio >= 1.5 ? 'text-emerald-600' : 'text-[#999]'">
           {{ currentRatio >= 2 ? 'Sangat Likuid' : currentRatio >= 1 ? 'Likuid' : 'Perlu Perhatian' }}
         </p>
       </div>
@@ -114,11 +123,6 @@ onMounted(() => { if (tenantId.value) loadData() })
         </p>
         <p class="text-[10px] mt-0.5 text-[#999]">{{ debtToEquity <= 1 ? 'Sehat' : debtToEquity <= 2 ? 'Moderat' : 'Tinggi' }}</p>
       </div>
-      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4 text-center">
-        <p class="text-[10px] text-[#999] uppercase mb-1">Equity Ratio</p>
-        <p class="text-2xl font-bold text-[#6b1525]">{{ equityRatio.toFixed(1) }}%</p>
-        <p class="text-[10px] mt-0.5 text-[#999]">Aset yang didanai ekuitas</p>
-      </div>
     </div>
 
     <div v-if="loading" class="flex items-center justify-center py-16">
@@ -126,7 +130,6 @@ onMounted(() => { if (tenantId.value) loadData() })
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
       <!-- ASET -->
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
         <div class="px-5 py-3" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 100%)">
@@ -134,27 +137,30 @@ onMounted(() => { if (tenantId.value) loadData() })
         </div>
         <div class="p-5 space-y-1 text-xs">
           <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2">Aset Lancar</p>
-          <div v-for="row in [
-            { label:'Kas & Setara Kas', val: bs.cash },
-            { label:'Piutang Usaha (AR)', val: bs.ar_total },
-            { label:'Persediaan / Transit', val: bs.inventory_est },
-          ]" :key="row.label" class="flex justify-between py-1.5 border-b border-[#ececec]">
-            <span class="text-[#555]">{{ row.label }}</span>
-            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(row.val) }}</span>
+          <div class="flex justify-between py-1.5 border-b border-[#ececec]">
+            <span class="text-[#555]">Kas & Setara Kas</span>
+            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.cash) }}</span>
+          </div>
+          <div class="flex justify-between py-1.5 border-b border-[#ececec]">
+            <div>
+              <span class="text-[#555]">Piutang dari RS</span>
+              <p class="text-[10px] text-[#aaa]">Invoice outstanding — dibayar via BPJS+SI</p>
+            </div>
+            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.arRS) }}</span>
+          </div>
+          <div class="flex justify-between py-1.5 border-b border-[#ececec]">
+            <span class="text-[#555]">Persediaan In-Transit</span>
+            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.inventoryTransit) }}</span>
           </div>
           <div class="flex justify-between py-1.5 font-bold border-b-2 border-[#ccc]">
             <span class="text-[#333]">Total Aset Lancar</span>
             <span class="text-[#1a1a1a]">{{ fmtRp(totalCurrentAssets) }}</span>
           </div>
 
-          <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2 mt-4">Aset Tidak Lancar</p>
+          <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2 mt-4">Aset Tetap</p>
           <div class="flex justify-between py-1.5 border-b border-[#ececec]">
             <span class="text-[#555]">Aset Tetap (nett)</span>
-            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.fixed_assets_est) }}</span>
-          </div>
-          <div class="flex justify-between py-1.5 font-bold border-b-2 border-[#ccc]">
-            <span class="text-[#333]">Total Aset Tidak Lancar</span>
-            <span class="text-[#1a1a1a]">{{ fmtRp(totalNonCurrentAssets) }}</span>
+            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.fixedAssets) }}</span>
           </div>
 
           <div class="flex justify-between py-2 font-bold text-sm bg-[#ebebeb] rounded-lg px-2 mt-2">
@@ -171,46 +177,39 @@ onMounted(() => { if (tenantId.value) loadData() })
         </div>
         <div class="p-5 space-y-1 text-xs">
           <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2">Kewajiban Lancar</p>
-          <div v-for="row in [
-            { label:'Utang Usaha (AP ke Distributor)', val: bs.ap_total },
-            { label:'Fasilitas SCF Outstanding', val: bs.scf_outstanding },
-          ]" :key="row.label" class="flex justify-between py-1.5 border-b border-[#ececec]">
-            <span class="text-[#555]">{{ row.label }}</span>
-            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(row.val) }}</span>
+          <div class="flex justify-between py-1.5 border-b border-[#ececec]">
+            <div>
+              <span class="text-[#555]">Hutang SCF ke Bank</span>
+              <p class="text-[10px] text-[#aaa]">Bank bayar Distributor → KSM hutang ke Bank</p>
+            </div>
+            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.arBankHutang) }}</span>
+          </div>
+          <div v-if="bs.shortfallDebt > 0" class="flex justify-between py-1.5 border-b border-[#ececec]">
+            <div>
+              <span class="text-[#555]">Hutang Shortfall (kredit bank)</span>
+              <p class="text-[10px] text-red-400">Bunga harian · 50% KSM / 50% RS</p>
+            </div>
+            <span class="font-semibold text-red-600">{{ fmtRp(bs.shortfallDebt) }}</span>
           </div>
           <div class="flex justify-between py-1.5 font-bold border-b-2 border-[#ccc]">
             <span class="text-[#333]">Total Kewajiban Lancar</span>
             <span class="text-[#1a1a1a]">{{ fmtRp(totalCurrentLiab) }}</span>
           </div>
 
-          <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2 mt-4">Kewajiban Jangka Panjang</p>
-          <div class="flex justify-between py-1.5 border-b border-[#ececec]">
-            <span class="text-[#555]">Utang Jangka Panjang</span>
-            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.ltl_est) }}</span>
-          </div>
-          <div class="flex justify-between py-1.5 font-bold border-b-2 border-[#ccc]">
-            <span class="text-[#333]">Total Kewajiban</span>
-            <span class="text-[#1a1a1a]">{{ fmtRp(totalLiabilities) }}</span>
-          </div>
-
           <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2 mt-4">Ekuitas</p>
           <div class="flex justify-between py-1.5 border-b border-[#ececec]">
-            <span class="text-[#555]">Modal Disetor + Laba Ditahan</span>
-            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.equity_est) }}</span>
-          </div>
-          <div class="flex justify-between py-1.5 font-bold border-b-2 border-[#ccc]">
-            <span class="text-[#333]">Total Ekuitas</span>
-            <span class="text-emerald-700">{{ fmtRp(totalEquity) }}</span>
+            <span class="text-[#555]">Modal + Laba Ditahan</span>
+            <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.equity) }}</span>
           </div>
 
           <div class="flex justify-between py-2 font-bold text-sm bg-[#ebebeb] rounded-lg px-2 mt-2">
             <span class="text-[#1a1a1a]">TOTAL KEWAJIBAN + EKUITAS</span>
-            <span :class="Math.abs(totalLiabEquity - totalAssets) < 100 ? 'text-emerald-700' : 'text-red-600'">
+            <span :class="Math.abs(totalLiabEquity - totalAssets) < 1000 ? 'text-emerald-700' : 'text-red-600'">
               {{ fmtRp(totalLiabEquity) }}
             </span>
           </div>
-          <p v-if="Math.abs(totalLiabEquity - totalAssets) < 100" class="text-[10px] text-emerald-600 text-center mt-1">
-            ✓ Neraca Seimbang
+          <p v-if="Math.abs(totalLiabEquity - totalAssets) < 1000" class="text-[10px] text-emerald-600 text-center mt-1">
+            Neraca Seimbang
           </p>
         </div>
       </div>
