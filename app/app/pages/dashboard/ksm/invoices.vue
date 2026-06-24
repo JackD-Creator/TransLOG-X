@@ -23,10 +23,10 @@ async function load() {
       .eq('ksm_tenant_id', tenantId.value)
       .order('invoice_date', { ascending: false })
       .limit(200),
-    // Bunga shortfall harian — sum ksm_share per invoice
+    // Bunga shortfall harian — sum ksm_share per invoice (inner join untuk filter tenant)
     supabase
       .from('daily_interest_accruals')
-      .select('invoice_id,ksm_share')
+      .select('invoice_id,ksm_share,ksm_invoices!inner(ksm_tenant_id)')
       .eq('ksm_invoices.ksm_tenant_id', tenantId.value),
   ])
   allInvoices.value = data ?? []
