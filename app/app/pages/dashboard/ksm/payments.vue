@@ -19,7 +19,8 @@ async function load() {
       .in('status', ['sent_to_rs', 'payment_pending', 'partially_paid', 'overdue'])
       .order('due_date', { ascending: true }),
     supabase.from('daily_interest_accruals')
-      .select('id,invoice_id,accrual_date,outstanding_principal,daily_rate,interest_amount,ksm_share,rs_share')
+      .select('id,invoice_id,accrual_date,outstanding_principal,daily_rate,interest_amount,ksm_share,rs_share,ksm_invoices!inner(ksm_tenant_id)')
+      .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
       .order('accrual_date', { ascending: false })
       .limit(100),
   ])

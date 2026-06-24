@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Revenue Cycle Management KSM' })
 
 const supabase = useSupabaseClient()
+const { tenantId } = useUserRole()
 
 const loading = ref(true)
 const nowRCM = new Date()

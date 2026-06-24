@@ -47,7 +47,8 @@ async function loadData() {
       .in('status', ['sent_to_supplier', 'partially_received']),
     // Bunga shortfall akrual — hanya 50% bagian KSM yang belum dibayar
     supabase.from('daily_interest_accruals')
-      .select('ksm_share')
+      .select('ksm_share, ksm_invoices!inner(ksm_tenant_id)')
+      .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
       .eq('status', 'accrued'),
   ])
 
@@ -64,7 +65,7 @@ async function loadData() {
   const cashEst = Math.max(0, invPaid - arPaid) + 200_000_000
 
   const totalAssets = cashEst + arRS + transit + 150_000_000
-  const totalLiab = arBankHutang + interestAccrual
+  const totalLiab = arBankHutang + scfOut + interestAccrual
   const equityCalc = totalAssets - totalLiab
 
   bs.value = {
@@ -83,7 +84,7 @@ async function loadData() {
 const totalCurrentAssets = computed(() => bs.value.cash + bs.value.arRS + bs.value.inventoryTransit)
 const totalNonCurrentAssets = computed(() => bs.value.fixedAssets)
 const totalAssets = computed(() => totalCurrentAssets.value + totalNonCurrentAssets.value)
-const totalCurrentLiab = computed(() => bs.value.arBankHutang + bs.value.interestAccrual)
+const totalCurrentLiab = computed(() => bs.value.arBankHutang + bs.value.scfOutstanding + bs.value.interestAccrual)
 const totalNonCurrentLiab = computed(() => 0)
 const totalLiabilities = computed(() => totalCurrentLiab.value + totalNonCurrentLiab.value)
 const totalEquity = computed(() => bs.value.equity)

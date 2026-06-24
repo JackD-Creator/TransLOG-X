@@ -45,39 +45,43 @@ async function loadData() {
     dateTo = new Date(y, m, 0).toISOString().slice(0, 10)
   }
 
-  // Query invoices dalam periode + ALL AR accounts (untuk match per PO)
-  let q1 = supabase.from('ksm_invoices').select('total_amount,paid_amount,bpjs_amount,status,metadata').eq('ksm_tenant_id', tenantId.value).gte('invoice_date', dateFrom)
-  let q2 = supabase.from('ar_accounts').select('po_number,disbursed_amount,interest_amount,paid_amount').eq('ksm_tenant_id', tenantId.value)
-  let q3 = supabase.from('daily_interest_accruals').select('ksm_share').gte('accrual_date', dateFrom)
-  if (dateTo) { q1 = q1.lte('invoice_date', dateTo); q3 = q3.lte('accrual_date', dateTo) }
+  // q1: Kas masuk — invoices dibayar RS dalam periode (filter by invoice_date + status paid)
+  let q1 = supabase.from('ksm_invoices')
+    .select('paid_amount,bpjs_amount,status')
+    .eq('ksm_tenant_id', tenantId.value)
+    .in('status', ['paid', 'partially_paid'])
+    .gte('invoice_date', dateFrom)
+
+  // q2: Kas keluar — AR accounts (SCF) yang dibuka dalam periode ini (by invoice_date)
+  // Tidak pakai matching po_number — filter langsung by tanggal
+  let q2 = supabase.from('ar_accounts')
+    .select('disbursed_amount,interest_amount,status')
+    .eq('ksm_tenant_id', tenantId.value)
+    .gte('invoice_date', dateFrom)
+
+  // q3: Bunga shortfall harian 50% KSM dalam periode
+  let q3 = supabase.from('daily_interest_accruals')
+    .select('ksm_share, ksm_invoices!inner(ksm_tenant_id)')
+    .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
+    .gte('accrual_date', dateFrom)
+
+  if (dateTo) {
+    q1 = q1.lte('invoice_date', dateTo)
+    q2 = q2.lte('invoice_date', dateTo)
+    q3 = q3.lte('accrual_date', dateTo)
+  }
 
   const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([q1, q2, q3])
 
-  const invoices = invData ?? []
-  const arMap: Record<string, any> = {}
-  for (const a of arData ?? []) { if (a.po_number) arMap[a.po_number] = a }
+  // ── Kas Masuk ──────────────────────────────────────────────────────────────
+  const rsPayments = (invData ?? []).reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
+  const bpjsTotal  = (invData ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
 
-  // Kas masuk = invoice yang sudah dibayar RS dalam periode
-  const paidInvoices = invoices.filter(i => ['paid', 'partially_paid'].includes(i.status))
-  const rsPayments = paidInvoices.reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
-  const bpjsTotal = paidInvoices.reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
-
-  // Kas keluar = pelunasan SCF ke Bank UNTUK invoice yang sama (matched per PO)
-  let ksmToBank = 0, bankInterest = 0, bankToDist = 0
-  for (const inv of paidInvoices) {
-    const poNum = (inv as any).metadata?.po_number
-    const ar = poNum ? arMap[poNum] : null
-    if (ar) {
-      ksmToBank += Number(ar.disbursed_amount ?? 0)
-      bankInterest += Number(ar.interest_amount ?? 0)
-    }
-  }
-  // Bank→Dist = total disbursement untuk SEMUA invoice periode ini (bukan hanya paid)
-  for (const inv of invoices) {
-    const poNum = (inv as any).metadata?.po_number
-    const ar = poNum ? arMap[poNum] : null
-    if (ar) bankToDist += Number(ar.disbursed_amount ?? 0)
-  }
+  // ── Kas Keluar ─────────────────────────────────────────────────────────────
+  // SCF: Bank cairkan ke Distributor atas nama KSM → KSM wajib lunasi ke Bank
+  const arAccounts     = arData ?? []
+  const scfPrincipal   = arAccounts.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
+  const scfInterest    = arAccounts.reduce((s, a) => s + Number(a.interest_amount  ?? 0), 0)
   const shortfallInterest = (diaData ?? []).reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
 
   operatingIn.value = [
@@ -87,11 +91,11 @@ async function loadData() {
     { label: 'Biaya operasional & SDM (est. 4%)', amount: rsPayments * 0.04 },
   ]
   financingIn.value = [
-    { label: 'Bank cair ke Distributor (atas nama KSM)', amount: bankToDist, sub: 'Tidak masuk kas KSM — langsung ke Distributor' },
+    { label: 'Bank cair ke Distributor (atas nama KSM)', amount: scfPrincipal, sub: 'Tidak masuk kas KSM — langsung ke Distributor' },
   ]
   financingOut.value = [
-    { label: 'Pelunasan pokok SCF ke Bank', amount: ksmToBank - bankInterest, sub: 'Dari dana RS' },
-    { label: 'Bunga fasilitas SCF ke Bank', amount: bankInterest },
+    { label: 'Pelunasan pokok SCF ke Bank', amount: scfPrincipal, sub: 'Dari dana RS yang diterima' },
+    { label: 'Bunga fasilitas SCF ke Bank', amount: scfInterest },
     { label: 'Bunga harian shortfall (bagian KSM 50%)', amount: shortfallInterest },
   ]
 

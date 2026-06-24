@@ -42,7 +42,8 @@ async function load() {
       .eq('ksm_tenant_id', tenantId.value),
     // Bunga harian shortfall (bagian KSM 50%)
     supabase.from('daily_interest_accruals')
-      .select('ksm_share')
+      .select('ksm_share, ksm_invoices!inner(ksm_tenant_id)')
+      .eq('ksm_invoices.ksm_tenant_id', tenantId.value)
       .gte('accrual_date', startDate).lte('accrual_date', endDate),
   ])
 
