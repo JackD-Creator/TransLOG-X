@@ -26,13 +26,13 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('supplier_catalog_items')
-    .select('*, tenants:tenant_id(name, city)')
+    .select('id,kfa_code,catalog_type,name,manufacturer,uom,hna_price,sell_price,min_order_qty,stock_available,lead_time_days,payment_terms,is_available,metadata')
     .order('name', { ascending: true })
     .limit(500)
   items.value = (data ?? []).map(d => ({
     ...d,
-    distributor: (d.tenants as any)?.name ?? '-',
-    kota: (d.tenants as any)?.city ?? '',
+    distributor: (d as any).metadata?.distributor_name ?? '-',
+    kota: '',
   }))
   loading.value = false
 }

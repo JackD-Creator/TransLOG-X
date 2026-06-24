@@ -28,6 +28,24 @@ const totalKSM = computed(() => accruals.value.reduce((s, d) => s + Number(d.ksm
 const totalRS = computed(() => accruals.value.reduce((s, d) => s + Number(d.rs_share ?? 0), 0))
 const totalPrincipal = computed(() => invoicesWithShortfall.value.reduce((s, i) => s + Number(i.shortfall_amount), 0))
 
+// Run daily interest accrual
+const accrueLoading = ref(false)
+const accrueResult = ref<string | null>(null)
+
+async function runAccrual() {
+  accrueLoading.value = true
+  accrueResult.value = null
+  try {
+    const { data, error } = await supabase.rpc('accrue_daily_interest', { p_date: new Date().toISOString().slice(0, 10) })
+    if (error) throw error
+    accrueResult.value = `Berhasil: ${(data as any)?.invoices_accrued ?? 0} invoice di-accrue untuk ${(data as any)?.date}`
+    await load()
+  } catch (e: any) {
+    accrueResult.value = 'Error: ' + (e.message ?? 'Gagal')
+  }
+  accrueLoading.value = false
+}
+
 // Group by date
 const byDate = computed(() => {
   const map: Record<string, { date: string; total: number; ksm: number; rs: number; count: number }> = {}
@@ -73,9 +91,19 @@ onMounted(load)
       </div>
     </div>
 
-    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-700">
-      <p class="font-bold mb-1">Mekanisme Bunga Harian</p>
-      <p class="text-blue-600">Saat BPJS tidak cover 100% invoice → Bank cover kekurangan (shortfall) → Bunga dihitung HARIAN dari saldo shortfall × rate SCF / 365 → Split: 50% ditanggung KSM, 50% ditanggung RS</p>
+    <div class="flex items-start gap-3">
+      <div class="flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-700">
+        <p class="font-bold mb-1">Mekanisme Bunga Harian</p>
+        <p class="text-blue-600">BPJS kurang → Bank cover shortfall → Bunga HARIAN = shortfall × rate SCF / 365 → Split 50% KSM + 50% RS</p>
+      </div>
+      <div class="flex flex-col gap-2 flex-shrink-0">
+        <button @click="runAccrual" :disabled="accrueLoading"
+          class="px-4 py-2 bg-[#6b1525] text-white text-xs font-bold rounded-lg hover:bg-[#5a1120] disabled:opacity-50 transition-colors flex items-center gap-2">
+          <UIcon :name="accrueLoading ? 'i-lucide-loader-2' : 'i-lucide-calculator'" :class="accrueLoading ? 'animate-spin' : ''" class="text-sm"/>
+          {{ accrueLoading ? 'Running...' : 'Run Accrual Hari Ini' }}
+        </button>
+        <p v-if="accrueResult" :class="['text-[10px]', accrueResult.startsWith('Error') ? 'text-red-600' : 'text-emerald-600']">{{ accrueResult }}</p>
+      </div>
     </div>
 
     <div v-if="loading" class="flex items-center justify-center py-16">

@@ -9,7 +9,7 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('ar_accounts')
-    .select('*, ksm_tenant:ksm_tenant_id(name)')
+    .select('id,ar_number,po_number,invoice_ref,invoice_amount,disbursed_amount,due_date,status,top_activated_at')
     .eq('status', 'disbursed')
     .is('top_activated_at', null)
     .order('due_date', { ascending: true })
@@ -62,7 +62,7 @@ onMounted(load)
         <tbody class="divide-y divide-[#e5e5e5]">
           <tr v-for="ar in pending" :key="ar.id" class="hover:bg-[#ebebeb] transition-colors">
             <td class="px-4 py-3 font-mono text-[#1a1a1a]">{{ ar.ar_number }}</td>
-            <td class="px-4 py-3 text-[#666]">{{ (ar.ksm_tenant as any)?.name ?? '-' }}</td>
+            <td class="px-4 py-3 text-[#666]">KSM Mitra</td>
             <td class="px-4 py-3 font-mono text-[#666]">{{ ar.invoice_ref ?? '-' }}</td>
             <td class="px-4 py-3 font-bold text-[#1a1a1a]">{{ fmtRp(ar.total_payable) }}</td>
             <td class="px-4 py-3 text-[#666]">{{ fmtDate(ar.due_date) }}</td>

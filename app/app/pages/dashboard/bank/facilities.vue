@@ -9,7 +9,7 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('scf_facilities')
-    .select('*, borrower:borrower_tenant_id(name, type)')
+    .select('id,facility_number,financing_type,facility_limit,outstanding,available_limit,interest_rate_pa,tenor_days,payment_terms,status,facility_start,facility_end,standing_instruction_active')
     .in('status', ['approved', 'disbursed', 'partially_repaid'])
     .order('facility_start', { ascending: false })
   facilities.value = data ?? []
@@ -76,7 +76,7 @@ onMounted(load)
         <div class="flex items-start justify-between mb-4">
           <div>
             <p class="text-sm font-bold text-[#1a1a1a]">{{ f.facility_number }}</p>
-            <p class="text-xs text-[#999]">{{ (f.borrower as any)?.name ?? '-' }} · {{ ftypeLabel[f.financing_type] ?? f.financing_type }}</p>
+            <p class="text-xs text-[#999]">KSM Mitra · {{ ftypeLabel[f.financing_type] ?? f.financing_type }}</p>
           </div>
           <div class="text-right text-xs">
             <p class="text-[#999]">{{ (Number(f.interest_rate_pa) * 100).toFixed(2) }}% p.a.</p>

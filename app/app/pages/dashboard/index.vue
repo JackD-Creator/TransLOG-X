@@ -337,7 +337,7 @@ const ksmDetail = ref({
 async function loadKsmDetail() {
   const [{ data: pos }, { data: ar }] = await Promise.all([
     supabase.from('ksm_purchase_orders')
-      .select('po_number, status, total_amount, po_date, tenants:supplier_tenant_id(name)')
+      .select('po_number, status, total_amount, po_date, metadata')
       .order('created_at', { ascending: false }).limit(30),
     supabase.from('ar_accounts').select('status, outstanding_amount, invoice_amount'),
   ])
@@ -350,7 +350,7 @@ async function loadKsmDetail() {
     received:  allPOs.filter(p => ['partially_received','fully_received'].includes(p.status)).length,
   }
   ksmDetail.value.recentPOs = allPOs.slice(0, 6).map(p => ({
-    no: p.po_number ?? '-', supplier: (p.tenants as any)?.name ?? '-',
+    no: p.po_number ?? '-', supplier: (p as any).metadata?.supplier_name ?? '-',
     amount: Number(p.total_amount ?? 0), status: p.status, date: (p.po_date ?? '').slice(0, 10),
   }))
   const allAR = ar ?? []

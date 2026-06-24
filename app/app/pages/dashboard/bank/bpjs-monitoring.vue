@@ -30,6 +30,37 @@ const totalWaiting = computed(() => waitingBPJS.value.reduce((s, i) => s + Numbe
 const totalReceived = computed(() => bpjsReceived.value.reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0))
 const totalShortfall = computed(() => invoices.value.reduce((s, i) => s + Number(i.shortfall_amount ?? 0), 0))
 
+// BPJS Payment input
+const bpjsModal = ref<any>(null)
+const bpjsForm = ref({ amount: 0, date: new Date().toISOString().slice(0, 10) })
+const bpjsLoading = ref(false)
+const bpjsError = ref<string | null>(null)
+
+function openBPJSInput(inv: any) {
+  bpjsModal.value = inv
+  bpjsForm.value = { amount: Number(inv.total_amount), date: new Date().toISOString().slice(0, 10) }
+  bpjsError.value = null
+}
+
+async function submitBPJSPayment() {
+  if (!bpjsModal.value) return
+  bpjsLoading.value = true
+  bpjsError.value = null
+  try {
+    const { data, error } = await supabase.rpc('process_bpjs_payment', {
+      p_invoice_id: bpjsModal.value.id,
+      p_bpjs_amount: bpjsForm.value.amount,
+      p_bpjs_date: bpjsForm.value.date,
+    })
+    if (error) throw error
+    bpjsModal.value = null
+    await load()
+  } catch (e: any) {
+    bpjsError.value = e.message ?? 'Gagal proses BPJS'
+  }
+  bpjsLoading.value = false
+}
+
 onMounted(load)
 </script>
 
@@ -105,6 +136,7 @@ onMounted(load)
                 <th class="px-4 py-3 font-semibold text-[#999] text-right">Shortfall</th>
                 <th class="px-4 py-3 font-semibold text-[#999]">Jatuh Tempo</th>
                 <th class="px-4 py-3 font-semibold text-[#999]">Status</th>
+                <th class="px-4 py-3 font-semibold text-[#999]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[#e5e5e5]">
@@ -128,11 +160,50 @@ onMounted(load)
                   <span v-else class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 animate-pulse">Tunggu BPJS</span>
                   <span v-if="inv.shortfall_covered_by_bank" class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700">Shortfall</span>
                 </td>
+                <td class="px-4 py-3">
+                  <button v-if="!inv.bpjs_received_date" @click="openBPJSInput(inv)"
+                    class="px-2.5 py-1 text-[10px] font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Input BPJS
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </template>
+
+    <!-- Modal Input BPJS Payment -->
+    <div v-if="bpjsModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+        <div class="px-6 py-4 border-b border-[#f0f0f0]">
+          <h3 class="font-bold text-[#1a1a1a]">Input Pembayaran BPJS</h3>
+          <p class="text-xs text-[#999] mt-0.5">{{ bpjsModal.invoice_number }} · {{ bpjsModal.metadata?.rs_name ?? 'RS' }} · Total: {{ fmtRp(bpjsModal.total_amount) }}</p>
+        </div>
+        <div class="p-6 space-y-4">
+          <div v-if="bpjsError" class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">{{ bpjsError }}</div>
+          <div>
+            <label class="text-[10px] text-[#999] uppercase font-semibold mb-1 block">Jumlah BPJS Diterima RS</label>
+            <input v-model.number="bpjsForm.amount" type="number" :min="0"
+              class="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#6b1525]">
+            <p v-if="bpjsForm.amount < Number(bpjsModal.total_amount)" class="text-[10px] text-red-500 mt-1">
+              Shortfall: {{ fmtRp(Number(bpjsModal.total_amount) - bpjsForm.amount) }} — akan dicover Bank sebagai kredit (bunga harian 50/50)
+            </p>
+          </div>
+          <div>
+            <label class="text-[10px] text-[#999] uppercase font-semibold mb-1 block">Tanggal BPJS Cair</label>
+            <input v-model="bpjsForm.date" type="date"
+              class="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-xs outline-none focus:border-[#6b1525]">
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-[#f0f0f0] flex gap-3">
+          <button @click="submitBPJSPayment" :disabled="bpjsLoading"
+            class="flex-1 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors">
+            {{ bpjsLoading ? 'Memproses...' : 'Proses Pembayaran BPJS' }}
+          </button>
+          <button @click="bpjsModal = null" class="px-5 py-2.5 border border-[#e5e5e5] text-[#666] text-sm rounded-xl hover:bg-[#f5f5f5]">Batal</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

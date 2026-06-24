@@ -9,7 +9,7 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('ar_accounts')
-    .select('*, ksm_tenant:ksm_tenant_id(name)')
+    .select('id,ar_number,po_number,invoice_ref,invoice_amount,disbursed_amount,interest_amount,total_payable,invoice_date,due_date,status,ksm_tenant_id')
     .eq('status', 'pending')
     .order('invoice_date', { ascending: false })
     .limit(50)
@@ -74,7 +74,7 @@ onMounted(load)
               <p class="font-mono text-[#1a1a1a]">{{ ar.ar_number }}</p>
               <p class="text-[#999]">{{ ar.invoice_ref ?? '-' }}</p>
             </td>
-            <td class="px-4 py-3 text-[#666]">{{ (ar.ksm_tenant as any)?.name ?? '-' }}</td>
+            <td class="px-4 py-3 text-[#666]">KSM Mitra</td>
             <td class="px-4 py-3 text-[#666]">{{ fmtDate(ar.invoice_date) }}</td>
             <td class="px-4 py-3 font-bold text-[#1a1a1a]">{{ fmtRp(ar.invoice_amount) }}</td>
             <td class="px-4 py-3 text-[#666]">{{ fmtDate(ar.due_date) }}</td>

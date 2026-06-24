@@ -9,8 +9,8 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('ar_accounts')
-    .select('*, tenants:ksm_tenant_id(name)')
-    .order('invoice_date', { ascending: false })
+    .select('id,ar_number,po_number,invoice_ref,invoice_amount,disbursed_amount,disbursement_date,due_date,status')
+    .order('disbursement_date', { ascending: false })
     .limit(50)
   invoices.value = data ?? []
   loading.value = false
@@ -78,7 +78,7 @@ onMounted(load)
         <tbody class="divide-y divide-[#e5e5e5]">
           <tr v-for="inv in invoices" :key="inv.id" class="hover:bg-[#ebebeb] transition-colors">
             <td class="px-4 py-3 font-mono text-[#1a1a1a]">{{ inv.invoice_ref ?? inv.ar_number }}</td>
-            <td class="px-4 py-3 text-[#666]">{{ (inv.tenants as any)?.name ?? '-' }}</td>
+            <td class="px-4 py-3 text-[#666]">KSM Mitra</td>
             <td class="px-4 py-3 text-[#666]">{{ fmtDate(inv.invoice_date) }}</td>
             <td class="px-4 py-3 font-bold text-[#1a1a1a]">{{ fmtRp(inv.invoice_amount) }}</td>
             <td class="px-4 py-3 text-[#666]">{{ fmtDate(inv.disbursement_date) }}</td>

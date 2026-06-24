@@ -9,7 +9,7 @@ const arStats = ref<Record<string, any>>({})
 async function load() {
   loading.value = true
   const [{ data: fac }, { data: ar }] = await Promise.all([
-    supabase.from('scf_facilities').select('*, borrower:borrower_tenant_id(name, type)').not('status', 'eq', 'cancelled'),
+    supabase.from('scf_facilities').select('id,facility_number,financing_type,facility_limit,outstanding,available_limit,interest_rate_pa,tenor_days,status,borrower_tenant_id').not('status', 'eq', 'cancelled'),
     supabase.from('ar_accounts').select('ksm_tenant_id, status, outstanding_amount, due_date'),
   ])
   facilities.value = fac ?? []
@@ -66,7 +66,7 @@ onMounted(load)
         <div class="flex items-start justify-between mb-4">
           <div>
             <div class="flex items-center gap-2">
-              <p class="text-sm font-bold text-[#1a1a1a]">{{ (f.borrower as any)?.name ?? '-' }}</p>
+              <p class="text-sm font-bold text-[#1a1a1a]">KSM Mitra</p>
               <span :class="['px-2 py-0.5 rounded-full text-[10px] font-bold', riskLevel(f).color]">
                 Risiko {{ riskLevel(f).label }}
               </span>

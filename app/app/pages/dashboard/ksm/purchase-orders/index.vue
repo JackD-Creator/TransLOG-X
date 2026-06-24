@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Purchase Order KSM' })
 
 const supabase = useSupabaseClient()
+const { tenantId } = useUserRole()
 
 const loading = ref(true)
 const orders = ref<any[]>([])
@@ -26,7 +27,8 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('ksm_purchase_orders')
-    .select('*, ksm_po_lines(*), tenants:supplier_tenant_id(name)')
+    .select('id,po_number,po_date,expected_delivery,status,total_amount,payment_terms,metadata,ksm_po_lines(id,item_name,ordered_qty,received_qty)')
+    .eq('ksm_tenant_id', tenantId.value)
     .order('po_date', { ascending: false })
     .limit(50)
   orders.value = data ?? []
@@ -99,7 +101,7 @@ onMounted(load)
           <tr v-for="po in orders" :key="po.id" class="hover:bg-[#ebebeb] transition-colors">
             <td class="px-4 py-3 font-mono text-[#1a1a1a]">{{ po.po_number }}</td>
             <td class="px-4 py-3 text-[#666]">{{ fmtDate(po.po_date) }}</td>
-            <td class="px-4 py-3 text-[#666]">{{ (po.tenants as any)?.name ?? '-' }}</td>
+            <td class="px-4 py-3 text-[#666]">{{ po.metadata?.supplier_name ?? '-' }}</td>
             <td class="px-4 py-3 font-semibold text-[#1a1a1a]">{{ po.ksm_po_lines?.length ?? 0 }} item</td>
             <td class="px-4 py-3 font-bold text-[#1a1a1a]">{{ fmtRp(po.total_amount) }}</td>
             <td class="px-4 py-3">

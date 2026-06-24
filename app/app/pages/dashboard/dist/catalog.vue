@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Katalog Produk Distributor' })
 
 const supabase = useSupabaseClient()
+const { tenantId } = useUserRole()
 
 const loading = ref(true)
 const items = ref<any[]>([])
@@ -15,9 +16,11 @@ const filtered = computed(() =>
 
 async function load() {
   loading.value = true
+  if (!tenantId.value) return
   const { data } = await supabase
     .from('supplier_catalog_items')
-    .select('*')
+    .select('id,kfa_code,catalog_type,name,manufacturer,uom,hna_price,sell_price,min_order_qty,stock_available,lead_time_days,payment_terms,is_available,metadata')
+    .eq('tenant_id', tenantId.value)
     .order('name', { ascending: true })
     .limit(200)
   items.value = data ?? []
