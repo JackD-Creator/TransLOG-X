@@ -11,12 +11,15 @@ const nowDate = new Date()
 const defaultPeriod = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2,'0')}`
 const period = ref(defaultPeriod)
 
-interface CashItem { label: string; amount: number; sub?: string }
+interface CashItem { label: string; amount: number; sub?: string; highlight?: 'bank' | 'bpjs' }
 
 const operatingIn = ref<CashItem[]>([])
 const operatingOut = ref<CashItem[]>([])
 const financingIn = ref<CashItem[]>([])
 const financingOut = ref<CashItem[]>([])
+const shortfallCoveredAmt = ref(0)
+const saldoAwal = ref(0)
+const saldoAkhir = ref(0)
 
 const periodOptions = [
   { value: '2026-01', label: 'Januari 2026' },
@@ -45,9 +48,29 @@ async function loadData() {
     dateTo = new Date(y, m, 0).toISOString().slice(0, 10)
   }
 
-  // q1: Kas masuk — invoices dibayar RS dalam periode (filter by invoice_date + status paid)
+  // Saldo Awal = net cash dari semua periode SEBELUM dateFrom (mulai dari data awal Jan 2026 = Des 2025)
+  const DATA_START = '2025-12-01'
+  const [{ data: prevInvData }, { data: prevArData }] = await Promise.all([
+    supabase.from('ksm_invoices')
+      .select('bpjs_amount,shortfall_amount,shortfall_covered_by_bank,status')
+      .eq('ksm_tenant_id', tenantId.value)
+      .in('status', ['paid', 'partially_paid'])
+      .gte('invoice_date', DATA_START)
+      .lt('invoice_date', dateFrom),
+    supabase.from('ar_accounts')
+      .select('disbursed_amount,interest_amount')
+      .eq('ksm_tenant_id', tenantId.value)
+      .gte('invoice_date', DATA_START)
+      .lt('invoice_date', dateFrom),
+  ])
+  const prevIn   = (prevInvData ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0) + ((i as any).shortfall_covered_by_bank ? Number((i as any).shortfall_amount ?? 0) : 0), 0)
+  const prevOut  = (prevArData ?? []).reduce((s, a) => s + Number(a.disbursed_amount ?? 0) + Number(a.interest_amount ?? 0), 0)
+  const prevOpex = prevIn * 0.04
+  saldoAwal.value = Math.max(0, prevIn - prevOut - prevOpex)
+
+  // q1: Kas masuk — RS bayar KSM PENUH (Bank jamin shortfall untuk RS, KSM tidak pernah kurang bayar)
   let q1 = supabase.from('ksm_invoices')
-    .select('paid_amount,bpjs_amount,status')
+    .select('total_amount,tax_amount,bpjs_amount,shortfall_amount,shortfall_covered_by_bank,status')
     .eq('ksm_tenant_id', tenantId.value)
     .in('status', ['paid', 'partially_paid'])
     .gte('invoice_date', dateFrom)
@@ -74,8 +97,14 @@ async function loadData() {
   const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([q1, q2, q3])
 
   // ── Kas Masuk ──────────────────────────────────────────────────────────────
-  const rsPayments = (invData ?? []).reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
-  const bpjsTotal  = (invData ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
+  // KSM terima dari DUA sumber:
+  // 1. SI dari rekening RS: BPJS yang sudah cair ke RS → RS transfer ke KSM via SI
+  // 2. Langsung dari Bank: shortfall → Bank buka kredit untuk RS → transfer langsung ke KSM
+  const bpjsTotal           = (invData ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
+  const bankShortfallDirect = (invData ?? []).reduce((s, i) =>
+    (i as any).shortfall_covered_by_bank ? s + Number((i as any).shortfall_amount ?? 0) : s, 0)
+  const rsPayments = bpjsTotal + bankShortfallDirect
+  shortfallCoveredAmt.value = bankShortfallDirect
 
   // ── Kas Keluar ─────────────────────────────────────────────────────────────
   // SCF: Bank cairkan ke Distributor atas nama KSM → KSM wajib lunasi ke Bank
@@ -85,7 +114,13 @@ async function loadData() {
   const shortfallInterest = (diaData ?? []).reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
 
   operatingIn.value = [
-    { label: 'Penerimaan dari RS (BPJS + SI transfer)', amount: rsPayments, sub: `BPJS: ${fmtRp(bpjsTotal)}` },
+    { label: 'SI dari Rekening RS (BPJS → transfer)', amount: bpjsTotal, sub: 'BPJS cair ke RS → RS transfer ke KSM via Standing Instruction' },
+    ...(bankShortfallDirect > 0 ? [{
+      label: 'Kredit Bank Langsung ke KSM (Shortfall)',
+      amount: bankShortfallDirect,
+      sub: 'Bank buka kredit untuk RS → langsung bayar KSM (bukan lewat rekening RS)',
+      highlight: 'bank' as const,
+    }] : []),
   ]
   operatingOut.value = [
     { label: 'Biaya operasional & SDM (est. 4%)', amount: rsPayments * 0.04 },
@@ -98,6 +133,10 @@ async function loadData() {
     { label: 'Bunga fasilitas SCF ke Bank', amount: scfInterest },
     { label: 'Bunga harian shortfall (bagian KSM 50%)', amount: shortfallInterest },
   ]
+
+  // Saldo Akhir = Saldo Awal + Net Cash Flow periode ini
+  const netPeriod = rsPayments - (rsPayments * 0.04) - scfPrincipal - scfInterest - shortfallInterest
+  saldoAkhir.value = saldoAwal.value + netPeriod
 
   loading.value = false
 }
@@ -131,6 +170,25 @@ onMounted(() => { if (tenantId.value) loadData() })
       </select>
     </div>
 
+    <!-- Saldo Awal & Akhir -->
+    <div v-if="!loading" class="grid grid-cols-2 gap-3">
+      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4 flex items-center justify-between">
+        <div>
+          <p class="text-[10px] text-[#999] uppercase">Saldo Kas Awal</p>
+          <p class="text-[10px] text-[#777] mt-0.5">Sisa kas dari periode sebelumnya</p>
+        </div>
+        <p class="text-lg font-bold text-[#1a1a1a]">{{ fmtRp(saldoAwal) }}</p>
+      </div>
+      <div :class="['rounded-xl border p-4 flex items-center justify-between',
+        saldoAkhir >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200']">
+        <div>
+          <p class="text-[10px] text-[#999] uppercase">Saldo Kas Akhir</p>
+          <p class="text-[10px] mt-0.5" :class="saldoAkhir >= 0 ? 'text-emerald-600' : 'text-red-600'">Dibawa ke periode berikutnya</p>
+        </div>
+        <p :class="['text-lg font-bold', saldoAkhir >= 0 ? 'text-emerald-700' : 'text-red-600']">{{ fmtRp(saldoAkhir) }}</p>
+      </div>
+    </div>
+
     <!-- Summary -->
     <div class="grid grid-cols-3 gap-4">
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4 text-center">
@@ -159,12 +217,13 @@ onMounted(() => { if (tenantId.value) loadData() })
           <p class="text-[10px] text-[#777] mt-0.5">BPJS cair → SI auto-transfer → masuk kas KSM</p>
         </div>
         <div class="p-5 text-xs space-y-0">
-          <div v-for="i in operatingIn" :key="i.label" class="flex justify-between py-2.5 border-b border-[#ececec]">
+          <div v-for="i in operatingIn" :key="i.label"
+            :class="['flex justify-between py-2.5 border-b border-[#ececec]', i.highlight === 'bank' ? 'bg-blue-50 -mx-5 px-5' : '']">
             <div>
-              <span class="text-[#555]">{{ i.label }}</span>
-              <p v-if="i.sub" class="text-[10px] text-[#777]">{{ i.sub }}</p>
+              <span :class="['font-medium', i.highlight === 'bank' ? 'text-blue-700' : 'text-[#555]']">{{ i.label }}</span>
+              <p v-if="i.sub" :class="['text-[10px]', i.highlight === 'bank' ? 'text-blue-500' : 'text-[#777]']">{{ i.sub }}</p>
             </div>
-            <span class="text-emerald-700 font-semibold">+{{ fmtRp(i.amount) }}</span>
+            <span :class="['font-semibold', i.highlight === 'bank' ? 'text-blue-700' : 'text-emerald-700']">+{{ fmtRp(i.amount) }}</span>
           </div>
           <div class="flex justify-between py-2.5 font-bold">
             <span class="text-[#333]">Total Kas Masuk</span>
