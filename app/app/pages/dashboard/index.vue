@@ -328,9 +328,50 @@ const lowStock = ref<any[]>([])
 const expiryItems = ref<any[]>([])
 const supplierUpdates = ref<any[]>([])
 
+// KSM analytics detail
+const ksmDetail = ref({
+  poByStatus: { draft: 0, submitted: 0, approved: 0, sent: 0, received: 0 },
+  recentPOs: [] as { no: string; supplier: string; amount: number; status: string; date: string }[],
+  arCurrent: 0, arOverdue: 0, arPaid: 0,
+})
+async function loadKsmDetail() {
+  const [{ data: pos }, { data: ar }] = await Promise.all([
+    supabase.from('ksm_purchase_orders')
+      .select('po_number, status, total_amount, po_date, tenants:supplier_tenant_id(name)')
+      .order('created_at', { ascending: false }).limit(30),
+    supabase.from('ar_accounts').select('status, outstanding_amount, invoice_amount'),
+  ])
+  const allPOs = pos ?? []
+  ksmDetail.value.poByStatus = {
+    draft:     allPOs.filter(p => p.status === 'draft').length,
+    submitted: allPOs.filter(p => p.status === 'submitted').length,
+    approved:  allPOs.filter(p => p.status === 'approved').length,
+    sent:      allPOs.filter(p => p.status === 'sent_to_supplier').length,
+    received:  allPOs.filter(p => ['partially_received','fully_received'].includes(p.status)).length,
+  }
+  ksmDetail.value.recentPOs = allPOs.slice(0, 6).map(p => ({
+    no: p.po_number ?? '-', supplier: (p.tenants as any)?.name ?? '-',
+    amount: Number(p.total_amount ?? 0), status: p.status, date: (p.po_date ?? '').slice(0, 10),
+  }))
+  const allAR = ar ?? []
+  ksmDetail.value.arCurrent = allAR.filter(a => a.status === 'disbursed').reduce((s, a) => s + Number(a.outstanding_amount ?? 0), 0)
+  ksmDetail.value.arOverdue  = allAR.filter(a => a.status === 'overdue').reduce((s, a) => s + Number(a.outstanding_amount ?? 0), 0)
+  ksmDetail.value.arPaid     = allAR.filter(a => a.status === 'paid').reduce((s, a) => s + Number(a.invoice_amount ?? 0), 0)
+}
+
+const poStatusLabel: Record<string, string> = {
+  draft: 'Draft', submitted: 'Diajukan', approved: 'Disetujui',
+  sent_to_supplier: 'Terkirim', partially_received: 'Sebagian', fully_received: 'Selesai', cancelled: 'Batal',
+}
+const poStatusColor: Record<string, string> = {
+  draft: 'bg-[#f0f0f0] text-[#999]', submitted: 'bg-blue-100 text-blue-700',
+  approved: 'bg-purple-100 text-purple-700', sent_to_supplier: 'bg-amber-100 text-amber-700',
+  partially_received: 'bg-orange-100 text-orange-700', fully_received: 'bg-emerald-100 text-emerald-700', cancelled: 'bg-red-100 text-red-700',
+}
+
 // Load sesuai role setelah role diketahui
 watch(portalType, (type) => {
-  if (type === 'mitra_ksm') loadKsmStats()
+  if (type === 'mitra_ksm') { loadKsmStats(); loadKsmDetail() }
   else if (type === 'distributor') loadDistStats()
   else if (type === 'bank') loadBankStats()
 }, { immediate: true })
@@ -393,86 +434,171 @@ watch(portalType, (type) => {
         </NuxtLink>
       </div>
 
-      <!-- Quick Actions -->
+      <!-- Quick Access -->
       <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
         <NuxtLink v-for="q in [
-          { label:'Purchase Order', icon:'i-lucide-clipboard-list', to:'/dashboard/ksm/purchase-orders', color:'text-[#6b1525]', bg:'bg-[#6b1525]/8' },
-          { label:'Cek Supplier', icon:'i-lucide-search', to:'/dashboard/ksm/supplier-check', color:'text-blue-700', bg:'bg-blue-50' },
-          { label:'AR & Tagihan', icon:'i-lucide-receipt', to:'/dashboard/ksm/ar', color:'text-amber-700', bg:'bg-amber-50' },
-          { label:'Fasilitas SCF', icon:'i-lucide-landmark', to:'/dashboard/ksm/scf', color:'text-sky-700', bg:'bg-sky-50' },
-          { label:'Katalog Item', icon:'i-lucide-layers', to:'/dashboard/ksm/catalog', color:'text-emerald-700', bg:'bg-emerald-50' },
-          { label:'Lap. Keuangan', icon:'i-lucide-trending-up', to:'/dashboard/ksm/finance/pl', color:'text-violet-700', bg:'bg-violet-50' },
+          { label:'Purchase Order', icon:'i-lucide-clipboard-list', to:'/dashboard/ksm/purchase-orders', color:'text-white',        bg:'bg-[#6b1525]' },
+          { label:'Cek Supplier',   icon:'i-lucide-search',         to:'/dashboard/ksm/supplier-check',  color:'text-blue-700',     bg:'bg-blue-100' },
+          { label:'AR & Tagihan',   icon:'i-lucide-receipt',        to:'/dashboard/ksm/ar',              color:'text-amber-700',    bg:'bg-amber-100' },
+          { label:'Fasilitas SCF',  icon:'i-lucide-landmark',       to:'/dashboard/ksm/scf',             color:'text-sky-700',      bg:'bg-sky-100' },
+          { label:'Katalog Item',   icon:'i-lucide-layers',         to:'/dashboard/ksm/catalog',         color:'text-emerald-700',  bg:'bg-emerald-100' },
+          { label:'Notifikasi RS',  icon:'i-lucide-bell',           to:'/dashboard/ksm/notifications',   color:'text-violet-700',   bg:'bg-violet-100' },
         ]" :key="q.label" :to="q.to"
-          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-3 flex flex-col items-center gap-2 hover:border-[#6b1525]/30 transition-all group">
-          <div :class="[q.bg, 'w-9 h-9 rounded-lg flex items-center justify-center']">
-            <UIcon :name="q.icon" :class="[q.color, 'text-lg']"/>
+          class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-3 flex flex-col items-center gap-2 hover:border-[#6b1525]/40 transition-all group">
+          <div :class="[q.bg, 'w-10 h-10 rounded-xl flex items-center justify-center']">
+            <UIcon :name="q.icon" :class="[q.color, 'text-xl']"/>
           </div>
-          <p class="text-[10px] font-medium text-[#666] group-hover:text-[#1a1a1a] text-center leading-tight">{{ q.label }}</p>
+          <p class="text-[10px] font-semibold text-[#555] group-hover:text-[#1a1a1a] text-center leading-tight">{{ q.label }}</p>
         </NuxtLink>
       </div>
 
-      <!-- Strategy + Finance Cards -->
+      <!-- Analytics Row: PO Status + AR/SCF -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        <!-- Strategy Section -->
+        <!-- PO Analytics -->
         <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl overflow-hidden">
           <div class="px-5 py-4 border-b border-[#e5e5e5] flex items-center justify-between">
             <div>
-              <p class="text-sm font-bold text-[#1a1a1a]">Strategi Bisnis</p>
-              <p class="text-[11px] text-[#999]">JP Morgan-level financial modeling</p>
+              <p class="text-sm font-bold text-[#1a1a1a]">Status Purchase Order</p>
+              <p class="text-[11px] text-[#999]">Breakdown PO ke distributor</p>
             </div>
-            <NuxtLink to="/dashboard/ksm/strategy" class="text-xs text-[#6b1525] hover:underline">Lihat semua →</NuxtLink>
+            <NuxtLink to="/dashboard/ksm/purchase-orders" class="text-xs text-[#6b1525] hover:underline font-semibold">Semua PO →</NuxtLink>
           </div>
-          <div class="divide-y divide-[#e5e5e5]">
-            <NuxtLink v-for="s in [
-              { title:'Supply ke RS', sub:'Revenue Architecture + KFA Benchmark', to:'/dashboard/ksm/strategy/supply', icon:'i-lucide-target', color:'text-emerald-700', bg:'bg-emerald-100' },
-              { title:'Negosiasi Distributor', sub:'5 Scenario NPV + Term Sheet', to:'/dashboard/ksm/strategy/negotiation', icon:'i-lucide-handshake', color:'text-blue-700', bg:'bg-blue-100' },
-              { title:'Pitch ke Bank', sub:'Credit Memo · DSCR · Yield Model', to:'/dashboard/ksm/strategy/bank-pitch', icon:'i-lucide-building-2', color:'text-amber-700', bg:'bg-amber-100' },
-              { title:'Ecosystem Value', sub:'Win-win semua stakeholder', to:'/dashboard/ksm/strategy/ecosystem', icon:'i-lucide-globe', color:'text-violet-700', bg:'bg-violet-100' },
-            ]" :key="s.title" :to="s.to"
-              class="px-5 py-3.5 flex items-center gap-3 hover:bg-white transition-colors group">
-              <div :class="[s.bg, 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0']">
-                <UIcon :name="s.icon" :class="[s.color, 'text-base']"/>
+          <!-- PO Status Bars -->
+          <div class="p-5 space-y-3">
+            <div v-for="s in [
+              { key:'submitted', label:'Diajukan',  val: ksmDetail.poByStatus.submitted, color:'bg-blue-500' },
+              { key:'approved',  label:'Disetujui', val: ksmDetail.poByStatus.approved,  color:'bg-purple-500' },
+              { key:'sent',      label:'Terkirim',  val: ksmDetail.poByStatus.sent,      color:'bg-amber-500' },
+              { key:'received',  label:'Diterima',  val: ksmDetail.poByStatus.received,  color:'bg-emerald-500' },
+              { key:'draft',     label:'Draft',     val: ksmDetail.poByStatus.draft,     color:'bg-[#ccc]' },
+            ]" :key="s.key" class="flex items-center gap-3">
+              <p class="text-[11px] text-[#666] w-20 flex-shrink-0">{{ s.label }}</p>
+              <div class="flex-1 h-2.5 bg-[#ebebeb] rounded-full overflow-hidden">
+                <div :class="[s.color, 'h-full rounded-full transition-all']"
+                  :style="{ width: (ksmStats.pos > 0 ? Math.min(100, s.val / ksmStats.pos * 100) : 0) + '%' }"/>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ s.title }}</p>
-                <p class="text-[10px] text-[#999]">{{ s.sub }}</p>
+              <span class="text-xs font-bold text-[#1a1a1a] w-6 text-right">{{ s.val }}</span>
+            </div>
+          </div>
+          <!-- Recent POs -->
+          <div class="border-t border-[#e5e5e5]">
+            <p class="px-5 py-2.5 text-[10px] font-semibold text-[#999] uppercase tracking-wide">PO Terbaru</p>
+            <div class="divide-y divide-[#e5e5e5]">
+              <NuxtLink v-for="po in ksmDetail.recentPOs.slice(0,4)" :key="po.no"
+                to="/dashboard/ksm/purchase-orders"
+                class="px-5 py-2.5 flex items-center justify-between hover:bg-[#ebebeb] transition-colors group">
+                <div>
+                  <p class="text-xs font-mono font-semibold text-[#1a1a1a]">{{ po.no }}</p>
+                  <p class="text-[10px] text-[#999]">{{ po.supplier }} · {{ po.date }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span :class="['px-2 py-0.5 rounded-full text-[10px] font-medium', poStatusColor[po.status] ?? 'bg-[#f0f0f0] text-[#999]']">
+                    {{ poStatusLabel[po.status] ?? po.status }}
+                  </span>
+                  <span class="text-xs font-bold text-[#1a1a1a]">{{ fmtRp(po.amount) }}</span>
+                </div>
+              </NuxtLink>
+              <div v-if="ksmDetail.recentPOs.length === 0" class="px-5 py-4 text-center text-xs text-[#aaa]">
+                Belum ada Purchase Order
               </div>
-              <UIcon name="i-lucide-chevron-right" class="text-[#ccc] group-hover:text-[#6b1525] text-sm transition-colors flex-shrink-0"/>
-            </NuxtLink>
+            </div>
           </div>
         </div>
 
-        <!-- Finance Overview -->
-        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl overflow-hidden">
-          <div class="px-5 py-4 border-b border-[#e5e5e5] flex items-center justify-between">
+        <!-- Finance Hub — AR + SCF + Laporan -->
+        <div class="space-y-4">
+
+          <!-- AR & SCF Summary -->
+          <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl p-5 space-y-4">
+            <p class="text-sm font-bold text-[#1a1a1a]">AR & SCF Summary</p>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="bg-[#ebebeb] rounded-xl p-3">
+                <p class="text-[10px] text-[#999] mb-1">AR Berjalan</p>
+                <p class="text-sm font-bold text-blue-700">{{ fmtRp(ksmDetail.arCurrent) }}</p>
+              </div>
+              <div class="bg-[#ebebeb] rounded-xl p-3">
+                <p class="text-[10px] text-[#999] mb-1">AR Overdue</p>
+                <p class="text-sm font-bold" :class="ksmDetail.arOverdue > 0 ? 'text-red-600' : 'text-emerald-700'">
+                  {{ fmtRp(ksmDetail.arOverdue) }}
+                </p>
+              </div>
+              <div class="bg-[#ebebeb] rounded-xl p-3">
+                <p class="text-[10px] text-[#999] mb-1">Sudah Dibayar</p>
+                <p class="text-sm font-bold text-emerald-700">{{ fmtRp(ksmDetail.arPaid) }}</p>
+              </div>
+            </div>
+            <!-- SCF Bar -->
             <div>
-              <p class="text-sm font-bold text-[#1a1a1a]">Ringkasan Keuangan</p>
-              <p class="text-[11px] text-[#999]">P&L · Neraca · Arus Kas</p>
+              <div class="flex justify-between text-[11px] text-[#999] mb-1.5">
+                <span>SCF Terpakai</span>
+                <span class="font-semibold text-[#1a1a1a]">{{ ksmStats.scfLimit > 0 ? Math.round(ksmStats.scfUsed/ksmStats.scfLimit*100) : 0 }}%</span>
+              </div>
+              <div class="h-2.5 bg-[#ebebeb] rounded-full overflow-hidden">
+                <div class="h-full bg-[#6b1525] rounded-full transition-all"
+                  :style="{ width: (ksmStats.scfLimit > 0 ? Math.min(100, ksmStats.scfUsed/ksmStats.scfLimit*100) : 0) + '%' }"/>
+              </div>
+              <div class="flex justify-between text-[10px] text-[#aaa] mt-1">
+                <span>{{ fmtRp(ksmStats.scfUsed) }}</span>
+                <span>Limit {{ fmtRp(ksmStats.scfLimit) }}</span>
+              </div>
             </div>
-            <NuxtLink to="/dashboard/ksm/finance/pl" class="text-xs text-[#6b1525] hover:underline">Lihat P&L →</NuxtLink>
           </div>
-          <div class="divide-y divide-[#e5e5e5]">
-            <NuxtLink v-for="f in [
-              { title:'Laporan P&L', sub:'Laba Rugi periode berjalan', to:'/dashboard/ksm/finance/pl', icon:'i-lucide-bar-chart-2', color:'text-[#6b1525]', bg:'bg-[#6b1525]/10' },
-              { title:'Neraca', sub:'Aset, Kewajiban, Ekuitas', to:'/dashboard/ksm/finance/balance-sheet', icon:'i-lucide-scale', color:'text-blue-700', bg:'bg-blue-100' },
-              { title:'Cash Flow', sub:'Kas operasional & pembiayaan SCF', to:'/dashboard/ksm/finance/cash-flow', icon:'i-lucide-trending-up', color:'text-emerald-700', bg:'bg-emerald-100' },
-              { title:'Revenue Cycle', sub:'Analisis cashflow & aging AR', to:'/dashboard/ksm/rcm', icon:'i-lucide-refresh-cw', color:'text-amber-700', bg:'bg-amber-100' },
-            ]" :key="f.title" :to="f.to"
-              class="px-5 py-3.5 flex items-center gap-3 hover:bg-white transition-colors group">
-              <div :class="[f.bg, 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0']">
-                <UIcon :name="f.icon" :class="[f.color, 'text-base']"/>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ f.title }}</p>
-                <p class="text-[10px] text-[#999]">{{ f.sub }}</p>
-              </div>
-              <UIcon name="i-lucide-chevron-right" class="text-[#ccc] group-hover:text-[#6b1525] text-sm transition-colors flex-shrink-0"/>
-            </NuxtLink>
-          </div>
-        </div>
 
+          <!-- Laporan Keuangan — prominent for admin -->
+          <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl overflow-hidden">
+            <div class="px-5 py-3 border-b border-[#e5e5e5]">
+              <p class="text-sm font-bold text-[#1a1a1a]">Laporan Keuangan</p>
+            </div>
+            <div class="grid grid-cols-2 gap-px bg-[#e5e5e5]">
+              <NuxtLink v-for="f in [
+                { label:'P&L',         sub:'Laba Rugi',          to:'/dashboard/ksm/finance/pl',           icon:'i-lucide-bar-chart-2',  color:'text-[#6b1525]', bg:'bg-[#6b1525]/15' },
+                { label:'Neraca',      sub:'Aset & Kewajiban',   to:'/dashboard/ksm/finance/balance-sheet', icon:'i-lucide-scale',        color:'text-blue-700',  bg:'bg-blue-100' },
+                { label:'Cash Flow',   sub:'Arus Kas',           to:'/dashboard/ksm/finance/cash-flow',     icon:'i-lucide-trending-up',  color:'text-emerald-700', bg:'bg-emerald-100' },
+                { label:'Revenue Cycle', sub:'Aging AR',         to:'/dashboard/ksm/rcm',                  icon:'i-lucide-refresh-cw',   color:'text-amber-700', bg:'bg-amber-100' },
+                { label:'AR & Tagihan', sub:'Piutang ke Bank',   to:'/dashboard/ksm/ar',                   icon:'i-lucide-receipt',      color:'text-sky-700',   bg:'bg-sky-100' },
+                { label:'Pembayaran',  sub:'Riwayat bayar',      to:'/dashboard/ksm/payments',             icon:'i-lucide-banknote',     color:'text-violet-700', bg:'bg-violet-100' },
+              ]" :key="f.label" :to="f.to"
+                class="bg-[#f5f5f5] p-4 flex items-center gap-3 hover:bg-[#ebebeb] transition-colors group">
+                <div :class="[f.bg, 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0']">
+                  <UIcon :name="f.icon" :class="[f.color, 'text-base']"/>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ f.label }}</p>
+                  <p class="text-[10px] text-[#999]">{{ f.sub }}</p>
+                </div>
+              </NuxtLink>
+            </div>
+          </div>
+
+        </div>
       </div>
+
+      <!-- Strategy (slim) -->
+      <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-[#e5e5e5] flex items-center justify-between">
+          <p class="text-sm font-bold text-[#1a1a1a]">Strategi Bisnis</p>
+          <NuxtLink to="/dashboard/ksm/strategy" class="text-xs text-[#6b1525] hover:underline font-semibold">Semua →</NuxtLink>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#e5e5e5]">
+          <NuxtLink v-for="s in [
+            { title:'Supply ke RS', sub:'Revenue Architecture', to:'/dashboard/ksm/strategy/supply', icon:'i-lucide-target', color:'text-emerald-700', bg:'bg-emerald-100' },
+            { title:'Negosiasi Dist.', sub:'NPV + Term Sheet', to:'/dashboard/ksm/strategy/negotiation', icon:'i-lucide-handshake', color:'text-blue-700', bg:'bg-blue-100' },
+            { title:'Pitch ke Bank', sub:'DSCR · Yield Model', to:'/dashboard/ksm/strategy/bank-pitch', icon:'i-lucide-building-2', color:'text-amber-700', bg:'bg-amber-100' },
+            { title:'Ecosystem Value', sub:'Semua stakeholder', to:'/dashboard/ksm/strategy/ecosystem', icon:'i-lucide-globe', color:'text-violet-700', bg:'bg-violet-100' },
+          ]" :key="s.title" :to="s.to"
+            class="bg-[#f5f5f5] px-5 py-4 flex items-center gap-3 hover:bg-[#ebebeb] transition-colors group">
+            <div :class="[s.bg, 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0']">
+              <UIcon :name="s.icon" :class="[s.color, 'text-base']"/>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-[#1a1a1a] group-hover:text-[#6b1525] transition-colors">{{ s.title }}</p>
+              <p class="text-[10px] text-[#999]">{{ s.sub }}</p>
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
+
     </template>
 
     <!-- ── Distributor Portal Dashboard ─────────────────────── -->

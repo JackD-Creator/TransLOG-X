@@ -68,7 +68,6 @@ const navKSM = [
     label: 'KATALOG',
     items: [
       { label: 'Katalog Item',   icon: 'i-lucide-layers',           to: '/dashboard/ksm/catalog' },
-      { label: 'Masterdata KFA', icon: 'i-lucide-database',         to: '/dashboard/ksm/kfa' }
     ]
   },
   {
@@ -127,7 +126,6 @@ const navDistributor = [
     items: [
       { label: 'Katalog Produk', icon: 'i-lucide-layers',           to: '/dashboard/dist/catalog' },
       { label: 'Stok Gudang',    icon: 'i-lucide-warehouse',        to: '/dashboard/dist/warehouse' },
-      { label: 'Masterdata KFA', icon: 'i-lucide-database',         to: '/dashboard/dist/kfa' }
     ]
   },
   {
