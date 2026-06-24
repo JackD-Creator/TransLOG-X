@@ -75,7 +75,7 @@ onMounted(load)
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Principal Shortfall</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(totalPrincipal) }}</p>
-        <p class="text-[10px] text-[#aaa] mt-1">{{ invoicesWithShortfall.length }} invoice</p>
+        <p class="text-[10px] text-[#777] mt-1">{{ invoicesWithShortfall.length }} invoice</p>
       </div>
       <div class="bg-red-50 rounded-xl border border-red-200 p-4">
         <p class="text-[10px] text-red-400 uppercase mb-1">Total Bunga Accrued</p>
@@ -114,7 +114,7 @@ onMounted(load)
       <div v-if="byDate.length === 0" class="flex flex-col items-center justify-center py-16 gap-3 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
         <UIcon name="i-lucide-check-circle" class="text-3xl text-emerald-400"/>
         <p class="text-sm text-[#999]">Tidak ada bunga harian yang di-accrue</p>
-        <p class="text-xs text-[#bbb]">Bunga harian muncul saat ada shortfall yang dicover Bank</p>
+        <p class="text-xs text-[#888]">Bunga harian muncul saat ada shortfall yang dicover Bank</p>
       </div>
 
       <div v-else class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">

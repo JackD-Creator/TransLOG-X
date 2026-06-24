@@ -113,7 +113,7 @@ onMounted(() => { if (tenantId.value) load() })
                 :style="`width:${f.facility_limit > 0 ? Math.min(100, f.outstanding/f.facility_limit*100) : 0}%`"/>
             </div>
           </div>
-          <div class="flex gap-6 text-[10px] text-[#aaa]">
+          <div class="flex gap-6 text-[10px] text-[#777]">
             <span>Tenor: <strong class="text-[#666]">{{ f.tenor_days }} hari</strong></span>
             <span>Aktif: <strong class="text-[#666]">{{ fmtDate(f.facility_start) }} – {{ fmtDate(f.facility_end) }}</strong></span>
           </div>
@@ -124,7 +124,7 @@ onMounted(() => { if (tenantId.value) load() })
       <div v-if="arList.length > 0" class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
         <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
           <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Riwayat Hutang KSM ke Bank</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">Bank bayar Distributor → KSM hutang ke Bank → KSM lunasi dari dana RS</p>
+          <p class="text-[10px] text-[#777] mt-0.5">Bank bayar Distributor → KSM hutang ke Bank → KSM lunasi dari dana RS</p>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-xs">

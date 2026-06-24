@@ -90,7 +90,7 @@ onMounted(() => { if (tenantId.value) load() })
                 <tr v-for="l in n.hospital_notification_lines" :key="l.id">
                   <td class="px-3 py-2">
                     <p class="font-semibold text-[#1a1a1a]">{{ l.item_name }}</p>
-                    <p class="text-[10px] font-mono text-[#aaa]">{{ l.kfa_code }}</p>
+                    <p class="text-[10px] font-mono text-[#777]">{{ l.kfa_code }}</p>
                   </td>
                   <td class="px-3 py-2 text-center">
                     <span :class="['font-bold', l.current_stock <= 10 ? 'text-red-600' : 'text-amber-600']">{{ l.current_stock }}</span>

@@ -230,7 +230,7 @@ const totalEcoBar = computed(() => {
             <p :class="['text-lg font-bold', p.id === 'ksm' ? 'text-amber-300' : p.id === 'bank' ? 'text-amber-400' : p.color]">
               {{ fmtRp(p.value) }}
             </p>
-            <p :class="['text-[10px]', p.id === 'ksm' || p.id === 'bank' ? 'text-white/40' : 'text-[#aaa]']">{{ p.headlineLabel }}</p>
+            <p :class="['text-[10px]', p.id === 'ksm' || p.id === 'bank' ? 'text-white/40' : 'text-[#777]']">{{ p.headlineLabel }}</p>
           </div>
         </div>
 

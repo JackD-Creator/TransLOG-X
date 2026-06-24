@@ -69,7 +69,7 @@ onMounted(() => { if (tenantId.value) load() })
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">PO Aktif</p>
         <p class="text-2xl font-bold text-[#1a1a1a]">{{ activeCount }}</p>
-        <p class="text-[10px] text-[#aaa] mt-1">Sedang diproses</p>
+        <p class="text-[10px] text-[#777] mt-1">Sedang diproses</p>
       </div>
       <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
         <p class="text-[10px] text-amber-500 uppercase mb-1">Dalam Pengiriman</p>
@@ -108,7 +108,7 @@ onMounted(() => { if (tenantId.value) load() })
     </div>
 
     <div v-else-if="orders.length === 0" class="flex flex-col items-center justify-center py-16 gap-3 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
-      <UIcon name="i-lucide-truck" class="text-3xl text-[#ccc]"/>
+      <UIcon name="i-lucide-truck" class="text-3xl text-[#999]"/>
       <p class="text-sm text-[#999]">
         {{ filterStatus === 'active' ? 'Tidak ada pengiriman aktif' : filterStatus === 'selesai' ? 'Belum ada PO yang selesai diterima RS' : 'Tidak ada data PO' }}
       </p>
@@ -141,7 +141,7 @@ onMounted(() => { if (tenantId.value) load() })
               <!-- Alur: Distributor → RS -->
               <div class="flex items-center gap-2 mt-2 text-xs">
                 <span class="font-semibold text-[#666]">{{ po.metadata?.supplier_name ?? 'Distributor' }}</span>
-                <UIcon name="i-lucide-arrow-right" class="text-[10px] text-[#ccc]"/>
+                <UIcon name="i-lucide-arrow-right" class="text-[10px] text-[#999]"/>
                 <span class="font-semibold text-[#1a1a1a]">{{ po.metadata?.rs_name ?? 'RS Tujuan' }}</span>
               </div>
 
@@ -165,7 +165,7 @@ onMounted(() => { if (tenantId.value) load() })
               </span>
               <span v-else-if="po.expected_delivery">
                 ETA {{ fmtDate(po.expected_delivery) }}
-                <span class="text-[#bbb]">({{ daysDiff(po.expected_delivery) }}h)</span>
+                <span class="text-[#888]">({{ daysDiff(po.expected_delivery) }}h)</span>
               </span>
               <span v-else>-</span>
             </div>

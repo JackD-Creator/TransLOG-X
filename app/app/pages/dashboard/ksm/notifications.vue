@@ -219,7 +219,7 @@ onMounted(() => { if (tenantId.value) load() })
     </div>
 
     <div v-else-if="rsGroups.length === 0" class="flex flex-col items-center justify-center py-16 gap-3 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
-      <UIcon name="i-lucide-bell-off" class="text-3xl text-[#ccc]"/>
+      <UIcon name="i-lucide-bell-off" class="text-3xl text-[#999]"/>
       <p class="text-sm text-[#999]">Belum ada notifikasi min stok dari RS mitra</p>
     </div>
 
@@ -284,7 +284,7 @@ onMounted(() => { if (tenantId.value) load() })
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-xs text-[#999]">{{ notif.hospital_notification_lines?.length ?? 0 }} item</span>
-                <UIcon :name="expandedNotif === notif.id ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="text-xs text-[#ccc]"/>
+                <UIcon :name="expandedNotif === notif.id ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="text-xs text-[#999]"/>
               </div>
             </button>
 
@@ -295,7 +295,7 @@ onMounted(() => { if (tenantId.value) load() })
               <div class="mb-4 flex items-center gap-1 flex-wrap">
                 <template v-for="(step, i) in ['SIMRS Alert', 'KSM Review', 'Konfirmasi RS', 'PO ke Dist.', 'Selesai']" :key="step">
                   <div :class="['flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold',
-                    currentStep(notif) >= i ? 'bg-[#6b1525] text-white' : 'bg-[#ebebeb] text-[#aaa]']">
+                    currentStep(notif) >= i ? 'bg-[#6b1525] text-white' : 'bg-[#ebebeb] text-[#777]']">
                     <UIcon v-if="currentStep(notif) > i" name="i-lucide-check" class="text-[10px]"/>
                     <span>{{ step }}</span>
                   </div>
@@ -334,7 +334,7 @@ onMounted(() => { if (tenantId.value) load() })
                     <tr v-for="line in notif.hospital_notification_lines" :key="line.id" class="hover:bg-[#fafafa] transition-colors">
                       <td class="px-3 py-2.5">
                         <p class="font-semibold text-[#1a1a1a]">{{ line.item_name }}</p>
-                        <p class="text-[10px] font-mono text-[#aaa]">{{ line.kfa_code }} · {{ line.uom }}</p>
+                        <p class="text-[10px] font-mono text-[#777]">{{ line.kfa_code }} · {{ line.uom }}</p>
                       </td>
                       <td class="px-3 py-2.5 text-center">
                         <span :class="['font-bold', line.current_stock <= 10 ? 'text-red-600' : line.current_stock <= 30 ? 'text-amber-600' : 'text-[#666]']">
@@ -347,7 +347,7 @@ onMounted(() => { if (tenantId.value) load() })
                         <span v-if="priceMap[line.kfa_code]?.fix_price" class="font-semibold text-[#1a1a1a]">
                           {{ fmtRp(priceMap[line.kfa_code].fix_price) }}
                         </span>
-                        <span v-else class="text-[#ccc]">-</span>
+                        <span v-else class="text-[#999]">-</span>
                       </td>
                       <td class="px-3 py-2.5">
                         <p v-if="supplierMap[line.kfa_code]?.distributor_name" class="text-[#555]">
@@ -356,14 +356,14 @@ onMounted(() => { if (tenantId.value) load() })
                         <p v-else-if="priceMap[line.kfa_code]?.distributor" class="text-[#888]">
                           {{ priceMap[line.kfa_code].distributor }}
                         </p>
-                        <span v-else class="text-[#ccc]">-</span>
+                        <span v-else class="text-[#999]">-</span>
                       </td>
                       <td class="px-3 py-2.5 text-center">
                         <span v-if="supplierMap[line.kfa_code]" :class="['font-semibold',
                           supplierMap[line.kfa_code].stock >= line.requested_qty ? 'text-emerald-600' : 'text-red-500']">
                           {{ supplierMap[line.kfa_code].stock }}
                         </span>
-                        <span v-else class="text-[#ccc]">-</span>
+                        <span v-else class="text-[#999]">-</span>
                       </td>
                       <td class="px-3 py-2.5 text-right font-semibold text-[#1a1a1a]">
                         {{ fmtRp((supplierMap[line.kfa_code]?.sell_price ?? priceMap[line.kfa_code]?.fix_price ?? 0) * line.requested_qty) }}

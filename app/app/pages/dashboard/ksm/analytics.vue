@@ -98,7 +98,7 @@ onMounted(() => { if (tenantId.value) loadAll() })
         <div :class="['rounded-xl border p-4', Number(kpi.total_shortfall) > 0 ? 'bg-red-50 border-red-200' : 'bg-[#f5f5f5] border-[#e5e5e5]']">
           <p class="text-[10px] text-[#999] uppercase mb-1">Shortfall + Bunga</p>
           <p class="text-xl font-bold" :class="Number(kpi.total_shortfall) > 0 ? 'text-red-600' : 'text-[#1a1a1a]'">{{ fmtRp(kpi.total_shortfall) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-1">Bunga KSM 50%: {{ fmtRp(kpi.total_daily_interest_ksm) }}</p>
+          <p class="text-[10px] text-[#777] mt-1">Bunga KSM 50%: {{ fmtRp(kpi.total_daily_interest_ksm) }}</p>
         </div>
       </div>
 
@@ -109,14 +109,14 @@ onMounted(() => { if (tenantId.value) loadAll() })
             <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Trend Revenue 6 Bulan</p>
           </div>
           <div class="p-5">
-            <div v-if="trends.length === 0" class="flex items-center justify-center py-10 text-[#ccc] text-xs">Belum ada data</div>
+            <div v-if="trends.length === 0" class="flex items-center justify-center py-10 text-[#999] text-xs">Belum ada data</div>
             <div v-else class="flex items-end gap-2 h-40">
               <div v-for="t in trends" :key="t.month" class="flex-1 flex flex-col items-center gap-1">
                 <p class="text-[8px] text-[#999]">{{ fmtRp(t.revenue) }}</p>
                 <div class="w-full rounded-t-md bg-[#6b1525] transition-all"
                   :style="`height: ${Math.max(4, (Number(t.revenue) / maxTrend) * 120)}px`"/>
                 <p class="text-[8px] text-[#999]">{{ t.month_label }}</p>
-                <p class="text-[7px] text-[#ccc]">{{ t.po_count }} PO</p>
+                <p class="text-[7px] text-[#999]">{{ t.po_count }} PO</p>
               </div>
             </div>
           </div>
@@ -126,10 +126,10 @@ onMounted(() => { if (tenantId.value) loadAll() })
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
           <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
             <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Prediksi Revenue 3 Bulan</p>
-            <p class="text-[10px] text-[#aaa] mt-0.5">Weighted Moving Average + Growth Trend</p>
+            <p class="text-[10px] text-[#777] mt-0.5">Weighted Moving Average + Growth Trend</p>
           </div>
           <div class="p-5">
-            <div v-if="forecast.length === 0" class="text-center text-xs text-[#ccc] py-10">Tidak cukup data untuk prediksi</div>
+            <div v-if="forecast.length === 0" class="text-center text-xs text-[#999] py-10">Tidak cukup data untuk prediksi</div>
             <div v-else class="space-y-3">
               <div v-for="f in forecast" :key="f.month" class="flex items-center gap-4">
                 <div class="w-16 text-xs font-semibold text-[#666]">{{ f.month_label }}</div>
@@ -162,9 +162,9 @@ onMounted(() => { if (tenantId.value) loadAll() })
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
           <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
             <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Risk Scoring RS Mitra</p>
-            <p class="text-[10px] text-[#aaa] mt-0.5">Payment history, overdue, shortfall — basis keputusan kredit</p>
+            <p class="text-[10px] text-[#777] mt-0.5">Payment history, overdue, shortfall — basis keputusan kredit</p>
           </div>
-          <div v-if="riskScores.length === 0" class="p-5 text-center text-xs text-[#ccc]">Belum ada data RS</div>
+          <div v-if="riskScores.length === 0" class="p-5 text-center text-xs text-[#999]">Belum ada data RS</div>
           <div v-else class="p-5 space-y-3">
             <div v-for="rs in riskScores" :key="rs.rs_tenant_id"
               :class="['p-3 rounded-xl border', rs.risk_score === 'HIGH' ? 'bg-red-50 border-red-200' : rs.risk_score === 'MEDIUM' ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200']">
@@ -206,9 +206,9 @@ onMounted(() => { if (tenantId.value) loadAll() })
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
           <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
             <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Top Demand Items</p>
-            <p class="text-[10px] text-[#aaa] mt-0.5">Item paling banyak diminta RS — basis negosiasi volume discount</p>
+            <p class="text-[10px] text-[#777] mt-0.5">Item paling banyak diminta RS — basis negosiasi volume discount</p>
           </div>
-          <div v-if="demandData.length === 0" class="p-5 text-center text-xs text-[#ccc]">Belum ada data demand</div>
+          <div v-if="demandData.length === 0" class="p-5 text-center text-xs text-[#999]">Belum ada data demand</div>
           <div v-else class="p-5 space-y-2">
             <div v-for="(item, i) in demandData.slice(0, 8)" :key="item.kfa_code"
               class="flex items-center gap-3 p-2 rounded-lg hover:bg-[#ebebeb] transition-colors">
@@ -235,13 +235,13 @@ onMounted(() => { if (tenantId.value) loadAll() })
             <UIcon name="i-lucide-brain" class="text-[#6b1525]"/>
             <p class="text-xs font-bold text-[#666] uppercase tracking-wide">AI Business Intelligence</p>
           </div>
-          <span class="text-[10px] text-[#aaa]">Groq · Llama 3.3 70B</span>
+          <span class="text-[10px] text-[#777]">Groq · Llama 3.3 70B</span>
         </div>
         <div class="p-5">
           <div v-if="!aiInsight && !aiLoading" class="flex flex-col items-center justify-center py-8 gap-3">
-            <UIcon name="i-lucide-sparkles" class="text-3xl text-[#ccc]"/>
+            <UIcon name="i-lucide-sparkles" class="text-3xl text-[#999]"/>
             <p class="text-sm text-[#999]">Klik "Generate AI Insight" untuk analisis mendalam</p>
-            <p class="text-xs text-[#bbb]">AI menganalisis KPI, trend, forecast, risk scoring, dan demand — memberikan rekomendasi aksi</p>
+            <p class="text-xs text-[#888]">AI menganalisis KPI, trend, forecast, risk scoring, dan demand — memberikan rekomendasi aksi</p>
           </div>
           <div v-else-if="aiLoading" class="flex items-center justify-center py-12 gap-3">
             <UIcon name="i-lucide-loader-2" class="text-xl text-[#6b1525] animate-spin"/>

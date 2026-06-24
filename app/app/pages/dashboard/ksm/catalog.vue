@@ -67,17 +67,17 @@ onMounted(load)
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Total Item</p>
         <p class="text-2xl font-bold text-[#1a1a1a]">{{ items.length }}</p>
-        <p class="text-[10px] text-[#aaa]">item di katalog</p>
+        <p class="text-[10px] text-[#777]">item di katalog</p>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Distributor</p>
         <p class="text-2xl font-bold text-[#1a1a1a]">{{ totalDistributor }}</p>
-        <p class="text-[10px] text-[#aaa]">supplier aktif</p>
+        <p class="text-[10px] text-[#777]">supplier aktif</p>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Tersedia (Stok)</p>
         <p class="text-2xl font-bold text-emerald-700">{{ items.filter(i => (i.stock_available ?? 0) > 0).length }}</p>
-        <p class="text-[10px] text-[#aaa]">item ada stok</p>
+        <p class="text-[10px] text-[#777]">item ada stok</p>
       </div>
     </div>
 
@@ -105,7 +105,7 @@ onMounted(load)
     <!-- Belum ada data -->
     <div v-else-if="items.length === 0"
       class="flex flex-col items-center justify-center py-16 gap-3 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
-      <UIcon name="i-lucide-store" class="text-4xl text-[#ccc]"/>
+      <UIcon name="i-lucide-store" class="text-4xl text-[#999]"/>
       <div class="text-center">
         <p class="text-sm font-semibold text-[#666]">Katalog Distributor Kosong</p>
         <p class="text-xs text-[#999] mt-1">Distributor belum menambahkan produk ke katalog mereka.</p>
@@ -119,7 +119,7 @@ onMounted(load)
 
     <div v-else-if="filtered.length === 0"
       class="flex flex-col items-center justify-center py-10 gap-2 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
-      <UIcon name="i-lucide-search-x" class="text-3xl text-[#ccc]"/>
+      <UIcon name="i-lucide-search-x" class="text-3xl text-[#999]"/>
       <p class="text-sm text-[#999]">Tidak ada item cocok untuk "{{ search }}"</p>
     </div>
 
@@ -142,7 +142,7 @@ onMounted(load)
             <td class="px-4 py-3 font-mono text-[#666]">{{ item.kfa_code }}</td>
             <td class="px-4 py-3">
               <p class="font-medium text-[#1a1a1a]">{{ item.name }}</p>
-              <p class="text-[#aaa]">{{ item.uom }}</p>
+              <p class="text-[#777]">{{ item.uom }}</p>
             </td>
             <td class="px-4 py-3">
               <span :class="['px-2 py-0.5 rounded-full text-[10px] font-semibold', typeColor[item.catalog_type] ?? 'bg-[#f0f0f0] text-[#999]']">
@@ -151,7 +151,7 @@ onMounted(load)
             </td>
             <td class="px-4 py-3">
               <p class="text-[#1a1a1a] font-medium">{{ item.distributor }}</p>
-              <p v-if="item.kota" class="text-[#aaa]">{{ item.kota }}</p>
+              <p v-if="item.kota" class="text-[#777]">{{ item.kota }}</p>
             </td>
             <td class="px-4 py-3 text-right font-bold text-[#1a1a1a]">{{ fmtRp(item.sell_price ?? 0) }}</td>
             <td class="px-4 py-3 text-center">

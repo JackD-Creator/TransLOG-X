@@ -94,7 +94,7 @@ onMounted(() => doSearch())
     </div>
 
     <div v-else-if="searched && items.length === 0" class="flex flex-col items-center justify-center py-16 gap-3 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
-      <UIcon name="i-lucide-database" class="text-3xl text-[#ccc]"/>
+      <UIcon name="i-lucide-database" class="text-3xl text-[#999]"/>
       <p class="text-sm text-[#999]">Tidak ada item ditemukan</p>
     </div>
 

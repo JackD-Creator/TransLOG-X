@@ -123,13 +123,13 @@ onMounted(() => { if (tenantId.value) loadData() })
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
         <div class="bg-[#ebebeb] border-b border-[#e0e0e0] px-5 py-3">
           <p class="text-xs font-bold text-[#1a1a1a]">Kas Masuk — RS bayar KSM</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">BPJS cair → SI auto-transfer → masuk kas KSM</p>
+          <p class="text-[10px] text-[#777] mt-0.5">BPJS cair → SI auto-transfer → masuk kas KSM</p>
         </div>
         <div class="p-5 text-xs space-y-0">
           <div v-for="i in operatingIn" :key="i.label" class="flex justify-between py-2.5 border-b border-[#ececec]">
             <div>
               <span class="text-[#555]">{{ i.label }}</span>
-              <p v-if="i.sub" class="text-[10px] text-[#aaa]">{{ i.sub }}</p>
+              <p v-if="i.sub" class="text-[10px] text-[#777]">{{ i.sub }}</p>
             </div>
             <span class="text-emerald-700 font-semibold">+{{ fmtRp(i.amount) }}</span>
           </div>
@@ -155,7 +155,7 @@ onMounted(() => { if (tenantId.value) loadData() })
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
           <div class="bg-[#ebebeb] border-b border-[#e0e0e0] px-5 py-3">
             <p class="text-xs font-bold text-[#1a1a1a]">Kas Keluar — KSM lunasi Bank</p>
-            <p class="text-[10px] text-[#aaa] mt-0.5">Pelunasan hutang SCF (pokok + bunga) dari dana yang diterima RS</p>
+            <p class="text-[10px] text-[#777] mt-0.5">Pelunasan hutang SCF (pokok + bunga) dari dana yang diterima RS</p>
           </div>
           <div class="p-5 text-xs space-y-0">
             <div v-for="i in financingOut" :key="i.label" class="flex justify-between py-2.5 border-b border-[#ececec]">

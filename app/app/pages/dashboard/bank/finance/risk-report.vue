@@ -67,12 +67,12 @@ onMounted(loadData)
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
         <p class="text-[10px] uppercase mb-1 text-[#999]">Total AR Aktif</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(totalAging) }}</p>
-        <p class="text-[10px] text-[#aaa]">Piutang outstanding</p>
+        <p class="text-[10px] text-[#777]">Piutang outstanding</p>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
         <p class="text-[10px] uppercase mb-1 text-[#999]">Utilisasi Fasilitas</p>
         <p class="text-xl font-bold text-[#6b1525]">{{ totalLimit > 0 ? (totalOut/totalLimit*100).toFixed(1) : 0 }}%</p>
-        <p class="text-[10px] text-[#aaa]">{{ fmtRp(totalOut) }} / {{ fmtRp(totalLimit) }}</p>
+        <p class="text-[10px] text-[#777]">{{ fmtRp(totalOut) }} / {{ fmtRp(totalLimit) }}</p>
       </div>
     </div>
 

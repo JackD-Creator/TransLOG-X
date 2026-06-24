@@ -153,7 +153,7 @@ const totalPages = computed(() => Math.max(1, Math.ceil(currentTotal.value / per
         </div>
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#e5e5e5] bg-[#f0f0f0]">
           <UIcon name="i-lucide-search" class="text-sm text-[#999]"/>
-          <input v-model="search" type="text" placeholder="Cari ref number..." class="bg-transparent text-xs outline-none w-36 text-[#1a1a1a] placeholder:text-[#bbb]"/>
+          <input v-model="search" type="text" placeholder="Cari ref number..." class="bg-transparent text-xs outline-none w-36 text-[#1a1a1a] placeholder:text-[#888]"/>
         </div>
       </div>
 
@@ -181,12 +181,12 @@ const totalPages = computed(() => Math.max(1, Math.ceil(currentTotal.value / per
               <td class="px-4 py-3 font-mono font-semibold text-[#6b1525]">{{ mv.ref_number ?? '—' }}</td>
               <td class="px-4 py-3">
                 <p class="font-medium text-[#1a1a1a]">{{ mv.prodName }}</p>
-                <p class="text-[10px] text-[#bbb] capitalize">{{ mv.category }}</p>
+                <p class="text-[10px] text-[#888] capitalize">{{ mv.category }}</p>
               </td>
               <td class="px-4 py-3 text-[#666]">{{ mv.unit }}</td>
               <td class="px-4 py-3 text-right font-bold" :class="mv.qty > 0 ? 'text-emerald-600' : 'text-rose-600'">
                 {{ mv.qty > 0 ? '+' : '' }}{{ Math.abs(Number(mv.qty)).toLocaleString('id-ID') }}
-                <span class="text-[#bbb] font-normal ml-0.5">{{ mv.uom }}</span>
+                <span class="text-[#888] font-normal ml-0.5">{{ mv.uom }}</span>
               </td>
               <td class="px-4 py-3">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-medium"
@@ -203,7 +203,7 @@ const totalPages = computed(() => Math.max(1, Math.ceil(currentTotal.value / per
 
       <!-- Empty -->
       <div v-else class="py-14 flex flex-col items-center gap-3">
-        <UIcon name="i-lucide-inbox" class="text-3xl text-[#ccc]"/>
+        <UIcon name="i-lucide-inbox" class="text-3xl text-[#999]"/>
         <p class="text-sm text-[#999]">Tidak ada data ditemukan</p>
       </div>
 

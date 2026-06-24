@@ -263,9 +263,9 @@ onMounted(() => { loadSuppliers(); loadRS() })
                 <UIcon name="i-lucide-search" class="text-base text-[#999] flex-shrink-0"/>
                 <input v-model="searchQ" @input="searchKFA" type="text"
                   placeholder="Ketik nama obat / nama dagang / kode KFA..."
-                  class="flex-1 bg-transparent text-sm text-[#1a1a1a] outline-none placeholder:text-[#bbb]">
+                  class="flex-1 bg-transparent text-sm text-[#1a1a1a] outline-none placeholder:text-[#888]">
                 <UIcon v-if="searchLoading" name="i-lucide-loader-2" class="text-sm text-[#999] animate-spin flex-shrink-0"/>
-                <button v-if="searchQ" @click="searchQ=''; showDropdown=false" type="button" class="text-[#ccc] hover:text-[#999]">
+                <button v-if="searchQ" @click="searchQ=''; showDropdown=false" type="button" class="text-[#999] hover:text-[#999]">
                   <UIcon name="i-lucide-x" class="text-sm"/>
                 </button>
               </div>
@@ -287,7 +287,7 @@ onMounted(() => { loadSuppliers(); loadRS() })
                   <div class="text-right flex-shrink-0">
                     <p v-if="drug.catalog_price" class="text-xs font-bold text-[#6b1525]">{{ fmtRp(drug.catalog_price) }}</p>
                     <p v-else class="text-xs font-semibold text-[#666]">{{ drug.fix_price ? fmtRp(drug.fix_price) : 'HAP -' }}</p>
-                    <p class="text-[9px] text-[#aaa]">{{ drug.catalog_price ? 'Harga Distributor' : 'HAP KFA' }}</p>
+                    <p class="text-[9px] text-[#777]">{{ drug.catalog_price ? 'Harga Distributor' : 'HAP KFA' }}</p>
                   </div>
                 </button>
               </div>
@@ -309,7 +309,7 @@ onMounted(() => { loadSuppliers(); loadRS() })
                   <tr v-for="(line, i) in lines" :key="line.kfa_code">
                     <td class="px-4 py-3">
                       <p class="font-semibold text-[#1a1a1a]">{{ line.item_name }}</p>
-                      <p class="text-[10px] text-[#aaa] font-mono mt-0.5">{{ line.kfa_code }} · {{ line.uom }}</p>
+                      <p class="text-[10px] text-[#777] font-mono mt-0.5">{{ line.kfa_code }} · {{ line.uom }}</p>
                     </td>
                     <td class="px-3 py-3 text-center">
                       <input v-model.number="line.ordered_qty" type="number" min="1"
@@ -338,8 +338,8 @@ onMounted(() => { loadSuppliers(); loadRS() })
 
             <div v-else class="border-2 border-dashed border-[#e0e0e0] rounded-xl p-10 text-center">
               <UIcon name="i-lucide-package-search" class="text-3xl text-[#ddd] mx-auto mb-2"/>
-              <p class="text-sm text-[#bbb]">Cari dan klik item dari hasil pencarian KFA</p>
-              <p class="text-xs text-[#ccc] mt-1">Contoh: ketik "paracetamol", "amoxicillin", "metformin"</p>
+              <p class="text-sm text-[#888]">Cari dan klik item dari hasil pencarian KFA</p>
+              <p class="text-xs text-[#999] mt-1">Contoh: ketik "paracetamol", "amoxicillin", "metformin"</p>
             </div>
           </div>
         </div>
@@ -387,7 +387,7 @@ onMounted(() => { loadSuppliers(); loadRS() })
                 Simpan sebagai Draft
               </button>
               <NuxtLink to="/dashboard/ksm/purchase-orders"
-                class="block w-full py-2 text-center text-xs text-[#aaa] hover:text-[#666] transition-colors">
+                class="block w-full py-2 text-center text-xs text-[#777] hover:text-[#666] transition-colors">
                 Batal
               </NuxtLink>
             </div>

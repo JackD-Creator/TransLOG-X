@@ -150,9 +150,9 @@ onMounted(() => { if (tenantId.value) load() })
     </div>
 
     <div v-else-if="invoices.length === 0" class="flex flex-col items-center justify-center py-16 gap-3 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
-      <UIcon name="i-lucide-file-text" class="text-3xl text-[#ccc]"/>
+      <UIcon name="i-lucide-file-text" class="text-3xl text-[#999]"/>
       <p class="text-sm text-[#999]">Belum ada invoice</p>
-      <p class="text-xs text-[#bbb]">Invoice otomatis terbit H+1 setelah barang diterima RS dengan benar</p>
+      <p class="text-xs text-[#888]">Invoice otomatis terbit H+1 setelah barang diterima RS dengan benar</p>
     </div>
 
     <!-- Invoice list -->
@@ -175,7 +175,7 @@ onMounted(() => { if (tenantId.value) load() })
               · PO: <span class="font-mono">{{ inv.metadata?.po_number ?? '-' }}</span>
               · Kontrak: Net {{ inv.contract_payment_days }} hari
             </p>
-            <div class="flex items-center gap-4 mt-1.5 text-[10px] text-[#aaa]">
+            <div class="flex items-center gap-4 mt-1.5 text-[10px] text-[#777]">
               <span>Terbit: {{ fmtDate(inv.invoice_date) }}</span>
               <span :class="inv.due_date < today && inv.status !== 'paid' ? 'text-red-600 font-bold' : ''">
                 JT: {{ fmtDate(inv.due_date) }}

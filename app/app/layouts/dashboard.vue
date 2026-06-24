@@ -229,7 +229,7 @@ async function logout() {
       <!-- Nav -->
       <nav class="flex-1 overflow-y-auto px-3 pb-3 space-y-4" style="scrollbar-width: thin; scrollbar-color: #e5e5e5 transparent">
         <div v-for="group in navGroups" :key="group.label">
-          <p class="px-3 mb-1.5 text-[9px] font-bold tracking-widest text-[#bbb]">
+          <p class="px-3 mb-1.5 text-[9px] font-bold tracking-widest text-[#888]">
             {{ group.label }}
           </p>
           <ul class="space-y-0.5">

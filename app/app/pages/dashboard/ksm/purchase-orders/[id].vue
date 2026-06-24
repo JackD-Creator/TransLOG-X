@@ -182,15 +182,15 @@ onMounted(load)
             <div :class="['w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 mb-2',
               stepState(i) === 'done'   ? 'bg-[#6b1525] text-white' :
               stepState(i) === 'active' ? 'bg-[#6b1525] text-white ring-4 ring-[#6b1525]/20' :
-              'bg-white border-2 border-[#e0e0e0] text-[#ccc]']">
+              'bg-white border-2 border-[#e0e0e0] text-[#999]']">
               <UIcon v-if="stepState(i) === 'done'" name="i-lucide-check" class="text-sm"/>
               <UIcon v-else :name="step.icon" class="text-sm"/>
             </div>
             <p :class="['text-[10px] font-semibold leading-tight',
-              stepState(i) === 'pending' ? 'text-[#ccc]' : 'text-[#1a1a1a]']">
+              stepState(i) === 'pending' ? 'text-[#999]' : 'text-[#1a1a1a]']">
               {{ step.label }}
             </p>
-            <p class="text-[9px] text-[#aaa] mt-0.5 leading-tight hidden md:block">{{ step.desc }}</p>
+            <p class="text-[9px] text-[#777] mt-0.5 leading-tight hidden md:block">{{ step.desc }}</p>
           </div>
         </div>
       </div>
@@ -279,13 +279,13 @@ onMounted(load)
               <tr v-for="line in lines" :key="line.id" class="hover:bg-[#ebebeb] transition-colors">
                 <td class="px-4 py-3">
                   <p class="font-semibold text-[#1a1a1a]">{{ line.item_name }}</p>
-                  <p class="text-[10px] font-mono text-[#aaa] mt-0.5">{{ line.kfa_code }} · {{ line.uom }}</p>
+                  <p class="text-[10px] font-mono text-[#777] mt-0.5">{{ line.kfa_code }} · {{ line.uom }}</p>
                 </td>
                 <td class="px-3 py-3 text-center font-semibold text-[#1a1a1a]">{{ line.ordered_qty }}</td>
                 <td class="px-3 py-3 text-center">
                   <span :class="['font-semibold',
                     line.received_qty >= line.ordered_qty ? 'text-emerald-600' :
-                    line.received_qty > 0 ? 'text-amber-600' : 'text-[#ccc]']">
+                    line.received_qty > 0 ? 'text-amber-600' : 'text-[#999]']">
                     {{ line.received_qty || '—' }}
                   </span>
                 </td>
@@ -325,7 +325,7 @@ onMounted(load)
             <div>
               <p class="text-[#999] mb-0.5">RS Tujuan Pengiriman</p>
               <p class="font-semibold text-[#1a1a1a]">{{ rsName }}</p>
-              <p v-if="po.metadata?.rs_address" class="text-[#aaa]">{{ po.metadata.rs_address }}</p>
+              <p v-if="po.metadata?.rs_address" class="text-[#777]">{{ po.metadata.rs_address }}</p>
             </div>
             <div>
               <p class="text-[#999] mb-0.5">Estimasi Tiba</p>

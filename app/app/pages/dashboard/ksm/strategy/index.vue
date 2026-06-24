@@ -90,12 +90,12 @@ onMounted(() => { if (tenantId.value) load() })
         <div class="bg-[#f5f5f5] p-4">
           <div class="flex items-start justify-between mb-2">
             <p class="text-[10px] text-[#999] uppercase font-semibold">Gross Margin</p>
-            <UIcon name="i-lucide-info" class="text-[10px] text-[#ccc]"/>
+            <UIcon name="i-lucide-info" class="text-[10px] text-[#999]"/>
           </div>
           <p class="text-2xl font-bold" :class="margin >= 8 ? 'text-emerald-700' : margin >= 5 ? 'text-amber-600' : 'text-red-600'">
             {{ fmtPct(margin) }}
           </p>
-          <p class="text-[10px] text-[#aaa] mt-1 leading-relaxed">
+          <p class="text-[10px] text-[#777] mt-1 leading-relaxed">
             <strong>Definisi:</strong> Selisih antara harga jual KSM ke RS (invoice) dengan harga beli dari Distributor (disbursement Bank).
             Target sehat: >8%.
           </p>
@@ -105,12 +105,12 @@ onMounted(() => { if (tenantId.value) load() })
         <div class="bg-[#f5f5f5] p-4">
           <div class="flex items-start justify-between mb-2">
             <p class="text-[10px] text-[#999] uppercase font-semibold">Utilisasi SCF</p>
-            <UIcon name="i-lucide-info" class="text-[10px] text-[#ccc]"/>
+            <UIcon name="i-lucide-info" class="text-[10px] text-[#999]"/>
           </div>
           <p class="text-2xl font-bold" :class="scfUtilization <= 70 ? 'text-emerald-700' : scfUtilization <= 90 ? 'text-amber-600' : 'text-red-600'">
             {{ fmtPct(scfUtilization) }}
           </p>
-          <p class="text-[10px] text-[#aaa] mt-1 leading-relaxed">
+          <p class="text-[10px] text-[#777] mt-1 leading-relaxed">
             <strong>Definisi:</strong> Persentase limit fasilitas SCF Bank yang terpakai.
             Outstanding {{ fmtRp(kpi.scf_outstanding) }} dari limit {{ fmtRp(kpi.scf_limit) }}.
             Target: <70% agar ada buffer.
@@ -121,12 +121,12 @@ onMounted(() => { if (tenantId.value) load() })
         <div class="bg-[#f5f5f5] p-4">
           <div class="flex items-start justify-between mb-2">
             <p class="text-[10px] text-[#999] uppercase font-semibold">Collection Rate</p>
-            <UIcon name="i-lucide-info" class="text-[10px] text-[#ccc]"/>
+            <UIcon name="i-lucide-info" class="text-[10px] text-[#999]"/>
           </div>
           <p class="text-2xl font-bold" :class="collectionEfficiency >= 80 ? 'text-emerald-700' : collectionEfficiency >= 60 ? 'text-amber-600' : 'text-red-600'">
             {{ fmtPct(collectionEfficiency) }}
           </p>
-          <p class="text-[10px] text-[#aaa] mt-1 leading-relaxed">
+          <p class="text-[10px] text-[#777] mt-1 leading-relaxed">
             <strong>Definisi:</strong> Persentase invoice RS yang sudah terbayar dari total revenue.
             Outstanding {{ fmtRp(kpi.outstanding_from_rs) }} dari total {{ fmtRp(kpi.revenue_total) }}.
             Sumber: BPJS + Standing Instruction.
@@ -137,12 +137,12 @@ onMounted(() => { if (tenantId.value) load() })
         <div class="bg-[#f5f5f5] p-4">
           <div class="flex items-start justify-between mb-2">
             <p class="text-[10px] text-[#999] uppercase font-semibold">Overdue Exposure</p>
-            <UIcon name="i-lucide-info" class="text-[10px] text-[#ccc]"/>
+            <UIcon name="i-lucide-info" class="text-[10px] text-[#999]"/>
           </div>
           <p class="text-2xl font-bold" :class="Number(kpi.overdue_amount) === 0 ? 'text-emerald-700' : 'text-red-600'">
             {{ fmtRp(kpi.overdue_amount) }}
           </p>
-          <p class="text-[10px] text-[#aaa] mt-1 leading-relaxed">
+          <p class="text-[10px] text-[#777] mt-1 leading-relaxed">
             <strong>Definisi:</strong> Invoice RS yang sudah lewat jatuh tempo dan belum dibayar.
             {{ kpi.overdue_invoices }} invoice overdue.
             Risiko: KSM tetap harus lunasi Bank meskipun RS belum bayar.
@@ -194,7 +194,7 @@ onMounted(() => { if (tenantId.value) load() })
         </div>
         <div class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg font-bold">BANK</div>
       </div>
-      <p class="text-[10px] text-[#aaa] text-center mt-3">
+      <p class="text-[10px] text-[#777] text-center mt-3">
         Jika RS kekurangan dana → Bank cover shortfall → Fasilitas kredit bunga harian (50% KSM · 50% RS)
       </p>
     </div>

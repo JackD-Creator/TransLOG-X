@@ -84,7 +84,7 @@ onMounted(load)
       <div :class="['rounded-xl border p-4', totalShortfall > 0 ? 'bg-red-50 border-red-200' : 'bg-[#f5f5f5] border-[#e5e5e5]']">
         <p class="text-[10px] text-[#999] uppercase mb-1">Shortfall (Bank Cover)</p>
         <p class="text-xl font-bold" :class="totalShortfall > 0 ? 'text-red-600' : 'text-[#1a1a1a]'">{{ fmtRp(totalShortfall) }}</p>
-        <p class="text-[10px] text-[#aaa] mt-1">Bunga harian 50% KSM / 50% RS</p>
+        <p class="text-[10px] text-[#777] mt-1">Bunga harian 50% KSM / 50% RS</p>
       </div>
       <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
         <p class="text-[10px] text-blue-500 uppercase mb-1">SI Aktif</p>
@@ -124,7 +124,7 @@ onMounted(load)
         <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
           <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Invoice KSM→RS — Status BPJS & Shortfall</p>
         </div>
-        <div v-if="invoices.length === 0" class="p-10 text-center text-xs text-[#ccc]">Tidak ada invoice pending</div>
+        <div v-if="invoices.length === 0" class="p-10 text-center text-xs text-[#999]">Tidak ada invoice pending</div>
         <div v-else class="overflow-x-auto">
           <table class="w-full text-xs min-w-[900px]">
             <thead class="border-b border-[#e5e5e5]">
@@ -146,7 +146,7 @@ onMounted(load)
                 <td class="px-4 py-3 text-right font-bold text-[#1a1a1a]">{{ fmtRp(inv.total_amount) }}</td>
                 <td class="px-4 py-3 text-right">
                   <span v-if="inv.bpjs_amount" class="font-bold text-emerald-700">{{ fmtRp(inv.bpjs_amount) }}</span>
-                  <span v-else class="text-[#ccc]">—</span>
+                  <span v-else class="text-[#999]">—</span>
                 </td>
                 <td class="px-4 py-3 text-right">
                   <span v-if="Number(inv.shortfall_amount) > 0" class="font-bold text-red-600">{{ fmtRp(inv.shortfall_amount) }}</span>

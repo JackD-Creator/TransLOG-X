@@ -132,12 +132,12 @@ onMounted(() => { if (tenantId.value) load() })
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
           <p class="text-[10px] text-[#999] uppercase mb-1">Revenue (Invoice RS)</p>
           <p class="text-xl font-bold text-emerald-700">{{ fmtRp(pl.revenueNetto) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-1">{{ pl.invoiceCount }} invoice</p>
+          <p class="text-[10px] text-[#777] mt-1">{{ pl.invoiceCount }} invoice</p>
         </div>
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
           <p class="text-[10px] text-[#999] uppercase mb-1">COGS (Bank→Dist)</p>
           <p class="text-xl font-bold text-red-600">{{ fmtRp(pl.cogs) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-1">{{ pl.arCount }} disbursement</p>
+          <p class="text-[10px] text-[#777] mt-1">{{ pl.arCount }} disbursement</p>
         </div>
         <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
           <p class="text-[10px] text-[#999] uppercase mb-1">Gross Margin</p>
@@ -233,7 +233,7 @@ onMounted(() => { if (tenantId.value) load() })
     </template>
 
     <div v-else class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] flex flex-col items-center justify-center py-16 gap-3">
-      <UIcon name="i-lucide-bar-chart-2" class="text-3xl text-[#ccc]"/>
+      <UIcon name="i-lucide-bar-chart-2" class="text-3xl text-[#999]"/>
       <p class="text-sm text-[#999]">Pilih periode dan klik Tampilkan</p>
     </div>
   </div>

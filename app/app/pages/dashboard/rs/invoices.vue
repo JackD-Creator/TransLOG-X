@@ -66,7 +66,7 @@ onMounted(() => { if (tenantId.value) load() })
     </div>
 
     <div v-else-if="invoices.length === 0" class="flex flex-col items-center justify-center py-16 gap-3 bg-[#f5f5f5] rounded-xl border border-[#e5e5e5]">
-      <UIcon name="i-lucide-file-text" class="text-3xl text-[#ccc]"/>
+      <UIcon name="i-lucide-file-text" class="text-3xl text-[#999]"/>
       <p class="text-sm text-[#999]">Belum ada invoice</p>
     </div>
 
@@ -95,7 +95,7 @@ onMounted(() => { if (tenantId.value) load() })
             <td class="px-4 py-3 text-right font-bold text-[#1a1a1a]">{{ fmtRp(inv.total_amount) }}</td>
             <td class="px-4 py-3 text-right">
               <span v-if="inv.bpjs_amount" class="text-blue-700 font-semibold">{{ fmtRp(inv.bpjs_amount) }}</span>
-              <span v-else class="text-[#ccc]">—</span>
+              <span v-else class="text-[#999]">—</span>
             </td>
             <td class="px-4 py-3 text-right font-bold" :class="Number(inv.outstanding ?? 0) > 0 ? 'text-amber-700' : 'text-emerald-600'">
               {{ fmtRp(inv.outstanding ?? 0) }}

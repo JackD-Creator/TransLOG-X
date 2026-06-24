@@ -77,7 +77,7 @@ onMounted(load)
         <UIcon name="i-lucide-loader-2" class="text-2xl text-[#999] animate-spin"/>
       </div>
       <div v-else-if="orders.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
-        <UIcon name="i-lucide-shopping-cart" class="text-3xl text-[#ccc]"/>
+        <UIcon name="i-lucide-shopping-cart" class="text-3xl text-[#999]"/>
         <p class="text-sm text-[#999]">Belum ada PO. Klik "Buat PO Baru" untuk memulai.</p>
       </div>
       <table v-else class="w-full text-xs">

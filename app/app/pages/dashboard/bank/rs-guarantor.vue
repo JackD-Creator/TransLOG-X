@@ -44,7 +44,7 @@ onMounted(load)
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Total Limit SCF</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(totalFacility) }}</p>
-        <p class="text-[10px] text-[#aaa] mt-1">Dijamin oleh RS mitra</p>
+        <p class="text-[10px] text-[#777] mt-1">Dijamin oleh RS mitra</p>
       </div>
       <div class="bg-amber-50 rounded-xl border border-amber-200 p-4">
         <p class="text-[10px] text-amber-500 uppercase mb-1">Outstanding</p>
@@ -53,7 +53,7 @@ onMounted(load)
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">RS Mitra</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ riskScores.length }}</p>
-        <p class="text-[10px] text-[#aaa] mt-1">Co-guarantor aktif</p>
+        <p class="text-[10px] text-[#777] mt-1">Co-guarantor aktif</p>
       </div>
     </div>
 
@@ -94,12 +94,12 @@ onMounted(load)
                 <p class="font-bold text-lg" :class="Number(rs.collection_rate) >= 80 ? 'text-emerald-700' : Number(rs.collection_rate) >= 50 ? 'text-amber-600' : 'text-red-600'">
                   {{ rs.collection_rate }}%
                 </p>
-                <p class="text-[9px] text-[#aaa]">Invoice terbayar / total</p>
+                <p class="text-[9px] text-[#777]">Invoice terbayar / total</p>
               </div>
               <div>
                 <p class="text-[10px] text-[#999] mb-0.5">Overdue</p>
                 <p :class="['font-bold text-lg', Number(rs.overdue_count) > 0 ? 'text-red-600' : 'text-emerald-700']">{{ rs.overdue_count }}</p>
-                <p class="text-[9px] text-[#aaa]">Invoice lewat JT</p>
+                <p class="text-[9px] text-[#777]">Invoice lewat JT</p>
               </div>
               <div>
                 <p class="text-[10px] text-[#999] mb-0.5">Overdue Amount</p>
@@ -108,12 +108,12 @@ onMounted(load)
               <div>
                 <p class="text-[10px] text-[#999] mb-0.5">Shortfall History</p>
                 <p class="font-bold text-[#1a1a1a]">{{ rs.shortfall_count }}x</p>
-                <p class="text-[9px] text-[#aaa]">{{ fmtRp(rs.shortfall_total) }} total</p>
+                <p class="text-[9px] text-[#777]">{{ fmtRp(rs.shortfall_total) }} total</p>
               </div>
               <div>
                 <p class="text-[10px] text-[#999] mb-0.5">Avg Payment Days</p>
                 <p class="font-bold text-[#1a1a1a]">{{ rs.avg_payment_days ?? '-' }} hari</p>
-                <p class="text-[9px] text-[#aaa]">Dari invoice terbit</p>
+                <p class="text-[9px] text-[#777]">Dari invoice terbit</p>
               </div>
             </div>
 

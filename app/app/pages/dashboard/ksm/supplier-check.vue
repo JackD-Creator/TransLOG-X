@@ -136,11 +136,11 @@ onMounted(load)
         <input v-model="search" @input="onSearch" type="text"
           :placeholder="activeTab === 'obat' ? 'Cari nama obat, nama dagang, kode KFA...' : 'Cari nama alkes atau kode KFA...'"
           class="bg-transparent text-xs text-[#1a1a1a] outline-none placeholder:text-[#999] w-full">
-        <button v-if="search" @click="search = ''; page = 1; load()" class="text-[#ccc] hover:text-[#999]">
+        <button v-if="search" @click="search = ''; page = 1; load()" class="text-[#999] hover:text-[#999]">
           <UIcon name="i-lucide-x" class="text-xs"/>
         </button>
       </div>
-      <p class="text-[10px] text-[#aaa] ml-auto">Sumber: KFA SATUSEHAT Kemkes · HAP = Harga Acuan Pemerintah</p>
+      <p class="text-[10px] text-[#777] ml-auto">Sumber: KFA SATUSEHAT Kemkes · HAP = Harga Acuan Pemerintah</p>
     </div>
 
     <!-- Table -->
@@ -150,7 +150,7 @@ onMounted(load)
       </div>
 
       <div v-else-if="results.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
-        <UIcon name="i-lucide-search-x" class="text-3xl text-[#ccc]"/>
+        <UIcon name="i-lucide-search-x" class="text-3xl text-[#999]"/>
         <p class="text-sm text-[#999]">Tidak ada hasil untuk "{{ search }}"</p>
       </div>
 
@@ -175,20 +175,20 @@ onMounted(load)
               <td class="px-4 py-3">
                 <p class="font-medium text-[#1a1a1a]">{{ item.name }}</p>
                 <p v-if="item.brand" class="text-[10px] text-[#999] mt-0.5">{{ item.brand }}</p>
-                <p v-if="item.detail" class="text-[10px] text-[#aaa]">{{ item.detail }}</p>
+                <p v-if="item.detail" class="text-[10px] text-[#777]">{{ item.detail }}</p>
               </td>
               <td class="px-4 py-3 text-[#666]">{{ item.satuan }}</td>
               <td class="px-4 py-3">
                 <p v-if="item.supplier && item.supplier !== '-'" class="text-[#555]">{{ item.supplier }}</p>
-                <span v-else class="text-[#ccc]">—</span>
+                <span v-else class="text-[#999]">—</span>
               </td>
               <td class="px-4 py-3 text-right">
                 <span v-if="item.hap" class="font-semibold text-[#1a1a1a]">{{ fmtRp(item.hap) }}</span>
-                <span v-else class="text-[#ccc]">—</span>
+                <span v-else class="text-[#999]">—</span>
               </td>
               <td v-if="activeTab === 'obat'" class="px-4 py-3 text-right">
                 <span v-if="item.het" class="text-amber-700 font-semibold">{{ fmtRp(item.het) }}</span>
-                <span v-else class="text-[#ccc]">—</span>
+                <span v-else class="text-[#999]">—</span>
               </td>
               <td class="px-4 py-3 text-center">
                 <UIcon v-if="item.is_fornas" name="i-lucide-check-circle" class="text-emerald-600 text-base"/>

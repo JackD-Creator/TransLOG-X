@@ -348,7 +348,7 @@ const mvTotalPages = computed(() => Math.max(1, Math.ceil(mvTotal.value / mvPerP
               <td class="px-4 py-3 text-right font-medium whitespace-nowrap text-[#1a1a1a]">{{ fmtRp(mv.value) }}</td>
               <td class="px-4 py-3 font-mono whitespace-nowrap text-[#999]">
                 {{ Number(mv.qty_before).toLocaleString('id-ID') }}
-                <span class="mx-1 text-[#ccc]">&rarr;</span>
+                <span class="mx-1 text-[#999]">&rarr;</span>
                 <span class="font-bold text-[#1a1a1a]">{{ Number(mv.qty_after).toLocaleString('id-ID') }}</span>
               </td>
               <td class="px-4 py-3 max-w-44 truncate text-[#666]">{{ mv.notes ?? '—' }}</td>

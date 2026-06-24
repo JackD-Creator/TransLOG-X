@@ -144,7 +144,7 @@ onMounted(() => { if (tenantId.value) loadData() })
           <div class="flex justify-between py-1.5 border-b border-[#ececec]">
             <div>
               <span class="text-[#555]">Piutang dari RS</span>
-              <p class="text-[10px] text-[#aaa]">Invoice outstanding — dibayar via BPJS+SI</p>
+              <p class="text-[10px] text-[#777]">Invoice outstanding — dibayar via BPJS+SI</p>
             </div>
             <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.arRS) }}</span>
           </div>
@@ -180,7 +180,7 @@ onMounted(() => { if (tenantId.value) loadData() })
           <div class="flex justify-between py-1.5 border-b border-[#ececec]">
             <div>
               <span class="text-[#555]">Hutang SCF ke Bank</span>
-              <p class="text-[10px] text-[#aaa]">Bank bayar Distributor → KSM hutang ke Bank</p>
+              <p class="text-[10px] text-[#777]">Bank bayar Distributor → KSM hutang ke Bank</p>
             </div>
             <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.arBankHutang) }}</span>
           </div>

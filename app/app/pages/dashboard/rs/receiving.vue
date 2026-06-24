@@ -99,7 +99,7 @@ onMounted(() => { if (tenantId.value) load() })
             <p v-if="po.metadata?.tracking_number" class="text-xs text-amber-700 mt-1 font-mono">
               Resi: {{ po.metadata.tracking_number }} {{ po.metadata?.courier ? '· ' + po.metadata.courier : '' }}
             </p>
-            <p :class="['text-[10px] mt-1', po.expected_delivery && po.expected_delivery < today ? 'text-red-600 font-semibold' : 'text-[#aaa]']">
+            <p :class="['text-[10px] mt-1', po.expected_delivery && po.expected_delivery < today ? 'text-red-600 font-semibold' : 'text-[#777]']">
               ETA: {{ fmtDate(po.expected_delivery) }}
               {{ po.expected_delivery && po.expected_delivery < today ? '(Terlambat)' : '' }}
             </p>

@@ -155,22 +155,22 @@ onMounted(loadBenchmarks)
         <div>
           <p class="text-[10px] text-[#999] mb-1">Gross Revenue (Annual)</p>
           <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(rev.totalAnnual) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">{{ model.num_rs }} RS × {{ fmtJt(model.avg_monthly_vol_per_rs) }}/bln</p>
+          <p class="text-[10px] text-[#777] mt-0.5">{{ model.num_rs }} RS × {{ fmtJt(model.avg_monthly_vol_per_rs) }}/bln</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Gross Profit (Annual)</p>
           <p class="text-xl font-bold text-emerald-700">{{ fmtRp(rev.totalGPAnnual) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">Blended margin {{ fmtPct(rev.blendedMargin) }}</p>
+          <p class="text-[10px] text-[#777] mt-0.5">Blended margin {{ fmtPct(rev.blendedMargin) }}</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Service Revenue (Annual)</p>
           <p class="text-xl font-bold text-blue-700">{{ fmtRp(rev.serviceRev * 12) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">{{ fmtJt(model.service_fee_per_rs) }}/RS/bln</p>
+          <p class="text-[10px] text-[#777] mt-0.5">{{ fmtJt(model.service_fee_per_rs) }}/RS/bln</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Volume Rebate (Annual)</p>
           <p class="text-xl font-bold text-amber-700">{{ fmtRp(rev.rebate * 12) }}</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">{{ fmtPct(model.volume_rebate_pct) }} dari total PO</p>
+          <p class="text-[10px] text-[#777] mt-0.5">{{ fmtPct(model.volume_rebate_pct) }} dari total PO</p>
         </div>
       </div>
     </div>
@@ -356,7 +356,7 @@ onMounted(loadBenchmarks)
               class="border-b border-[#ececec] hover:bg-[#ebebeb]/60 transition-colors">
               <td class="py-2.5 pr-3 font-semibold text-[#1a1a1a] max-w-[200px]">
                 <p class="truncate" :title="b.name">{{ b.name }}</p>
-                <p class="text-[10px] text-[#aaa] font-normal">{{ b.kfa_code }}</p>
+                <p class="text-[10px] text-[#777] font-normal">{{ b.kfa_code }}</p>
               </td>
               <td class="py-2.5 pr-3 text-[#777] hidden md:table-cell text-[11px]">{{ b.kelas_terapi || '—' }}</td>
               <td class="py-2.5 pr-3 text-right text-[#555]">{{ fmtRp(b.fix_price) }}</td>
@@ -371,7 +371,7 @@ onMounted(loadBenchmarks)
             </tr>
           </tbody>
         </table>
-        <div class="flex items-center gap-4 mt-3 text-[10px] text-[#aaa]">
+        <div class="flex items-center gap-4 mt-3 text-[10px] text-[#777]">
           <span><span class="inline-block w-2 h-2 rounded-sm bg-emerald-200 mr-1"/>HIGH ≥20% spread</span>
           <span><span class="inline-block w-2 h-2 rounded-sm bg-amber-200 mr-1"/>MID 10–20%</span>
           <span><span class="inline-block w-2 h-2 rounded-sm bg-slate-200 mr-1"/>LOW &lt;10%</span>

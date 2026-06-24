@@ -65,7 +65,7 @@ onMounted(() => { if (tenantId.value) load() })
       <div v-if="totalKSMInterest > 0" class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Bunga KSM (50%)</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(totalKSMInterest) }}</p>
-        <p class="text-[10px] text-[#aaa] mt-1">Harian dari shortfall</p>
+        <p class="text-[10px] text-[#777] mt-1">Harian dari shortfall</p>
       </div>
     </div>
 
@@ -90,7 +90,7 @@ onMounted(() => { if (tenantId.value) load() })
     <div v-else-if="activeTab === 'bpjs'" class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
       <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
         <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Invoice Menunggu Pembayaran BPJS</p>
-        <p class="text-[10px] text-[#aaa] mt-0.5">RS terima BPJS → SI auto-transfer ke KSM → selesai</p>
+        <p class="text-[10px] text-[#777] mt-0.5">RS terima BPJS → SI auto-transfer ke KSM → selesai</p>
       </div>
       <div v-if="invoices.length === 0" class="flex flex-col items-center justify-center py-12 gap-2">
         <UIcon name="i-lucide-check-circle" class="text-3xl text-emerald-400"/>
@@ -118,7 +118,7 @@ onMounted(() => { if (tenantId.value) load() })
             <td class="px-4 py-3 text-right font-bold text-[#1a1a1a]">{{ fmtRp(inv.total_amount) }}</td>
             <td class="px-4 py-3 text-right">
               <span v-if="inv.bpjs_amount" class="font-bold text-blue-700">{{ fmtRp(inv.bpjs_amount) }}</span>
-              <span v-else class="text-[#ccc]">—</span>
+              <span v-else class="text-[#999]">—</span>
             </td>
             <td class="px-4 py-3 text-right font-bold" :class="Number(inv.outstanding ?? 0) > 0 ? 'text-amber-700' : 'text-emerald-600'">
               {{ fmtRp(inv.outstanding ?? 0) }}
@@ -179,7 +179,7 @@ onMounted(() => { if (tenantId.value) load() })
     <div v-else-if="activeTab === 'interest'" class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
       <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
         <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Accrued Daily Interest (Bunga Harian Shortfall)</p>
-        <p class="text-[10px] text-[#aaa] mt-0.5">Ditanggung 50% KSM + 50% RS · Dihitung dari saldo shortfall × rate harian</p>
+        <p class="text-[10px] text-[#777] mt-0.5">Ditanggung 50% KSM + 50% RS · Dihitung dari saldo shortfall × rate harian</p>
       </div>
       <div v-if="interestData.length === 0" class="flex flex-col items-center justify-center py-12 gap-2">
         <UIcon name="i-lucide-check-circle" class="text-3xl text-emerald-400"/>

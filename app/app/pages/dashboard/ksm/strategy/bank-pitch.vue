@@ -106,17 +106,17 @@ onMounted(loadRealData)
         <div class="md:col-span-2">
           <p class="text-[10px] text-[#999] mb-1">Facility Type</p>
           <p class="text-sm font-bold text-[#1a1a1a]">Revolving SCF / Reverse Factoring</p>
-          <p class="text-[10px] text-[#aaa] mt-0.5">Supply Chain Finance — Healthcare Sector</p>
+          <p class="text-[10px] text-[#777] mt-0.5">Supply Chain Finance — Healthcare Sector</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Limit Diminta</p>
           <p class="text-lg font-bold text-[#1a1a1a]">{{ fmtRp(params.facility_limit_requested) }}</p>
-          <p class="text-[10px] text-[#aaa]">{{ fmtPct(model.ltv*100) }} LTV</p>
+          <p class="text-[10px] text-[#777]">{{ fmtPct(model.ltv*100) }} LTV</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Bank Yield p.a.</p>
           <p class="text-lg font-bold text-amber-700">{{ fmtPct(model.roe_bank_est) }}</p>
-          <p class="text-[10px] text-[#aaa]">interest + admin fee</p>
+          <p class="text-[10px] text-[#777]">interest + admin fee</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">DSCR</p>
@@ -128,7 +128,7 @@ onMounted(loadRealData)
           <p class="text-lg font-bold" :class="passCount >= 5 ? 'text-emerald-700' : passCount >= 4 ? 'text-amber-700' : 'text-red-600'">
             {{ passCount }}/{{ scorecard.length }}
           </p>
-          <p class="text-[10px] text-[#aaa]">metrics passing</p>
+          <p class="text-[10px] text-[#777]">metrics passing</p>
         </div>
       </div>
     </div>
@@ -169,22 +169,22 @@ onMounted(loadRealData)
           <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
             <p class="text-[10px] text-[#999] uppercase mb-1">Interest Income / Thn</p>
             <p class="text-xl font-bold text-emerald-700">{{ fmtRp(model.interest_income) }}</p>
-            <p class="text-[10px] text-[#aaa]">{{ params.interest_rate_pa }}% × limit</p>
+            <p class="text-[10px] text-[#777]">{{ params.interest_rate_pa }}% × limit</p>
           </div>
           <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
             <p class="text-[10px] text-[#999] uppercase mb-1">Admin Fee / Thn</p>
             <p class="text-xl font-bold text-blue-700">{{ fmtRp(model.admin_fee_income) }}</p>
-            <p class="text-[10px] text-[#aaa]">{{ params.admin_fee_pct }}% × PO vol.</p>
+            <p class="text-[10px] text-[#777]">{{ params.admin_fee_pct }}% × PO vol.</p>
           </div>
           <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
             <p class="text-[10px] text-[#999] uppercase mb-1">Total Bank Revenue</p>
             <p class="text-xl font-bold text-[#6b1525]">{{ fmtRp(model.total_bank_rev) }}</p>
-            <p class="text-[10px] text-[#aaa]">Yield {{ fmtPct(model.roe_bank_est) }}</p>
+            <p class="text-[10px] text-[#777]">Yield {{ fmtPct(model.roe_bank_est) }}</p>
           </div>
           <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
             <p class="text-[10px] text-[#999] uppercase mb-1">BPJS Collateral</p>
             <p class="text-xl font-bold text-amber-700">{{ fmtRp(model.bpjs_collateral) }}</p>
-            <p class="text-[10px] text-[#aaa]">{{ params.risk_coverage_pct }}% × BPJS/thn</p>
+            <p class="text-[10px] text-[#777]">{{ params.risk_coverage_pct }}% × BPJS/thn</p>
           </div>
         </div>
 
@@ -200,7 +200,7 @@ onMounted(loadRealData)
               <span class="text-amber-700 font-bold">Disb.</span>
             </div>
             <div class="flex-1 h-px bg-[#ddd] relative mx-1">
-              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#aaa] text-[9px]">→ PO Verified</span>
+              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#777] text-[9px]">→ PO Verified</span>
             </div>
             <div class="flex flex-col items-center gap-1">
               <div class="w-12 h-12 rounded-full bg-blue-100 border border-blue-300 flex items-center justify-center">
@@ -210,7 +210,7 @@ onMounted(loadRealData)
               <span class="text-blue-700 font-bold">Supply</span>
             </div>
             <div class="flex-1 h-px bg-[#ddd] relative mx-1">
-              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#aaa] text-[9px]">→ Barang GR</span>
+              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#777] text-[9px]">→ Barang GR</span>
             </div>
             <div class="flex flex-col items-center gap-1">
               <div class="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center">
@@ -220,7 +220,7 @@ onMounted(loadRealData)
               <span class="text-emerald-700 font-bold">Pakai</span>
             </div>
             <div class="flex-1 h-px bg-[#ddd] relative mx-1">
-              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#aaa] text-[9px]">BPJS SI</span>
+              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#777] text-[9px]">BPJS SI</span>
             </div>
             <div class="flex flex-col items-center gap-1">
               <div class="w-12 h-12 rounded-full bg-[#f0e0e3] border border-[#6b1525]/30 flex items-center justify-center">
@@ -230,7 +230,7 @@ onMounted(loadRealData)
               <span class="text-[#6b1525] font-bold">Collect</span>
             </div>
           </div>
-          <p class="text-[10px] text-[#aaa] text-center mt-3">Standing Instruction BPJS → Bank auto-debit rekening RS</p>
+          <p class="text-[10px] text-[#777] text-center mt-3">Standing Instruction BPJS → Bank auto-debit rekening RS</p>
         </div>
       </div>
     </div>
@@ -344,7 +344,7 @@ onMounted(loadRealData)
             </tr>
           </tbody>
         </table>
-        <p class="text-[10px] text-[#aaa] mt-2">Interest income saja (belum termasuk admin fee {{ params.admin_fee_pct }}% dari volume PO)</p>
+        <p class="text-[10px] text-[#777] mt-2">Interest income saja (belum termasuk admin fee {{ params.admin_fee_pct }}% dari volume PO)</p>
       </div>
     </div>
 

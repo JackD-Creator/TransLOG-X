@@ -120,7 +120,7 @@ onMounted(() => { if (tenantId.value) load() })
                 <tr v-for="line in notif.hospital_notification_lines" :key="line.id">
                   <td class="px-3 py-2.5">
                     <p class="font-semibold text-[#1a1a1a]">{{ line.item_name }}</p>
-                    <p class="text-[10px] font-mono text-[#aaa]">{{ line.kfa_code }} · {{ line.uom }}</p>
+                    <p class="text-[10px] font-mono text-[#777]">{{ line.kfa_code }} · {{ line.uom }}</p>
                   </td>
                   <td class="px-3 py-2.5 text-center">
                     <span :class="['font-bold', line.current_stock <= 10 ? 'text-red-600' : 'text-amber-600']">

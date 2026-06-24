@@ -65,22 +65,22 @@ watch(period, loadData)
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
         <p class="text-[10px] text-[#999] uppercase mb-1">Net Income</p>
         <p class="text-xl font-bold" :class="netIncome >= 0 ? 'text-emerald-700' : 'text-red-600'">{{ fmtRp(netIncome) }}</p>
-        <p class="text-[10px] text-[#aaa] mt-0.5">{{ netIncome >= 0 ? 'Profit' : 'Loss' }}</p>
+        <p class="text-[10px] text-[#777] mt-0.5">{{ netIncome >= 0 ? 'Profit' : 'Loss' }}</p>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
         <p class="text-[10px] text-[#999] uppercase mb-1">Gross Income</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(grossIncome) }}</p>
-        <p class="text-[10px] text-[#aaa]">Int + Fee + Provisi</p>
+        <p class="text-[10px] text-[#777]">Int + Fee + Provisi</p>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
         <p class="text-[10px] text-[#999] uppercase mb-1">NIM</p>
         <p class="text-xl font-bold text-blue-700">{{ nim.toFixed(2) }}%</p>
-        <p class="text-[10px] text-[#aaa]">Net Interest Margin</p>
+        <p class="text-[10px] text-[#777]">Net Interest Margin</p>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
         <p class="text-[10px] text-[#999] uppercase mb-1">Total Disbursed</p>
         <p class="text-xl font-bold text-[#6b1525]">{{ fmtRp(data.disbTotal) }}</p>
-        <p class="text-[10px] text-[#aaa]">Portofolio aktif</p>
+        <p class="text-[10px] text-[#777]">Portofolio aktif</p>
       </div>
     </div>
 

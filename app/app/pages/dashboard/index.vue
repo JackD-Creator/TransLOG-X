@@ -146,21 +146,21 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
         <div>
           <p class="text-white/60 text-xs">{{ greeting }},</p>
           <h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1>
-          <p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p>
+          <p class="text-white/70 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p>
         </div>
         <div class="flex items-center gap-8">
           <div class="text-right">
-            <p class="text-white/50 text-[10px] uppercase tracking-wider">Revenue Total</p>
+            <p class="text-white/80 text-[10px] uppercase tracking-wider">Revenue Total</p>
             <p class="text-white text-2xl font-bold mt-0.5">{{ fmtRp(kpi.revenue_total) }}</p>
           </div>
           <div class="h-10 w-px bg-white/20"/>
           <div class="text-right">
-            <p class="text-white/50 text-[10px] uppercase tracking-wider">Bulan Ini</p>
+            <p class="text-white/80 text-[10px] uppercase tracking-wider">Bulan Ini</p>
             <p class="text-amber-300 text-lg font-bold mt-0.5">{{ fmtRp(kpi.revenue_this_month) }}</p>
           </div>
           <div class="h-10 w-px bg-white/20"/>
           <div class="text-right">
-            <p class="text-white/50 text-[10px] uppercase tracking-wider">Gross Margin</p>
+            <p class="text-white/80 text-[10px] uppercase tracking-wider">Gross Margin</p>
             <p :class="['text-lg font-bold mt-0.5', grossMargin >= 8 ? 'text-emerald-400' : 'text-amber-400']">{{ fmtPct(grossMargin) }}</p>
           </div>
         </div>
@@ -207,7 +207,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
           <div class="px-3 pt-2">
             <ClientOnly>
               <apexchart v-if="trends.length > 0" type="area" :options="revenueChartOpts" :series="revenueChartSeries" height="220"/>
-              <p v-else class="text-center text-xs text-[#ccc] py-16">Belum ada data</p>
+              <p v-else class="text-center text-xs text-[#999] py-16">Belum ada data</p>
             </ClientOnly>
           </div>
         </div>
@@ -244,7 +244,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
             <div class="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center"><UIcon name="i-lucide-landmark" class="text-blue-600 text-[10px]"/></div>
           </div>
           <p class="text-[#1a1a1a] text-lg font-bold">{{ fmtRp(kpi.hutang_bank) }}</p>
-          <p class="text-[9px] text-[#bbb] mt-1">Bank→Dist: {{ fmtRp(kpi.bank_to_dist_total) }}</p>
+          <p class="text-[9px] text-[#888] mt-1">Bank→Dist: {{ fmtRp(kpi.bank_to_dist_total) }}</p>
         </NuxtLink>
         <NuxtLink to="/dashboard/ksm/ar" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
@@ -252,7 +252,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
             <div class="w-5 h-5 rounded-full bg-red-500/10 flex items-center justify-center"><UIcon name="i-lucide-alert-circle" class="text-red-600 text-[10px]"/></div>
           </div>
           <p :class="['text-lg font-bold', Number(kpi.overdue_amount) > 0 ? 'text-red-600' : 'text-emerald-600']">{{ fmtRp(kpi.overdue_amount) }}</p>
-          <p class="text-[9px] text-[#bbb] mt-1">{{ kpi.overdue_invoices }} invoice</p>
+          <p class="text-[9px] text-[#888] mt-1">{{ kpi.overdue_invoices }} invoice</p>
         </NuxtLink>
         <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
@@ -278,7 +278,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
             <p class="text-xs font-bold text-[#1a1a1a]">RS Risk Score</p>
             <NuxtLink to="/dashboard/ksm/analytics" class="text-[10px] text-[#6b1525] font-semibold hover:underline">Detail</NuxtLink>
           </div>
-          <div v-if="riskScores.length === 0" class="p-5 text-center text-xs text-[#ccc]">No data</div>
+          <div v-if="riskScores.length === 0" class="p-5 text-center text-xs text-[#999]">No data</div>
           <div v-else class="divide-y divide-[#f5f5f5]">
             <div v-for="rs in riskScores.slice(0, 5)" :key="rs.rs_tenant_id" class="px-5 py-2.5 flex items-center gap-3">
               <div :class="['w-1.5 h-6 rounded-full', rs.risk_score === 'HIGH' ? 'bg-red-500' : rs.risk_score === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-500']"/>
@@ -300,7 +300,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
           <div class="px-2">
             <ClientOnly>
               <apexchart v-if="demandData.length > 0" type="bar" :options="demandBarOpts" :series="demandBarSeries" height="200"/>
-              <p v-else class="text-center text-xs text-[#ccc] py-12">No data</p>
+              <p v-else class="text-center text-xs text-[#999] py-12">No data</p>
             </ClientOnly>
           </div>
         </div>
@@ -338,7 +338,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
             <p class="text-xs font-bold text-[#1a1a1a]">{{ section.title }}</p>
             <NuxtLink :to="section.link" class="text-[10px] text-[#6b1525] font-semibold hover:underline">Semua</NuxtLink>
           </div>
-          <div v-if="section.items.length === 0" class="p-5 text-center text-xs text-[#ccc]">Kosong</div>
+          <div v-if="section.items.length === 0" class="p-5 text-center text-xs text-[#999]">Kosong</div>
           <div v-else class="divide-y divide-[#f5f5f5]">
             <component :is="section.type === 'ar' ? 'div' : 'NuxtLink'"
               v-for="item in section.items" :key="item.id"
@@ -374,7 +374,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
               <p class="text-xs font-semibold text-[#1a1a1a]">{{ n.metadata?.rs_name ?? n.notif_number }}</p>
               <p class="text-[9px] text-[#999]">{{ fmtDate(n.notif_date) }} · Stok kritis</p>
             </div>
-            <UIcon name="i-lucide-chevron-right" class="text-xs text-[#ccc]"/>
+            <UIcon name="i-lucide-chevron-right" class="text-xs text-[#999]"/>
           </NuxtLink>
         </div>
       </div>
@@ -383,15 +383,15 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
     <!-- ═══ BANK DASHBOARD ══════════════════════════════════════════════════ -->
     <template v-else-if="isBank && kpi">
       <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
-        <div><p class="text-white/50 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
+        <div><p class="text-white/80 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/70 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
         <div class="flex items-center gap-6">
-          <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Total Limit</p><p class="text-white text-2xl font-bold">{{ fmtRp(kpi.total_limit) }}</p></div>
+          <div class="text-right"><p class="text-white/80 text-[10px] uppercase">Total Limit</p><p class="text-white text-2xl font-bold">{{ fmtRp(kpi.total_limit) }}</p></div>
           <div class="h-10 w-px bg-white/20"/>
-          <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Interest</p><p class="text-emerald-400 text-lg font-bold">{{ fmtRp(kpi.total_interest) }}</p></div>
+          <div class="text-right"><p class="text-white/80 text-[10px] uppercase">Interest</p><p class="text-emerald-400 text-lg font-bold">{{ fmtRp(kpi.total_interest) }}</p></div>
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Outstanding</p><p class="text-xl font-bold text-amber-600 mt-1">{{ fmtRp(kpi.total_outstanding) }}</p><p class="text-[9px] text-[#bbb]">{{ kpi.total_limit > 0 ? ((kpi.total_outstanding/kpi.total_limit)*100).toFixed(1) : 0 }}% utilisasi</p></div>
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Outstanding</p><p class="text-xl font-bold text-amber-600 mt-1">{{ fmtRp(kpi.total_outstanding) }}</p><p class="text-[9px] text-[#888]">{{ kpi.total_limit > 0 ? ((kpi.total_outstanding/kpi.total_limit)*100).toFixed(1) : 0 }}% utilisasi</p></div>
         <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Disbursed→Dist</p><p class="text-xl font-bold text-blue-600 mt-1">{{ fmtRp(kpi.total_disbursed) }}</p></div>
         <NuxtLink to="/dashboard/bank/ar-monitoring" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">AR Overdue</p><p class="text-xl font-bold text-red-600 mt-1">{{ kpi.overdue_count }}</p></NuxtLink>
         <NuxtLink to="/dashboard/bank/daily-interest" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Shortfall</p><p class="text-xl font-bold mt-1" :class="Number(kpi.shortfall_total) > 0 ? 'text-red-600' : 'text-[#1a1a1a]'">{{ fmtRp(kpi.shortfall_total) }}</p></NuxtLink>
@@ -410,8 +410,8 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
     <!-- ═══ DISTRIBUTOR DASHBOARD ═══════════════════════════════════════════ -->
     <template v-else-if="isDistributor && kpi">
       <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
-        <div><p class="text-white/50 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
-        <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Total Diterima Bank</p><p class="text-emerald-400 text-2xl font-bold">{{ fmtRp(kpi.total_value) }}</p></div>
+        <div><p class="text-white/80 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/70 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
+        <div class="text-right"><p class="text-white/80 text-[10px] uppercase">Total Diterima Bank</p><p class="text-emerald-400 text-2xl font-bold">{{ fmtRp(kpi.total_value) }}</p></div>
       </div>
       <div class="grid grid-cols-3 gap-3">
         <NuxtLink to="/dashboard/dist/purchase-orders" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Perlu Konfirmasi</p><p class="text-2xl font-bold text-blue-600 mt-1">{{ kpi.need_confirm }}</p></NuxtLink>
@@ -432,8 +432,8 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
     <!-- ═══ RS DASHBOARD ════════════════════════════════════════════════════ -->
     <template v-else-if="isRS && kpi">
       <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
-        <div><p class="text-white/50 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
-        <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Outstanding Invoice</p><p class="text-amber-400 text-2xl font-bold">{{ fmtRp(kpi.outstanding_invoice) }}</p></div>
+        <div><p class="text-white/80 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/70 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
+        <div class="text-right"><p class="text-white/80 text-[10px] uppercase">Outstanding Invoice</p><p class="text-amber-400 text-2xl font-bold">{{ fmtRp(kpi.outstanding_invoice) }}</p></div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <NuxtLink to="/dashboard/rs/confirmations" class="bg-[#faf7f3] rounded-xl border-2 border-amber-300 p-4 hover:border-amber-500"><p class="text-[9px] text-amber-600 uppercase font-bold">Perlu Persetujuan</p><p class="text-2xl font-bold text-amber-700 mt-1">{{ kpi.pending_confirm }}</p></NuxtLink>
@@ -444,12 +444,12 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0]"><p class="text-xs font-bold text-[#1a1a1a]">Alert SIMRS</p></div>
-          <div v-if="recentNotifs.length===0" class="p-5 text-center text-xs text-[#ccc]">Stok aman</div>
+          <div v-if="recentNotifs.length===0" class="p-5 text-center text-xs text-[#999]">Stok aman</div>
           <div v-else class="divide-y divide-[#f5f5f5]"><NuxtLink v-for="n in recentNotifs" :key="n.id" to="/dashboard/rs/alerts" class="px-5 py-3 flex items-center gap-3 hover:bg-[#fafafa] block"><div :class="['w-2 h-2 rounded-full', n.ksm_confirmation_status==='pending_rs_approval'?'bg-amber-500 animate-pulse':'bg-blue-400']"/><div class="flex-1"><p class="text-xs font-semibold text-[#1a1a1a]">{{ n.notif_number }}</p><p class="text-[9px] text-[#999]">{{ n.status }}</p></div></NuxtLink></div>
         </div>
         <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0]"><p class="text-xs font-bold text-[#1a1a1a]">Pengiriman Aktif</p></div>
-          <div v-if="recentPOs.length===0" class="p-5 text-center text-xs text-[#ccc]">Tidak ada</div>
+          <div v-if="recentPOs.length===0" class="p-5 text-center text-xs text-[#999]">Tidak ada</div>
           <div v-else class="divide-y divide-[#f5f5f5]"><div v-for="po in recentPOs" :key="po.id" class="px-5 py-2.5 flex items-center justify-between"><div><p class="text-[11px] font-mono font-semibold text-[#1a1a1a]">{{ po.po_number }}</p><p class="text-[9px] text-[#999]">{{ po.metadata?.supplier_name }}</p></div><p class="text-[11px] font-bold text-[#1a1a1a]">{{ fmtRp(po.total_amount) }}</p></div></div>
         </div>
       </div>

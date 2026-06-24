@@ -185,17 +185,17 @@ onMounted(loadKfa)
             <div class="bg-[#ebebeb] rounded-lg p-3">
               <p class="text-[10px] text-[#999] mb-1">HAP (Floor)</p>
               <p class="text-lg font-bold text-[#1a1a1a]">{{ fmtRp(calc.hap) }}</p>
-              <p class="text-[10px] text-[#aaa] mt-0.5">Kemkes Reference</p>
+              <p class="text-[10px] text-[#777] mt-0.5">Kemkes Reference</p>
             </div>
             <div class="bg-[#ebebeb] rounded-lg p-3">
               <p class="text-[10px] text-[#999] mb-1">HNA est.</p>
               <p class="text-lg font-bold text-blue-700">{{ fmtRp(calc.hap * 1.10) }}</p>
-              <p class="text-[10px] text-[#aaa] mt-0.5">HAP × 1.10 (target beli)</p>
+              <p class="text-[10px] text-[#777] mt-0.5">HAP × 1.10 (target beli)</p>
             </div>
             <div class="bg-[#ebebeb] rounded-lg p-3">
               <p class="text-[10px] text-[#999] mb-1">HET (Ceiling)</p>
               <p class="text-lg font-bold text-emerald-700">{{ fmtRp(calc.het) }}</p>
-              <p class="text-[10px] text-[#aaa] mt-0.5">Max jual ke RS</p>
+              <p class="text-[10px] text-[#777] mt-0.5">Max jual ke RS</p>
             </div>
           </div>
           <div class="bg-[#ebebeb] rounded-lg p-3 mt-2">
