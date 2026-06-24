@@ -109,8 +109,14 @@ async function loadData() {
   // ── Kas Keluar ─────────────────────────────────────────────────────────────
   // SCF: Bank cairkan ke Distributor atas nama KSM → KSM wajib lunasi ke Bank
   const arAccounts     = arData ?? []
-  const scfPrincipal   = arAccounts.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
-  const scfInterest    = arAccounts.reduce((s, a) => s + Number(a.interest_amount  ?? 0), 0)
+  let scfPrincipal   = arAccounts.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
+  let scfInterest    = arAccounts.reduce((s, a) => s + Number(a.interest_amount  ?? 0), 0)
+  // Fallback: kalau ar_accounts kosong, estimasi dari invoice (COGS = subtotal × 88%, bunga = 11%/12)
+  if (scfPrincipal === 0 && (invData ?? []).length > 0) {
+    const fallbackSubtotal = (invData ?? []).reduce((s: number, i: any) => s + Number(i.total_amount ?? 0) / 1.11, 0)
+    scfPrincipal = fallbackSubtotal * 0.88
+    scfInterest  = scfPrincipal * (annualRate / 12)
+  }
   // Bunga shortfall 50% KSM = kalkulasi matematis dari invoice dalam periode
   const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
   const periodEnd = dateTo ? new Date(dateTo) : new Date()
