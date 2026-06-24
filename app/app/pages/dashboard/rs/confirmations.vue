@@ -42,9 +42,10 @@ async function approveConfirmation(notifId: string) {
       for (const l of notif?.hospital_notification_lines ?? []) {
         const newQty = editQtys.value[l.id] ?? l.requested_qty
         if (newQty !== l.requested_qty) {
-          await supabase.from('hospital_notification_lines')
+          const { error: lineErr } = await supabase.from('hospital_notification_lines')
             .update({ approved_qty: newQty, requested_qty: newQty })
             .eq('id', l.id)
+          if (lineErr) throw lineErr
         }
       }
     }

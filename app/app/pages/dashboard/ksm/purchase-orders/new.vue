@@ -13,12 +13,27 @@ const showDropdown = ref(false)
 
 const form = reactive({
   supplier_tenant_id: '',
-  rs_name: '',          // nama RS tujuan (teks bebas untuk demo)
-  rs_address: '',       // alamat RS tujuan
+  rs_tenant_id: '',
+  rs_name: '',
+  rs_address: '',
   payment_terms: 'net_30',
   expected_delivery: '',
   notes: '',
 })
+
+const rsList = ref<{ id: string; name: string; city: string }[]>([])
+async function loadRS() {
+  const { data } = await supabase.from('tenants')
+    .select('id, name, city')
+    .in('type', ['rs_pemerintah', 'rs_swasta'])
+    .eq('status', 'active')
+    .order('name')
+  rsList.value = data ?? []
+}
+function onRSSelect(rsId: string) {
+  const rs = rsList.value.find(r => r.id === rsId)
+  if (rs) { form.rs_name = rs.name; form.rs_address = rs.city ?? '' }
+}
 
 const lines = ref<{
   kfa_code: string; item_name: string; catalog_type: string
@@ -112,6 +127,7 @@ async function submit(status: 'draft' | 'submitted') {
   const { data: po, error } = await supabase.from('ksm_purchase_orders').insert({
     ksm_tenant_id: tenantId.value,
     supplier_tenant_id: form.supplier_tenant_id,
+    rs_tenant_id: form.rs_tenant_id || null,
     po_number: poNumber,
     po_date: new Date().toISOString().slice(0, 10),
     expected_delivery: form.expected_delivery || null,
@@ -155,7 +171,7 @@ const paymentOptions = [
   { value: 'net_90', label: 'Net 90' },
 ]
 
-onMounted(loadSuppliers)
+onMounted(() => { loadSuppliers(); loadRS() })
 </script>
 
 <template>
@@ -197,8 +213,11 @@ onMounted(loadSuppliers)
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="text-xs font-semibold text-[#555] mb-1.5 block">RS Tujuan Pengiriman *</label>
-                <input v-model="form.rs_name" type="text" placeholder="Nama Rumah Sakit..."
+                <select v-model="form.rs_tenant_id" @change="onRSSelect(form.rs_tenant_id)"
                   class="w-full bg-white border border-[#e0e0e0] rounded-xl px-3 py-2.5 text-sm text-[#1a1a1a] outline-none focus:border-[#6b1525] transition-colors">
+                  <option value="">Pilih RS...</option>
+                  <option v-for="rs in rsList" :key="rs.id" :value="rs.id">{{ rs.name }}</option>
+                </select>
               </div>
               <div>
                 <label class="text-xs font-semibold text-[#555] mb-1.5 block">Alamat RS</label>

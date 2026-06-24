@@ -9,7 +9,7 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('ar_accounts')
-    .select('id,ar_number,po_number,invoice_ref,invoice_amount,disbursed_amount,due_date,status,top_activated_at')
+    .select('id,ar_number,po_number,invoice_ref,invoice_amount,disbursed_amount,interest_amount,total_payable,paid_amount,outstanding_amount,due_date,status,top_activated_at')
     .eq('status', 'disbursed')
     .is('top_activated_at', null)
     .order('due_date', { ascending: true })

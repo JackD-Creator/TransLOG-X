@@ -73,6 +73,7 @@ async function saveItem() {
         min_order_qty: form.value.min_order_qty, stock_available: form.value.stock_available,
         lead_time_days: form.value.lead_time_days, payment_terms: form.value.payment_terms,
         is_available: form.value.is_available,
+        metadata: { ...editingItem.value.metadata, distributor_name: editingItem.value.metadata?.distributor_name },
       }).eq('id', editingItem.value.id)
       if (error) throw error
     } else {
