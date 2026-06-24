@@ -25,10 +25,13 @@ async function load() {
 
 const today = new Date().toISOString().slice(0, 10)
 
+// partially_paid + shortfall_covered_by_bank = Lunas untuk KSM (Bank bayar langsung)
+const isUnpaid = (i: any) => i.status !== 'paid' && !(i.status === 'partially_paid' && i.shortfall_covered_by_bank)
+
 // Aging buckets berdasarkan invoice due_date
 const aging = computed(() => {
-  const unpaid = invoices.value.filter(i => !['paid'].includes(i.status))
-  const sum = (arr: any[]) => arr.reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
+  const unpaid = invoices.value.filter(isUnpaid)
+  const sum = (arr: any[]) => arr.reduce((s, i) => s + Number(i.total_amount ?? 0), 0)
   const dd = (i: any) => Math.round((new Date(i.due_date).getTime() - new Date(today).getTime()) / 86400000)
 
   const current = unpaid.filter(i => dd(i) >= 0)
@@ -44,10 +47,10 @@ const aging = computed(() => {
   ]
 })
 
-const totalOutstanding = computed(() => invoices.value.filter(i => i.status !== 'paid').reduce((s, i) => s + Number(i.outstanding ?? 0), 0))
-const totalPaid = computed(() => invoices.value.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.total_amount), 0))
+const totalOutstanding = computed(() => invoices.value.filter(isUnpaid).reduce((s, i) => s + Number(i.total_amount ?? 0), 0))
+const totalPaid = computed(() => invoices.value.filter(i => !isUnpaid(i)).reduce((s, i) => s + Number(i.total_amount), 0))
 const totalOverdue = computed(() => {
-  return invoices.value.filter(i => i.status !== 'paid' && i.due_date < today).reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
+  return invoices.value.filter(i => isUnpaid(i) && i.due_date < today).reduce((s, i) => s + Number(i.total_amount ?? 0), 0)
 })
 
 watch(tenantId, (id) => { if (id) load() })

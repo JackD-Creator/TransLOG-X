@@ -33,13 +33,14 @@ async function load() {
   const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([
     // Revenue = Invoice KSM ke RS (+ po_number untuk match AR)
     supabase.from('ksm_invoices')
-      .select('total_amount,subtotal,tax_amount,status,paid_amount,metadata')
+      .select('total_amount,subtotal,tax_amount,status,paid_amount,metadata,shortfall_covered_by_bank')
       .eq('ksm_tenant_id', tenantId.value)
       .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    // AR = disbursement Bank ke Distributor (matched per PO)
+    // COGS = disbursement Bank ke Distributor untuk PO dalam periode ini
     supabase.from('ar_accounts')
-      .select('po_number,disbursed_amount,interest_amount')
-      .eq('ksm_tenant_id', tenantId.value),
+      .select('disbursed_amount,interest_amount')
+      .eq('ksm_tenant_id', tenantId.value)
+      .gte('invoice_date', startDate).lte('invoice_date', endDate),
     // Bunga harian shortfall (bagian KSM 50%)
     supabase.from('daily_interest_accruals')
       .select('ksm_share, ksm_invoices!inner(ksm_tenant_id)')
@@ -47,22 +48,21 @@ async function load() {
       .gte('accrual_date', startDate).lte('accrual_date', endDate),
   ])
 
-  const invoices = invData ?? []
+  const allInv = invData ?? []
   const arAccounts = arData ?? []
   const dailyInterest = diaData ?? []
 
-  // Revenue = total invoice ke RS
-  const revenue = invoices.reduce((s, i) => s + Number(i.total_amount), 0)
-  const revenuePPN = invoices.reduce((s, i) => s + Number(i.tax_amount), 0)
+  // Revenue = invoice yang sudah dibayar RS ke KSM (paid atau partially_paid + shortfall covered = lunas)
+  const invoices = allInv.filter((i: any) =>
+    i.status === 'paid' || (i.status === 'partially_paid' && i.shortfall_covered_by_bank)
+  )
+
+  const revenue = invoices.reduce((s: number, i: any) => s + Number(i.total_amount), 0)
+  const revenuePPN = invoices.reduce((s: number, i: any) => s + Number(i.tax_amount), 0)
   const revenueNetto = revenue - revenuePPN
 
-  // COGS = disbursement Bank ke Distributor, matched per PO dari invoice
-  const arMap: Record<string, number> = {}
-  for (const a of arAccounts) { if (a.po_number) arMap[a.po_number] = Number(a.disbursed_amount ?? 0) }
-  const cogs = invoices.reduce((s, i) => {
-    const poNum = (i as any).metadata?.po_number
-    return s + (poNum && arMap[poNum] ? arMap[poNum] : 0)
-  }, 0)
+  // COGS = disbursement Bank ke Distributor per PO dalam periode (filter by invoice_date)
+  const cogs = arAccounts.reduce((s: number, a: any) => s + Number(a.disbursed_amount ?? 0), 0)
 
   // Gross Profit = Revenue (netto PPN) - COGS
   const grossProfit = revenueNetto - cogs

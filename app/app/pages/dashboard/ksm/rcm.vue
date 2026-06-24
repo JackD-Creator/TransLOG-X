@@ -58,11 +58,12 @@ async function load() {
   const today     = new Date().toISOString().slice(0, 10)
 
   const [{ data: invData }, { data: arData }, { data: poData }, { data: notifData }] = await Promise.all([
-    supabase.from('ksm_invoices').select('total_amount,subtotal,tax_amount,status,paid_amount,due_date,metadata')
+    supabase.from('ksm_invoices').select('total_amount,subtotal,tax_amount,status,paid_amount,due_date,metadata,shortfall_covered_by_bank')
       .eq('ksm_tenant_id', tenantId.value)
       .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    supabase.from('ar_accounts').select('po_number,disbursed_amount,interest_amount,invoice_date,paid_date,status')
-      .eq('ksm_tenant_id', tenantId.value),
+    supabase.from('ar_accounts').select('disbursed_amount,interest_amount,status')
+      .eq('ksm_tenant_id', tenantId.value)
+      .gte('invoice_date', startDate).lte('invoice_date', endDate),
     supabase.from('ksm_purchase_orders').select('id,subtotal,total_amount,metadata')
       .eq('ksm_tenant_id', tenantId.value)
       .gte('po_date', startDate).lte('po_date', endDate),
@@ -74,22 +75,16 @@ async function load() {
   const po = poData ?? []
   const notif = notifData ?? []
 
-  // Revenue = Invoice KSM ke RS (netto PPN)
-  const totalRevenue = inv.reduce((s, i) => s + Number(i.total_amount ?? 0) - Number(i.tax_amount ?? 0), 0)
+  // Revenue = invoice yang sudah dibayar RS ke KSM (paid atau partially_paid + shortfall covered = lunas)
+  const paidInv = inv.filter((i: any) =>
+    i.status === 'paid' || (i.status === 'partially_paid' && i.shortfall_covered_by_bank)
+  )
+  const totalRevenue = paidInv.reduce((s, i) => s + Number(i.total_amount ?? 0) - Number(i.tax_amount ?? 0), 0)
 
-  // HPP + Interest = matched per PO number dari ar_accounts
-  const arMap: Record<string, any> = {}
-  for (const a of ar) { if (a.po_number) arMap[a.po_number] = a }
-  let totalCogs = 0, interestExp = 0
-  for (const i of inv) {
-    const poNum = (i as any).metadata?.po_number
-    const matched = poNum ? arMap[poNum] : null
-    if (matched) {
-      totalCogs += Number(matched.disbursed_amount ?? 0)
-      interestExp += Number(matched.interest_amount ?? 0)
-    }
-  }
-  // Fallback HPP dari PO data jika matching ar_accounts gagal (non-SCF or data lama)
+  // HPP = disbursed_amount dari ar_accounts dalam periode (tidak pakai po_number matching yang sering gagal)
+  let totalCogs = ar.reduce((s: number, a: any) => s + Number(a.disbursed_amount ?? 0), 0)
+  let interestExp = ar.reduce((s: number, a: any) => s + Number(a.interest_amount ?? 0), 0)
+  // Fallback jika ar_accounts kosong
   if (totalCogs === 0 && po.length > 0) {
     totalCogs = po.reduce((s: number, p: any) => s + Number(p.subtotal ?? 0) * 0.88, 0)
   }
@@ -120,8 +115,8 @@ async function load() {
   const completedNotif = notif.filter(n => n.status === 'completed').length
   const fulfilmentRate = notif.length > 0 ? (completedNotif / notif.length * 100) : 0
 
-  // AR Aging dari ksm_invoices (piutang RS, bukan hutang ke Bank)
-  const unpaidInv = inv.filter(i => !['paid'].includes(i.status))
+  // AR Aging — exclude partially_paid + shortfall_covered (= lunas untuk KSM)
+  const unpaidInv = inv.filter((i: any) => i.status !== 'paid' && !(i.status === 'partially_paid' && i.shortfall_covered_by_bank))
   const arCurrent = unpaidInv.filter(i => {
     const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
     return days <= 0
