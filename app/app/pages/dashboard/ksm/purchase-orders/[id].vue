@@ -47,12 +47,51 @@ async function load() {
   loading.value = false
 }
 
+const actionError = ref<string | null>(null)
+
 async function updateStatus(newStatus: string) {
   updating.value = true
-  await supabase.from('ksm_purchase_orders')
-    .update({ status: newStatus })
-    .eq('id', po.value.id)
-  await load()
+  actionError.value = null
+  try {
+    if (newStatus === 'submitted') {
+      const { error } = await supabase.from('ksm_purchase_orders').update({ status: newStatus }).eq('id', po.value.id)
+      if (error) throw error
+    } else if (newStatus === 'cancelled') {
+      const { error } = await supabase.from('ksm_purchase_orders').update({ status: newStatus }).eq('id', po.value.id)
+      if (error) throw error
+    }
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal update status'
+  }
+  updating.value = false
+}
+
+async function approvePO() {
+  updating.value = true
+  actionError.value = null
+  try {
+    const { data, error } = await supabase.rpc('ksm_approve_po', { p_po_id: po.value.id })
+    if (error) throw error
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal approve PO'
+  }
+  updating.value = false
+}
+
+async function requestCorrection() {
+  const reason = prompt('Alasan koreksi:')
+  if (!reason) return
+  updating.value = true
+  actionError.value = null
+  try {
+    const { data, error } = await supabase.rpc('ksm_request_po_correction', { p_po_id: po.value.id, p_reason: reason })
+    if (error) throw error
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal kirim koreksi'
+  }
   updating.value = false
 }
 
@@ -67,15 +106,16 @@ function openReceiveModal() {
 
 async function confirmReceive() {
   updating.value = true
-  for (const l of lines.value) {
-    await supabase.from('ksm_po_lines').update({ received_qty: receiveQtys.value[l.id] ?? 0 }).eq('id', l.id)
+  actionError.value = null
+  try {
+    const items = lines.value.map(l => ({ line_id: l.id, received_qty: receiveQtys.value[l.id] ?? 0 }))
+    const { data, error } = await supabase.rpc('rs_confirm_receipt', { p_po_id: po.value.id, p_received_items: items })
+    if (error) throw error
+    receiveModal.value = false
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal konfirmasi penerimaan'
   }
-  const allFull = lines.value.every(l => (receiveQtys.value[l.id] ?? 0) >= l.ordered_qty)
-  await supabase.from('ksm_purchase_orders')
-    .update({ status: allFull ? 'fully_received' : 'partially_received' })
-    .eq('id', po.value.id)
-  receiveModal.value = false
-  await load()
   updating.value = false
 }
 
@@ -169,17 +209,50 @@ onMounted(load)
         </div>
       </div>
 
+      <!-- Error display -->
+      <div v-if="actionError" class="mt-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+        <UIcon name="i-lucide-alert-circle" class="text-red-500 text-sm mt-0.5 flex-shrink-0"/>
+        <div>
+          <p class="text-xs font-semibold text-red-700">Gagal</p>
+          <p class="text-[10px] text-red-600">{{ actionError }}</p>
+        </div>
+        <button @click="actionError = null" class="ml-auto text-red-300 hover:text-red-500"><UIcon name="i-lucide-x" class="text-xs"/></button>
+      </div>
+
       <!-- Aksi sesuai status -->
       <div class="mt-5 flex gap-2 flex-wrap">
         <button v-if="po.status === 'draft'" @click="updateStatus('submitted')" :disabled="updating"
           class="px-4 py-2 bg-[#6b1525] text-white text-xs font-bold rounded-lg hover:bg-[#5a1120] disabled:opacity-50 transition-colors flex items-center gap-2">
           <UIcon name="i-lucide-send" class="text-sm"/> Ajukan ke Distributor
         </button>
+
+        <!-- Supplier sudah konfirmasi → KSM review: approve atau minta koreksi -->
+        <template v-if="po.status === 'approved' && po.metadata?.needs_ksm_review">
+          <div class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
+            <UIcon name="i-lucide-info" class="text-sm"/>
+            Supplier sudah konfirmasi — review dan approve atau minta koreksi
+          </div>
+          <button @click="approvePO" :disabled="updating"
+            class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2">
+            <UIcon name="i-lucide-check" class="text-sm"/> Approve & Kirim Info ke RS
+          </button>
+          <button @click="requestCorrection" :disabled="updating"
+            class="px-4 py-2 bg-white border border-amber-300 text-amber-700 text-xs font-semibold rounded-lg hover:bg-amber-50 disabled:opacity-50 transition-colors flex items-center gap-2">
+            <UIcon name="i-lucide-rotate-ccw" class="text-sm"/> Minta Koreksi ke Supplier
+          </button>
+        </template>
+
+        <!-- Approve tanpa review flag (approve biasa) -->
+        <button v-else-if="po.status === 'approved'" @click="approvePO" :disabled="updating"
+          class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2">
+          <UIcon name="i-lucide-check" class="text-sm"/> Approve & Kirim Info ke RS
+        </button>
+
         <button v-if="po.status === 'sent_to_supplier'" @click="openReceiveModal" :disabled="updating"
           class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2">
           <UIcon name="i-lucide-package-check" class="text-sm"/> Input Info Penerimaan RS
         </button>
-        <button v-if="['fully_received'].includes(po.status)"
+        <button v-if="po.status === 'fully_received'"
           class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
           <UIcon name="i-lucide-file-text" class="text-sm"/> Buat Invoice ke RS
         </button>

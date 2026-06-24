@@ -94,106 +94,48 @@ function supplierCheckLabel(meta: any) {
   return null
 }
 
-// ─── Actions ──────────────────────────────────────────────────────────────────
+// ─── Actions (semua via RPC backend) ─────────────────────────────────────────
+
+const actionError = ref<string | null>(null)
 
 async function reviewAndCheckSupplier(notifId: string) {
   actionLoading.value = notifId
-  await supabase.from('hospital_notifications').update({
-    status: 'acknowledged',
-    acknowledged_at: new Date().toISOString(),
-    metadata: { ...notifications.value.find(n => n.id === notifId)?.metadata, supplier_check: 'checking' },
-  }).eq('id', notifId)
-  await load()
+  actionError.value = null
+  try {
+    const { data, error } = await supabase.rpc('notif_review_and_check_supplier', { p_notif_id: notifId })
+    if (error) throw error
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal review notifikasi'
+  }
   actionLoading.value = null
 }
 
 async function simulateSupplierConfirm(notifId: string) {
   actionLoading.value = notifId
-  const notif = notifications.value.find(n => n.id === notifId)
-  await supabase.from('hospital_notifications').update({
-    metadata: { ...notif?.metadata, supplier_check: 'confirmed', supplier_confirmed_at: new Date().toISOString() },
-  }).eq('id', notifId)
-  await load()
+  actionError.value = null
+  try {
+    const { data, error } = await supabase.rpc('notif_supplier_confirm', { p_notif_id: notifId })
+    if (error) throw error
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal konfirmasi supplier'
+  }
   actionLoading.value = null
 }
 
 async function createAutoPO(notifId: string) {
   actionLoading.value = notifId
-  const notif = notifications.value.find(n => n.id === notifId)
-  if (!notif) return
-
-  const lines = notif.hospital_notification_lines ?? []
-  if (lines.length === 0) { actionLoading.value = null; return }
-
-  // Build PO from notification items
-  const poLines = lines.map((l: any) => {
-    const sup = supplierMap.value[l.kfa_code]
-    const kfa = priceMap.value[l.kfa_code]
-    const price = sup?.sell_price ?? kfa?.fix_price ?? 10000
-    return {
-      kfa_code: l.kfa_code,
-      item_name: l.item_name,
-      uom: l.uom,
-      ordered_qty: l.requested_qty,
-      unit_price: price,
-      line_total: price * l.requested_qty,
-    }
-  })
-
-  const subtotal = poLines.reduce((s: number, l: any) => s + l.line_total, 0)
-  const tax = Math.round(subtotal * 0.11)
-  const total = subtotal + tax
-  const seq = Date.now().toString().slice(-6)
-  const poNumber = `KSM-PO-2026-${seq}`
-
-  const { data: po, error: poErr } = await supabase.from('ksm_purchase_orders').insert({
-    ksm_tenant_id: tenantId.value,
-    supplier_tenant_id: '8187892c-8d84-43b2-a39c-1e171d301297', // demo distributor
-    rs_tenant_id: notif.rs_tenant_id,
-    notification_id: notifId,
-    po_number: poNumber,
-    po_date: new Date().toISOString().slice(0, 10),
-    expected_delivery: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
-    status: 'submitted',
-    payment_terms: 'net_30',
-    subtotal,
-    tax_amount: tax,
-    total_amount: total,
-    metadata: {
-      rs_name: notif.metadata?.rs_name,
-      rs_address: notif.metadata?.rs_address,
-      supplier_name: supplierMap.value[lines[0]?.kfa_code]?.distributor_name ?? 'PT Distributor Farma Demo',
-      auto_from_notif: notif.notif_number,
-    },
-  }).select('id').single()
-
-  if (poErr) { console.error('PO error:', poErr.message); actionLoading.value = null; return }
-
-  // Insert PO lines
-  if (po?.id) {
-    const plData = poLines.map((l: any) => ({ ...l, po_id: po.id }))
-    await supabase.from('ksm_po_lines').insert(plData)
+  actionError.value = null
+  try {
+    const { data, error } = await supabase.rpc('create_po_from_notification', { p_notif_id: notifId })
+    if (error) throw error
+    await load()
+    if (data?.po_id) router.push(`/dashboard/ksm/purchase-orders/${data.po_id}`)
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal membuat PO otomatis'
   }
-
-  // Update notification status
-  await supabase.from('hospital_notifications').update({
-    status: 'po_created',
-    metadata: { ...notif.metadata, po_number: poNumber, po_id: po?.id },
-  }).eq('id', notifId)
-
-  await load()
   actionLoading.value = null
-
-  if (po?.id) router.push(`/dashboard/ksm/purchase-orders/${po.id}`)
-}
-
-function fmtRp(n: number | null) {
-  if (!n) return '-'
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  return 'Rp ' + Math.round(n).toLocaleString('id-ID')
-}
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 // Stats
@@ -217,6 +159,13 @@ onMounted(() => { if (tenantId.value) load() })
         <UIcon name="i-lucide-refresh-cw" class="text-sm"/>
         Refresh
       </button>
+    </div>
+
+    <!-- Error Banner -->
+    <div v-if="actionError" class="px-4 py-2.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+      <UIcon name="i-lucide-alert-circle" class="text-red-500 text-sm mt-0.5 flex-shrink-0"/>
+      <p class="text-xs text-red-700 flex-1">{{ actionError }}</p>
+      <button @click="actionError = null" class="text-red-300 hover:text-red-500"><UIcon name="i-lucide-x" class="text-xs"/></button>
     </div>
 
     <!-- Stats -->
