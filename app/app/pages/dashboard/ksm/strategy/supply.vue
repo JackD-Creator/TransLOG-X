@@ -72,8 +72,8 @@ const rev = computed(() => {
 })
 
 // ─── Sensitivity Table: RS count × vol per RS ───────────────────────────────
-const sensCols = [300, 500, 750, 1000, 1500]  // jt Rp / RS / bulan
-const sensRows = [3, 5, 8, 10, 15]             // jumlah RS
+const sensCols = [500, 1000, 2000, 5000, 10000, 50000]  // jt Rp / RS / bulan (s/d 50 M)
+const sensRows = [3, 5, 8, 10, 15, 20]                  // jumlah RS
 
 function sensGP(numRS: number, volJt: number) {
   const monthly = numRS * volJt * 1_000_000
@@ -113,28 +113,28 @@ onMounted(loadBenchmarks)
     </div>
 
     <!-- Executive Summary KPIs -->
-    <div class="rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 60%, #1a1a1a 100%)">
-      <p class="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-4">Executive Summary — Revenue Potential</p>
+    <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5">
+      <p class="text-[10px] uppercase tracking-[0.2em] text-[#999] mb-4">Executive Summary — Revenue Potential</p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <p class="text-[10px] text-white/50 mb-1">Gross Revenue (Annual)</p>
-          <p class="text-xl font-bold text-white">{{ fmtM(rev.totalAnnual) }}</p>
-          <p class="text-[10px] text-white/40 mt-0.5">{{ model.num_rs }} RS × {{ fmtJt(model.avg_monthly_vol_per_rs) }}/bln</p>
+          <p class="text-[10px] text-[#999] mb-1">Gross Revenue (Annual)</p>
+          <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtM(rev.totalAnnual) }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">{{ model.num_rs }} RS × {{ fmtJt(model.avg_monthly_vol_per_rs) }}/bln</p>
         </div>
         <div>
-          <p class="text-[10px] text-white/50 mb-1">Gross Profit (Annual)</p>
-          <p class="text-xl font-bold text-emerald-400">{{ fmtM(rev.totalGPAnnual) }}</p>
-          <p class="text-[10px] text-white/40 mt-0.5">Blended margin {{ fmtPct(rev.blendedMargin) }}</p>
+          <p class="text-[10px] text-[#999] mb-1">Gross Profit (Annual)</p>
+          <p class="text-xl font-bold text-emerald-700">{{ fmtM(rev.totalGPAnnual) }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">Blended margin {{ fmtPct(rev.blendedMargin) }}</p>
         </div>
         <div>
-          <p class="text-[10px] text-white/50 mb-1">Service Revenue (Annual)</p>
-          <p class="text-xl font-bold text-blue-400">{{ fmtM(rev.serviceRev * 12) }}</p>
-          <p class="text-[10px] text-white/40 mt-0.5">{{ fmtJt(model.service_fee_per_rs) }}/RS/bln</p>
+          <p class="text-[10px] text-[#999] mb-1">Service Revenue (Annual)</p>
+          <p class="text-xl font-bold text-blue-700">{{ fmtM(rev.serviceRev * 12) }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">{{ fmtJt(model.service_fee_per_rs) }}/RS/bln</p>
         </div>
         <div>
-          <p class="text-[10px] text-white/50 mb-1">Volume Rebate (Annual)</p>
-          <p class="text-xl font-bold text-amber-400">{{ fmtM(rev.rebate * 12) }}</p>
-          <p class="text-[10px] text-white/40 mt-0.5">{{ fmtPct(model.volume_rebate_pct) }} dari total PO</p>
+          <p class="text-[10px] text-[#999] mb-1">Volume Rebate (Annual)</p>
+          <p class="text-xl font-bold text-amber-700">{{ fmtM(rev.rebate * 12) }}</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">{{ fmtPct(model.volume_rebate_pct) }} dari total PO</p>
         </div>
       </div>
     </div>
@@ -160,7 +160,7 @@ onMounted(loadBenchmarks)
               <label class="text-[11px] text-[#666]">Vol. per RS / Bulan</label>
               <span class="text-[11px] font-bold text-[#6b1525]">{{ fmtM(model.avg_monthly_vol_per_rs) }}</span>
             </div>
-            <input type="range" v-model.number="model.avg_monthly_vol_per_rs" :min="100_000_000" :max="2_000_000_000" :step="50_000_000" class="w-full accent-[#6b1525]"/>
+            <input type="range" v-model.number="model.avg_monthly_vol_per_rs" :min="100_000_000" :max="50_000_000_000" :step="500_000_000" class="w-full accent-[#6b1525]"/>
           </div>
 
           <div>
@@ -346,27 +346,27 @@ onMounted(loadBenchmarks)
 
     <!-- Deal Structure Framework -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-[#1a1a1a] text-white rounded-xl p-5">
-        <p class="text-[10px] uppercase tracking-widest text-white/50 mb-3">Structure I — Spot Supply</p>
-        <p class="text-base font-bold text-white mb-3">Transaction-Based Model</p>
-        <div class="space-y-2 text-[11px] text-white/70">
-          <div class="flex justify-between"><span>Pricing</span><span class="text-white font-semibold">HNA + 12–15%</span></div>
-          <div class="flex justify-between"><span>Payment Terms</span><span class="text-white font-semibold">30 hari nett</span></div>
-          <div class="flex justify-between"><span>Min. Order</span><span class="text-white font-semibold">Rp 5 jt/PO</span></div>
-          <div class="flex justify-between"><span>Risk Level</span><span class="text-amber-400 font-semibold">MEDIUM</span></div>
-          <div class="flex justify-between"><span>Net Margin est.</span><span class="text-emerald-400 font-bold">9–12%</span></div>
+      <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5">
+        <p class="text-[10px] uppercase tracking-widest text-[#999] mb-3">Structure I — Spot Supply</p>
+        <p class="text-base font-bold text-[#1a1a1a] mb-3">Transaction-Based Model</p>
+        <div class="space-y-2 text-[11px] text-[#666]">
+          <div class="flex justify-between"><span>Pricing</span><span class="text-[#1a1a1a] font-semibold">HNA + 12–15%</span></div>
+          <div class="flex justify-between"><span>Payment Terms</span><span class="text-[#1a1a1a] font-semibold">30 hari nett</span></div>
+          <div class="flex justify-between"><span>Min. Order</span><span class="text-[#1a1a1a] font-semibold">Rp 5 jt/PO</span></div>
+          <div class="flex justify-between"><span>Risk Level</span><span class="text-amber-700 font-semibold">MEDIUM</span></div>
+          <div class="flex justify-between"><span>Net Margin est.</span><span class="text-emerald-700 font-bold">9–12%</span></div>
         </div>
       </div>
 
-      <div class="bg-[#6b1525] text-white rounded-xl p-5 ring-2 ring-[#6b1525]/50">
-        <p class="text-[10px] uppercase tracking-widest text-white/70 mb-3">Structure II — RECOMMENDED ★</p>
-        <p class="text-base font-bold text-white mb-3">Annual Contract + Service Bundle</p>
-        <div class="space-y-2 text-[11px] text-white/80">
-          <div class="flex justify-between"><span>Base Pricing</span><span class="text-white font-semibold">HNA + 9–11%</span></div>
-          <div class="flex justify-between"><span>Service Fee</span><span class="text-white font-semibold">Rp 5–10 jt/RS/bln</span></div>
-          <div class="flex justify-between"><span>Rebate</span><span class="text-white font-semibold">2–3% dari PO vol.</span></div>
-          <div class="flex justify-between"><span>Payment Terms</span><span class="text-white font-semibold">45 hari nett</span></div>
-          <div class="flex justify-between"><span>Net Margin est.</span><span class="text-amber-300 font-bold">13–18%</span></div>
+      <div class="bg-[#f5f5f5] border-2 border-[#6b1525] rounded-xl p-5">
+        <p class="text-[10px] uppercase tracking-widest text-[#6b1525] font-bold mb-3">Structure II — RECOMMENDED ★</p>
+        <p class="text-base font-bold text-[#1a1a1a] mb-3">Annual Contract + Service Bundle</p>
+        <div class="space-y-2 text-[11px] text-[#666]">
+          <div class="flex justify-between"><span>Base Pricing</span><span class="text-[#1a1a1a] font-semibold">HNA + 9–11%</span></div>
+          <div class="flex justify-between"><span>Service Fee</span><span class="text-[#1a1a1a] font-semibold">Rp 5–10 jt/RS/bln</span></div>
+          <div class="flex justify-between"><span>Rebate</span><span class="text-[#1a1a1a] font-semibold">2–3% dari PO vol.</span></div>
+          <div class="flex justify-between"><span>Payment Terms</span><span class="text-[#1a1a1a] font-semibold">45 hari nett</span></div>
+          <div class="flex justify-between"><span>Net Margin est.</span><span class="text-emerald-700 font-bold">13–18%</span></div>
         </div>
       </div>
 

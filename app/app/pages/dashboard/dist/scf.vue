@@ -43,18 +43,18 @@ onMounted(loadData)
     </div>
 
     <!-- How it works -->
-    <div class="rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #1a4a6b 0%, #0f2540 100%)">
-      <p class="text-[10px] uppercase tracking-widest text-white/40 mb-3">Mekanisme SCF — Reverse Factoring</p>
+    <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5">
+      <p class="text-[10px] uppercase tracking-widest text-[#999] mb-3">Mekanisme SCF — Reverse Factoring</p>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-[11px] text-center">
         <div v-for="step in [
           { icon:'i-lucide-file-check', text:'KSM buat PO terverifikasi di e-Logistik', label:'1. PO Digital' },
           { icon:'i-lucide-truck', text:'Distributor kirim barang, GR dikonfirmasi sistem', label:'2. GR Konfirmasi' },
           { icon:'i-lucide-landmark', text:'Bank cair invoice D+1 → rekening distributor', label:'3. Bank Bayar' },
           { icon:'i-lucide-rotate-ccw', text:'KSM bayar Bank pada jatuh tempo (30–45 hari)', label:'4. KSM Bayar Bank' },
-        ]" :key="step.label" class="bg-white/5 rounded-xl p-3">
-          <UIcon :name="step.icon" class="text-2xl text-amber-400 mb-2"/>
-          <p class="font-bold text-white mb-1">{{ step.label }}</p>
-          <p class="text-white/50">{{ step.text }}</p>
+        ]" :key="step.label" class="bg-[#ebebeb] rounded-xl p-3">
+          <UIcon :name="step.icon" class="text-2xl text-[#6b1525] mb-2"/>
+          <p class="font-bold text-[#1a1a1a] mb-1">{{ step.label }}</p>
+          <p class="text-[#777]">{{ step.text }}</p>
         </div>
       </div>
     </div>

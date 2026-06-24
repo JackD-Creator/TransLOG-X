@@ -67,10 +67,10 @@ watch(period, loadData)
 
     <!-- KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="rounded-xl p-4 text-center text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 100%)">
-        <p class="text-[10px] text-white/60 uppercase mb-1">Net Income</p>
-        <p class="text-xl font-bold" :class="netIncome >= 0 ? 'text-amber-300' : 'text-red-300'">{{ fmtRp(netIncome) }}</p>
-        <p class="text-[10px] text-white/50 mt-0.5">{{ netIncome >= 0 ? 'Profit' : 'Loss' }}</p>
+      <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
+        <p class="text-[10px] text-[#999] uppercase mb-1">Net Income</p>
+        <p class="text-xl font-bold" :class="netIncome >= 0 ? 'text-emerald-700' : 'text-red-600'">{{ fmtRp(netIncome) }}</p>
+        <p class="text-[10px] text-[#aaa] mt-0.5">{{ netIncome >= 0 ? 'Profit' : 'Loss' }}</p>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
         <p class="text-[10px] text-[#999] uppercase mb-1">Gross Income</p>
@@ -96,8 +96,8 @@ watch(period, loadData)
     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <!-- Income -->
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
-        <div class="bg-emerald-700 px-5 py-3">
-          <p class="text-xs font-bold text-white">PENDAPATAN</p>
+        <div class="bg-[#ebebeb] border-b border-[#e0e0e0] px-5 py-3">
+          <p class="text-xs font-bold text-[#1a1a1a]">PENDAPATAN</p>
         </div>
         <div class="p-5 space-y-2 text-xs">
           <div v-for="row in [
@@ -117,8 +117,8 @@ watch(period, loadData)
 
       <!-- Expense -->
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
-        <div class="bg-[#6b1525] px-5 py-3">
-          <p class="text-xs font-bold text-white">BEBAN</p>
+        <div class="bg-[#ebebeb] border-b border-[#e0e0e0] px-5 py-3">
+          <p class="text-xs font-bold text-[#1a1a1a]">BEBAN</p>
         </div>
         <div class="p-5 space-y-2 text-xs">
           <div v-for="row in [

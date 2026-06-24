@@ -50,11 +50,11 @@ onMounted(loadData)
 
     <!-- Summary -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="rounded-xl p-4 text-center text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 100%)">
-        <p class="text-[10px] text-white/60 uppercase mb-1">Utilisasi</p>
-        <p class="text-2xl font-bold" :class="avgUtilization >= 80 ? 'text-amber-300' : 'text-emerald-300'">{{ avgUtilization.toFixed(1) }}%</p>
-        <div class="mt-2 bg-white/10 rounded-full h-1.5">
-          <div class="h-1.5 rounded-full bg-emerald-400" :style="{width: avgUtilization+'%'}"/>
+      <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">
+        <p class="text-[10px] text-[#999] uppercase mb-1">Utilisasi</p>
+        <p class="text-2xl font-bold" :class="avgUtilization >= 80 ? 'text-amber-700' : 'text-emerald-700'">{{ avgUtilization.toFixed(1) }}%</p>
+        <div class="mt-2 bg-[#e0e0e0] rounded-full h-1.5">
+          <div class="h-1.5 rounded-full bg-[#6b1525]" :style="{width: avgUtilization+'%'}"/>
         </div>
       </div>
       <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 text-center">

@@ -141,19 +141,19 @@ const totalEcoBar = computed(() => {
     </div>
 
     <!-- Total Ecosystem Value -->
-    <div class="rounded-xl p-6 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 60%, #1a1a1a 100%)">
-      <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-2">Total Ecosystem Value Created — Annual</p>
+    <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-6">
+      <p class="text-[10px] uppercase tracking-[0.2em] text-[#999] mb-2">Total Ecosystem Value Created — Annual</p>
       <div class="flex items-end gap-4 mb-5">
-        <p class="text-3xl font-bold text-white">{{ fmtM(calc.totalEcoValue) }}</p>
-        <p class="text-sm text-white/40 mb-1">dibagi ke semua pihak — tidak ada zero-sum game</p>
+        <p class="text-3xl font-bold text-[#1a1a1a]">{{ fmtM(calc.totalEcoValue) }}</p>
+        <p class="text-sm text-[#999] mb-1">dibagi ke semua pihak — tidak ada zero-sum game</p>
       </div>
       <div class="space-y-2">
         <div v-for="p in totalEcoBar" :key="p.id" class="flex items-center gap-3">
-          <span class="text-[11px] text-white/50 w-32 flex-shrink-0">{{ p.name }}</span>
-          <div class="flex-1 bg-white/10 rounded-full h-3">
+          <span class="text-[11px] text-[#666] w-32 flex-shrink-0">{{ p.name }}</span>
+          <div class="flex-1 bg-[#e0e0e0] rounded-full h-3">
             <div :class="[p.bar, 'h-3 rounded-full transition-all duration-500']" :style="{ width: p.barPct + '%' }"/>
           </div>
-          <span class="text-[11px] font-bold text-white w-32 text-right flex-shrink-0">{{ fmtRp(p.value) }}/thn</span>
+          <span class="text-[11px] font-bold text-[#1a1a1a] w-32 text-right flex-shrink-0">{{ fmtRp(p.value) }}/thn</span>
         </div>
       </div>
     </div>

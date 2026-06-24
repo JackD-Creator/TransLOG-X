@@ -131,9 +131,9 @@ onMounted(loadData)
 
       <!-- Operasional -->
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
-        <div class="bg-emerald-700 px-5 py-3 flex items-center justify-between">
-          <p class="text-xs font-bold text-white">Aktivitas Operasional</p>
-          <p class="text-xs font-bold" :class="netOp >= 0 ? 'text-emerald-200' : 'text-red-200'">{{ fmtRp(netOp) }}</p>
+        <div class="bg-[#ebebeb] border-b border-[#e0e0e0] px-5 py-3 flex items-center justify-between">
+          <p class="text-xs font-bold text-[#1a1a1a]">Aktivitas Operasional</p>
+          <p class="text-xs font-bold" :class="netOp >= 0 ? 'text-emerald-700' : 'text-red-600'">{{ fmtRp(netOp) }}</p>
         </div>
         <div class="p-5 text-xs space-y-1">
           <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2">Kas Masuk</p>
@@ -160,9 +160,9 @@ onMounted(loadData)
 
       <!-- Pembiayaan -->
       <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
-        <div class="bg-blue-700 px-5 py-3 flex items-center justify-between">
-          <p class="text-xs font-bold text-white">Aktivitas Pembiayaan (SCF)</p>
-          <p class="text-xs font-bold" :class="netFin >= 0 ? 'text-blue-200' : 'text-amber-200'">{{ fmtRp(netFin) }}</p>
+        <div class="bg-[#ebebeb] border-b border-[#e0e0e0] px-5 py-3 flex items-center justify-between">
+          <p class="text-xs font-bold text-[#1a1a1a]">Aktivitas Pembiayaan (SCF)</p>
+          <p class="text-xs font-bold" :class="netFin >= 0 ? 'text-blue-700' : 'text-amber-700'">{{ fmtRp(netFin) }}</p>
         </div>
         <div class="p-5 text-xs space-y-1">
           <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-2">Kas Masuk</p>
@@ -180,12 +180,12 @@ onMounted(loadData)
       </div>
 
       <!-- Net Change -->
-      <div :class="['rounded-xl p-5 flex items-center justify-between', netCash >= 0 ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200']">
+      <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5 flex items-center justify-between">
         <div>
-          <p class="text-xs font-bold" :class="netCash >= 0 ? 'text-emerald-800' : 'text-red-800'">
+          <p class="text-xs font-bold text-[#1a1a1a]">
             Kenaikan (Penurunan) Bersih Kas & Setara Kas
           </p>
-          <p class="text-[11px] mt-0.5" :class="netCash >= 0 ? 'text-emerald-600' : 'text-red-600'">
+          <p class="text-[11px] mt-0.5" :class="netCash >= 0 ? 'text-emerald-700' : 'text-red-600'">
             {{ netCash >= 0 ? 'Cashflow positif — operasional menghasilkan kas melebihi pembiayaan' : 'Cashflow negatif — perlu optimasi collection AR atau kurangi outstanding SCF' }}
           </p>
         </div>

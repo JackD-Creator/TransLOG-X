@@ -183,33 +183,33 @@ onMounted(loadKfa)
         </div>
       </div>
 
-      <div class="lg:col-span-2 rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)">
-        <p class="text-[10px] uppercase tracking-widest text-white/40 mb-4">Selected Item — KFA Benchmark</p>
+      <div class="lg:col-span-2 bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5">
+        <p class="text-[10px] uppercase tracking-widest text-[#999] mb-4">Selected Item — KFA Benchmark</p>
         <div v-if="selectedItem" class="space-y-3">
-          <p class="text-base font-bold text-white">{{ selectedItem.name }}</p>
-          <p class="text-[11px] text-white/50">{{ selectedItem.kelas_terapi }} · FORNAS · KFA {{ selectedItem.kfa_code }}</p>
+          <p class="text-base font-bold text-[#1a1a1a]">{{ selectedItem.name }}</p>
+          <p class="text-[11px] text-[#777]">{{ selectedItem.kelas_terapi }} · FORNAS · KFA {{ selectedItem.kfa_code }}</p>
           <div class="grid grid-cols-3 gap-3 mt-4">
-            <div class="bg-white/5 rounded-lg p-3">
-              <p class="text-[10px] text-white/40 mb-1">HAP (Floor)</p>
-              <p class="text-lg font-bold text-white">{{ fmtRp(calc.hap) }}</p>
-              <p class="text-[10px] text-white/30 mt-0.5">Kemkes Reference</p>
+            <div class="bg-[#ebebeb] rounded-lg p-3">
+              <p class="text-[10px] text-[#999] mb-1">HAP (Floor)</p>
+              <p class="text-lg font-bold text-[#1a1a1a]">{{ fmtRp(calc.hap) }}</p>
+              <p class="text-[10px] text-[#aaa] mt-0.5">Kemkes Reference</p>
             </div>
-            <div class="bg-white/5 rounded-lg p-3">
-              <p class="text-[10px] text-white/40 mb-1">HNA est.</p>
-              <p class="text-lg font-bold text-blue-400">{{ fmtRp(calc.hap * 1.10) }}</p>
-              <p class="text-[10px] text-white/30 mt-0.5">HAP × 1.10 (target beli)</p>
+            <div class="bg-[#ebebeb] rounded-lg p-3">
+              <p class="text-[10px] text-[#999] mb-1">HNA est.</p>
+              <p class="text-lg font-bold text-blue-700">{{ fmtRp(calc.hap * 1.10) }}</p>
+              <p class="text-[10px] text-[#aaa] mt-0.5">HAP × 1.10 (target beli)</p>
             </div>
-            <div class="bg-white/5 rounded-lg p-3">
-              <p class="text-[10px] text-white/40 mb-1">HET (Ceiling)</p>
-              <p class="text-lg font-bold text-emerald-400">{{ fmtRp(calc.het) }}</p>
-              <p class="text-[10px] text-white/30 mt-0.5">Max jual ke RS</p>
+            <div class="bg-[#ebebeb] rounded-lg p-3">
+              <p class="text-[10px] text-[#999] mb-1">HET (Ceiling)</p>
+              <p class="text-lg font-bold text-emerald-700">{{ fmtRp(calc.het) }}</p>
+              <p class="text-[10px] text-[#aaa] mt-0.5">Max jual ke RS</p>
             </div>
           </div>
-          <div class="bg-white/5 rounded-lg p-3 mt-2">
-            <p class="text-[10px] text-white/50 mb-1">Maximum Spread (HNA → HET)</p>
-            <p class="text-xl font-bold text-amber-400">
+          <div class="bg-[#ebebeb] rounded-lg p-3 mt-2">
+            <p class="text-[10px] text-[#999] mb-1">Maximum Spread (HNA → HET)</p>
+            <p class="text-xl font-bold text-[#6b1525]">
               +{{ (((calc.het - calc.hap * 1.10) / (calc.hap * 1.10)) * 100).toFixed(1) }}%
-              <span class="text-sm font-normal text-white/50 ml-2">= {{ fmtRp(calc.het - calc.hap * 1.10) }} / unit</span>
+              <span class="text-sm font-normal text-[#777] ml-2">= {{ fmtRp(calc.het - calc.hap * 1.10) }} / unit</span>
             </p>
           </div>
         </div>
@@ -256,40 +256,40 @@ onMounted(loadKfa)
       <p class="text-xs font-bold text-[#1a1a1a] mb-3">Deal Scenario Analysis — Annual Gross Profit (after financing cost)</p>
       <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
         <div v-for="s in scenarios" :key="s.id"
-          :class="['rounded-xl p-4 border transition-all', s.recommended ? 'bg-[#6b1525] text-white border-[#6b1525] ring-2 ring-[#6b1525]/40' : 'bg-[#f5f5f5] border-[#e5e5e5] text-[#1a1a1a]']">
+          :class="['rounded-xl p-4 border transition-all bg-[#f5f5f5]', s.recommended ? 'border-2 border-[#6b1525]' : 'border-[#e5e5e5]']">
           <span :class="['text-[10px] px-2 py-0.5 rounded-full font-bold mb-3 inline-block', s.badge]">
             {{ s.tag }}
           </span>
-          <p :class="['text-xs font-bold mb-3', s.recommended ? 'text-white' : 'text-[#1a1a1a]']">{{ s.name }}</p>
+          <p class="text-xs font-bold mb-3 text-[#1a1a1a]">{{ s.name }}</p>
           <div class="space-y-1.5">
             <div class="flex justify-between text-[11px]">
-              <span :class="s.recommended ? 'text-white/60' : 'text-[#999]'">Harga Beli</span>
-              <span :class="['font-semibold', s.recommended ? 'text-white' : 'text-[#1a1a1a]']">{{ fmtRp(s.buyPrice) }}</span>
+              <span class="text-[#999]">Harga Beli</span>
+              <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(s.buyPrice) }}</span>
             </div>
             <div class="flex justify-between text-[11px]">
-              <span :class="s.recommended ? 'text-white/60' : 'text-[#999]'">Harga Jual RS</span>
-              <span :class="['font-semibold', s.recommended ? 'text-white' : 'text-[#1a1a1a]']">{{ fmtRp(s.sellPrice) }}</span>
+              <span class="text-[#999]">Harga Jual RS</span>
+              <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(s.sellPrice) }}</span>
             </div>
             <div class="flex justify-between text-[11px]">
-              <span :class="s.recommended ? 'text-white/60' : 'text-[#999]'">Net Margin</span>
-              <span :class="['font-bold', s.recommended ? 'text-amber-300' : 'text-emerald-700']">{{ fmtPct(s.netMarginPct) }}</span>
+              <span class="text-[#999]">Net Margin</span>
+              <span class="font-bold text-emerald-700">{{ fmtPct(s.netMarginPct) }}</span>
             </div>
             <div class="flex justify-between text-[11px]">
-              <span :class="s.recommended ? 'text-white/60' : 'text-[#999]'">Termin</span>
-              <span :class="['font-semibold', s.recommended ? 'text-white' : 'text-[#555]']">{{ s.tenor }} hari</span>
+              <span class="text-[#999]">Termin</span>
+              <span class="font-semibold text-[#555]">{{ s.tenor }} hari</span>
             </div>
-            <div class="border-t pt-1.5 mt-1.5" :class="s.recommended ? 'border-white/20' : 'border-[#ddd]'">
+            <div class="border-t border-[#ddd] pt-1.5 mt-1.5">
               <div class="flex justify-between text-[11px]">
-                <span :class="s.recommended ? 'text-white/60' : 'text-[#999]'">GP Bruto/thn</span>
-                <span :class="['font-semibold', s.recommended ? 'text-white' : 'text-[#555]']">{{ fmtRp(s.annualGP) }}</span>
+                <span class="text-[#999]">GP Bruto/thn</span>
+                <span class="font-semibold text-[#555]">{{ fmtRp(s.annualGP) }}</span>
               </div>
               <div class="flex justify-between text-[11px] mt-0.5">
-                <span :class="s.recommended ? 'text-white/60' : 'text-[#999]'">Fin. Cost/thn</span>
-                <span class="font-semibold text-red-400">-{{ fmtRp(s.financingCost) }}</span>
+                <span class="text-[#999]">Fin. Cost/thn</span>
+                <span class="font-semibold text-red-600">-{{ fmtRp(s.financingCost) }}</span>
               </div>
               <div class="flex justify-between text-[11px] mt-1 font-bold">
-                <span :class="s.recommended ? 'text-white/80' : 'text-[#333]'">Net GP/thn</span>
-                <span :class="s.recommended ? 'text-amber-300 text-sm' : 'text-emerald-700 text-sm'">
+                <span class="text-[#333]">Net GP/thn</span>
+                <span class="text-emerald-700 text-sm">
                   {{ fmtRp(s.annualGP - s.financingCost) }}
                 </span>
               </div>
@@ -344,14 +344,14 @@ onMounted(loadKfa)
     </div>
 
     <!-- Negotiation Term Sheet Template -->
-    <div class="rounded-xl p-6 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #3d0d16 100%)">
+    <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-6">
       <div class="flex items-center gap-3 mb-5">
-        <p class="text-[10px] uppercase tracking-widest text-white/40">Term Sheet Template</p>
-        <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">Annual Contract Structure</span>
+        <p class="text-[10px] uppercase tracking-widest text-[#999]">Term Sheet Template</p>
+        <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#e0e0e0] text-[#666]">Annual Contract Structure</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="space-y-3">
-          <p class="text-xs font-bold text-white/70 uppercase tracking-wide mb-2">Commercial Terms</p>
+          <p class="text-xs font-bold text-[#999] uppercase tracking-wide mb-2">Commercial Terms</p>
           <div v-for="row in [
             { k:'Product Scope', v:'Semua item FORNAS + selected non-FORNAS sesuai kebutuhan RS mitra' },
             { k:'Base Price', v:'HNA (HAP × 1.10) dengan cap maksimal HET Kemkes' },
@@ -359,12 +359,12 @@ onMounted(loadKfa)
             { k:'Rebate Structure', v:'2% @ 90% target · 3% @ 100% target · 4% @ 110% target' },
             { k:'Price Lock Period', v:'12 bulan, eskalasi max 5% per tahun setelah review' },
           ]" :key="row.k" class="flex gap-3 text-[11px]">
-            <span class="text-white/40 w-36 flex-shrink-0">{{ row.k }}</span>
-            <span class="text-white/80">{{ row.v }}</span>
+            <span class="text-[#999] w-36 flex-shrink-0">{{ row.k }}</span>
+            <span class="text-[#1a1a1a]">{{ row.v }}</span>
           </div>
         </div>
         <div class="space-y-3">
-          <p class="text-xs font-bold text-white/70 uppercase tracking-wide mb-2">Financial Terms</p>
+          <p class="text-xs font-bold text-[#999] uppercase tracking-wide mb-2">Financial Terms</p>
           <div v-for="row in [
             { k:'Payment Terms', v:'Net 45 hari dari tanggal invoice + GR konfirmasi sistem' },
             { k:'Early Payment', v:'Diskon 1.5% jika dibayar dalam 7 hari (2/7 net 45)' },
@@ -372,25 +372,25 @@ onMounted(loadKfa)
             { k:'Consignment', v:'Stok titip untuk top-10 fast-moving items, bayar saat usage' },
             { k:'SCF Integration', v:'Bank X menjadi offtaker AR distributor via reverse factoring' },
           ]" :key="row.k" class="flex gap-3 text-[11px]">
-            <span class="text-white/40 w-36 flex-shrink-0">{{ row.k }}</span>
-            <span class="text-white/80">{{ row.v }}</span>
+            <span class="text-[#999] w-36 flex-shrink-0">{{ row.k }}</span>
+            <span class="text-[#1a1a1a]">{{ row.v }}</span>
           </div>
         </div>
       </div>
-      <div class="mt-5 pt-4 border-t border-white/10">
-        <p class="text-[10px] text-white/30 uppercase tracking-wide mb-2">Why Distributor Should Accept This</p>
+      <div class="mt-5 pt-4 border-t border-[#e0e0e0]">
+        <p class="text-[10px] text-[#999] uppercase tracking-wide mb-2">Why Distributor Should Accept This</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px]">
-          <div class="bg-white/5 rounded-lg p-3">
-            <p class="text-white font-semibold mb-1">Guaranteed Volume</p>
-            <p class="text-white/50">KSM mengaggregasi demand dari multiple RS → satu contract menggantikan banyak transaksi kecil</p>
+          <div class="bg-[#ebebeb] rounded-lg p-3">
+            <p class="text-[#1a1a1a] font-semibold mb-1">Guaranteed Volume</p>
+            <p class="text-[#666]">KSM mengaggregasi demand dari multiple RS → satu contract menggantikan banyak transaksi kecil</p>
           </div>
-          <div class="bg-white/5 rounded-lg p-3">
-            <p class="text-white font-semibold mb-1">SCF Liquidity</p>
-            <p class="text-white/50">Bank langsung bayar distributor via reverse factoring → distributor tidak perlu tunggu 45 hari</p>
+          <div class="bg-[#ebebeb] rounded-lg p-3">
+            <p class="text-[#1a1a1a] font-semibold mb-1">SCF Liquidity</p>
+            <p class="text-[#666]">Bank langsung bayar distributor via reverse factoring → distributor tidak perlu tunggu 45 hari</p>
           </div>
-          <div class="bg-white/5 rounded-lg p-3">
-            <p class="text-white font-semibold mb-1">Digital Audit Trail</p>
-            <p class="text-white/50">Sistem e-Logistik → PO digital, GR digital, invoice otomatis → compliance distributor meningkat</p>
+          <div class="bg-[#ebebeb] rounded-lg p-3">
+            <p class="text-[#1a1a1a] font-semibold mb-1">Digital Audit Trail</p>
+            <p class="text-[#666]">Sistem e-Logistik → PO digital, GR digital, invoice otomatis → compliance distributor meningkat</p>
           </div>
         </div>
       </div>

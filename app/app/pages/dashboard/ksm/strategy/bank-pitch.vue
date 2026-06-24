@@ -107,35 +107,35 @@ onMounted(loadRealData)
     </div>
 
     <!-- Executive Summary Bar -->
-    <div class="rounded-xl p-5 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 60%, #1a1a1a 100%)">
-      <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4">Executive Summary — Credit Application</p>
+    <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-5">
+      <p class="text-[10px] uppercase tracking-[0.2em] text-[#999] mb-4">Executive Summary — Credit Application</p>
       <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
         <div class="md:col-span-2">
-          <p class="text-[10px] text-white/40 mb-1">Facility Type</p>
-          <p class="text-sm font-bold text-white">Revolving SCF / Reverse Factoring</p>
-          <p class="text-[10px] text-white/30 mt-0.5">Supply Chain Finance — Healthcare Sector</p>
+          <p class="text-[10px] text-[#999] mb-1">Facility Type</p>
+          <p class="text-sm font-bold text-[#1a1a1a]">Revolving SCF / Reverse Factoring</p>
+          <p class="text-[10px] text-[#aaa] mt-0.5">Supply Chain Finance — Healthcare Sector</p>
         </div>
         <div>
-          <p class="text-[10px] text-white/40 mb-1">Limit Diminta</p>
-          <p class="text-lg font-bold text-white">{{ fmtRp(params.facility_limit_requested) }}</p>
-          <p class="text-[10px] text-white/30">{{ fmtPct(model.ltv*100) }} LTV</p>
+          <p class="text-[10px] text-[#999] mb-1">Limit Diminta</p>
+          <p class="text-lg font-bold text-[#1a1a1a]">{{ fmtRp(params.facility_limit_requested) }}</p>
+          <p class="text-[10px] text-[#aaa]">{{ fmtPct(model.ltv*100) }} LTV</p>
         </div>
         <div>
-          <p class="text-[10px] text-white/40 mb-1">Bank Yield p.a.</p>
-          <p class="text-lg font-bold text-amber-400">{{ fmtPct(model.roe_bank_est) }}</p>
-          <p class="text-[10px] text-white/30">interest + admin fee</p>
+          <p class="text-[10px] text-[#999] mb-1">Bank Yield p.a.</p>
+          <p class="text-lg font-bold text-amber-700">{{ fmtPct(model.roe_bank_est) }}</p>
+          <p class="text-[10px] text-[#aaa]">interest + admin fee</p>
         </div>
         <div>
-          <p class="text-[10px] text-white/40 mb-1">DSCR</p>
-          <p class="text-lg font-bold" :class="model.dscr >= 1.5 ? 'text-emerald-400' : 'text-red-400'">{{ model.dscr.toFixed(2) }}x</p>
-          <p class="text-[10px]" :class="model.dscr >= 1.5 ? 'text-emerald-600' : 'text-red-600'">{{ model.dscr >= 1.5 ? '✓ BANKABLE' : '⚠ BORDERLINE' }}</p>
+          <p class="text-[10px] text-[#999] mb-1">DSCR</p>
+          <p class="text-lg font-bold" :class="model.dscr >= 1.5 ? 'text-emerald-700' : 'text-red-600'">{{ model.dscr.toFixed(2) }}x</p>
+          <p class="text-[10px]" :class="model.dscr >= 1.5 ? 'text-emerald-700' : 'text-red-600'">{{ model.dscr >= 1.5 ? '✓ BANKABLE' : '⚠ BORDERLINE' }}</p>
         </div>
         <div>
-          <p class="text-[10px] text-white/40 mb-1">Scorecard</p>
-          <p class="text-lg font-bold" :class="passCount >= 5 ? 'text-emerald-400' : passCount >= 4 ? 'text-amber-400' : 'text-red-400'">
+          <p class="text-[10px] text-[#999] mb-1">Scorecard</p>
+          <p class="text-lg font-bold" :class="passCount >= 5 ? 'text-emerald-700' : passCount >= 4 ? 'text-amber-700' : 'text-red-600'">
             {{ passCount }}/{{ scorecard.length }}
           </p>
-          <p class="text-[10px] text-white/30">metrics passing</p>
+          <p class="text-[10px] text-[#aaa]">metrics passing</p>
         </div>
       </div>
     </div>
@@ -196,48 +196,48 @@ onMounted(loadRealData)
         </div>
 
         <!-- Cash Flow Cycle Diagram -->
-        <div class="bg-[#1a1a1a] text-white rounded-xl p-4">
-          <p class="text-[10px] uppercase tracking-widest text-white/40 mb-3">Self-Liquidating Cash Cycle</p>
+        <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4">
+          <p class="text-[10px] uppercase tracking-widest text-[#999] mb-3">Self-Liquidating Cash Cycle</p>
           <div class="flex items-center justify-between text-[10px] text-center">
             <div class="flex flex-col items-center gap-1">
-              <div class="w-12 h-12 rounded-full bg-amber-600/20 border border-amber-600/40 flex items-center justify-center">
-                <UIcon name="i-lucide-landmark" class="text-amber-400 text-base"/>
+              <div class="w-12 h-12 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center">
+                <UIcon name="i-lucide-landmark" class="text-amber-700 text-base"/>
               </div>
-              <span class="text-white/60">Bank</span>
-              <span class="text-amber-400 font-bold">Disb.</span>
+              <span class="text-[#777]">Bank</span>
+              <span class="text-amber-700 font-bold">Disb.</span>
             </div>
-            <div class="flex-1 h-px bg-white/20 relative mx-1">
-              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-white/40 text-[9px]">→ PO Verified</span>
+            <div class="flex-1 h-px bg-[#ddd] relative mx-1">
+              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#aaa] text-[9px]">→ PO Verified</span>
             </div>
             <div class="flex flex-col items-center gap-1">
-              <div class="w-12 h-12 rounded-full bg-blue-600/20 border border-blue-600/40 flex items-center justify-center">
-                <UIcon name="i-lucide-truck" class="text-blue-400 text-base"/>
+              <div class="w-12 h-12 rounded-full bg-blue-100 border border-blue-300 flex items-center justify-center">
+                <UIcon name="i-lucide-truck" class="text-blue-700 text-base"/>
               </div>
-              <span class="text-white/60">Distributor</span>
-              <span class="text-blue-400 font-bold">Supply</span>
+              <span class="text-[#777]">Distributor</span>
+              <span class="text-blue-700 font-bold">Supply</span>
             </div>
-            <div class="flex-1 h-px bg-white/20 relative mx-1">
-              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-white/40 text-[9px]">→ Barang GR</span>
+            <div class="flex-1 h-px bg-[#ddd] relative mx-1">
+              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#aaa] text-[9px]">→ Barang GR</span>
             </div>
             <div class="flex flex-col items-center gap-1">
-              <div class="w-12 h-12 rounded-full bg-emerald-600/20 border border-emerald-600/40 flex items-center justify-center">
-                <UIcon name="i-lucide-hospital" class="text-emerald-400 text-base"/>
+              <div class="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center">
+                <UIcon name="i-lucide-hospital" class="text-emerald-700 text-base"/>
               </div>
-              <span class="text-white/60">RS Mitra</span>
-              <span class="text-emerald-400 font-bold">Pakai</span>
+              <span class="text-[#777]">RS Mitra</span>
+              <span class="text-emerald-700 font-bold">Pakai</span>
             </div>
-            <div class="flex-1 h-px bg-white/20 relative mx-1">
-              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-white/40 text-[9px]">BPJS SI</span>
+            <div class="flex-1 h-px bg-[#ddd] relative mx-1">
+              <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[#aaa] text-[9px]">BPJS SI</span>
             </div>
             <div class="flex flex-col items-center gap-1">
-              <div class="w-12 h-12 rounded-full bg-[#6b1525]/30 border border-[#6b1525]/50 flex items-center justify-center">
-                <UIcon name="i-lucide-landmark" class="text-[#c0657a] text-base"/>
+              <div class="w-12 h-12 rounded-full bg-[#f0e0e3] border border-[#6b1525]/30 flex items-center justify-center">
+                <UIcon name="i-lucide-landmark" class="text-[#6b1525] text-base"/>
               </div>
-              <span class="text-white/60">Bank</span>
-              <span class="text-[#c0657a] font-bold">Collect</span>
+              <span class="text-[#777]">Bank</span>
+              <span class="text-[#6b1525] font-bold">Collect</span>
             </div>
           </div>
-          <p class="text-[10px] text-white/30 text-center mt-3">Standing Instruction BPJS → Bank auto-debit rekening RS</p>
+          <p class="text-[10px] text-[#aaa] text-center mt-3">Standing Instruction BPJS → Bank auto-debit rekening RS</p>
         </div>
       </div>
     </div>
@@ -269,11 +269,11 @@ onMounted(loadRealData)
     </div>
 
     <!-- Term Sheet Proposal -->
-    <div class="rounded-xl p-6 text-white" style="background: linear-gradient(135deg, #6b1525 0%, #3d0d16 100%)">
-      <p class="text-[10px] uppercase tracking-widest text-white/40 mb-5">Proposed Term Sheet — Supply Chain Finance Facility</p>
+    <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-6">
+      <p class="text-[10px] uppercase tracking-widest text-[#999] mb-5">Proposed Term Sheet — Supply Chain Finance Facility</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <p class="text-[10px] font-bold text-white/50 uppercase tracking-wide mb-3">Facility Structure</p>
+          <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-3">Facility Structure</p>
           <div class="space-y-2.5">
             <div v-for="r in [
               { k:'Facility Type', v:'Revolving SCF / Reverse Factoring' },
@@ -283,13 +283,13 @@ onMounted(loadRealData)
               { k:'Disbursement', v:'Per PO terverifikasi, max 95% nilai invoice' },
               { k:'Repayment', v:'30–45 hari dari tanggal disbursement' },
             ]" :key="r.k" class="flex gap-3 text-[11px]">
-              <span class="text-white/40 w-32 flex-shrink-0">{{ r.k }}</span>
-              <span class="text-white/80">{{ r.v }}</span>
+              <span class="text-[#999] w-32 flex-shrink-0">{{ r.k }}</span>
+              <span class="text-[#1a1a1a]">{{ r.v }}</span>
             </div>
           </div>
         </div>
         <div>
-          <p class="text-[10px] font-bold text-white/50 uppercase tracking-wide mb-3">Pricing & Security</p>
+          <p class="text-[10px] font-bold text-[#999] uppercase tracking-wide mb-3">Pricing & Security</p>
           <div class="space-y-2.5">
             <div v-for="r in [
               { k:'Interest Rate', v:params.interest_rate_pa + '% p.a. (floating BI Rate + 3%)' },
@@ -299,31 +299,31 @@ onMounted(loadRealData)
               { k:'Financial Covenant', v:'DSCR ≥ 1.5x, reviewed quarterly' },
               { k:'Governing Law', v:'Hukum Indonesia, POJK 57/2020 SCF' },
             ]" :key="r.k" class="flex gap-3 text-[11px]">
-              <span class="text-white/40 w-32 flex-shrink-0">{{ r.k }}</span>
-              <span class="text-white/80">{{ r.v }}</span>
+              <span class="text-[#999] w-32 flex-shrink-0">{{ r.k }}</span>
+              <span class="text-[#1a1a1a]">{{ r.v }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="mt-5 pt-4 border-t border-white/10">
-        <p class="text-[10px] text-white/30 uppercase tracking-wide mb-3">Why This is a Win for the Bank</p>
+      <div class="mt-5 pt-4 border-t border-[#e0e0e0]">
+        <p class="text-[10px] text-[#999] uppercase tracking-wide mb-3">Why This is a Win for the Bank</p>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-[11px]">
-          <div class="bg-white/5 rounded-lg p-3">
-            <p class="text-amber-400 font-bold mb-1">{{ fmtPct(model.roe_bank_est) }} Yield</p>
-            <p class="text-white/50">Return on deployed capital dari interest + admin fee — lebih tinggi dari SBN / deposito bank</p>
+          <div class="bg-[#ebebeb] rounded-lg p-3">
+            <p class="text-amber-700 font-bold mb-1">{{ fmtPct(model.roe_bank_est) }} Yield</p>
+            <p class="text-[#666]">Return on deployed capital dari interest + admin fee — lebih tinggi dari SBN / deposito bank</p>
           </div>
-          <div class="bg-white/5 rounded-lg p-3">
-            <p class="text-emerald-400 font-bold mb-1">Self-Liquidating</p>
-            <p class="text-white/50">Dana follow underlying asset (PO → barang → RS bayar). Bukan blind credit — setiap rupiah teraudit di sistem</p>
+          <div class="bg-[#ebebeb] rounded-lg p-3">
+            <p class="text-emerald-700 font-bold mb-1">Self-Liquidating</p>
+            <p class="text-[#666]">Dana follow underlying asset (PO → barang → RS bayar). Bukan blind credit — setiap rupiah teraudit di sistem</p>
           </div>
-          <div class="bg-white/5 rounded-lg p-3">
-            <p class="text-blue-400 font-bold mb-1">BPJS Collateral</p>
-            <p class="text-white/50">Quasi-government cashflow. BPJS tidak pernah gagal bayar RS — ini setara dengan KPR beragunan real-estate prime</p>
+          <div class="bg-[#ebebeb] rounded-lg p-3">
+            <p class="text-blue-700 font-bold mb-1">BPJS Collateral</p>
+            <p class="text-[#666]">Quasi-government cashflow. BPJS tidak pernah gagal bayar RS — ini setara dengan KPR beragunan real-estate prime</p>
           </div>
-          <div class="bg-white/5 rounded-lg p-3">
-            <p class="text-purple-400 font-bold mb-1">{{ model.multiplier.toFixed(1) }}x Multiplier</p>
-            <p class="text-white/50">Setiap Rp 1 fasilitas memfasilitasi Rp {{ model.multiplier.toFixed(1) }} transaksi riil — efisiensi modal Bank sangat tinggi</p>
+          <div class="bg-[#ebebeb] rounded-lg p-3">
+            <p class="text-[#6b1525] font-bold mb-1">{{ model.multiplier.toFixed(1) }}x Multiplier</p>
+            <p class="text-[#666]">Setiap Rp 1 fasilitas memfasilitasi Rp {{ model.multiplier.toFixed(1) }} transaksi riil — efisiensi modal Bank sangat tinggi</p>
           </div>
         </div>
       </div>
