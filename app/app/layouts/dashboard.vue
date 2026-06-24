@@ -188,7 +188,7 @@ const navGroups = computed(() => {
 })
 
 const portalLabel = computed(() => {
-  if (isKSM.value)         return 'Mitra KSM Logistic'
+  if (isKSM.value)         return 'Medical & Consumables Supply Platform'
   if (isDistributor.value) return 'Distributor / Supplier'
   if (isBank.value)        return 'Bank & Pembiayaan'
   return 'Medical & Consumable Platform'

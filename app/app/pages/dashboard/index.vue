@@ -144,23 +144,23 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
       <!-- Hero -->
       <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
         <div>
-          <p class="text-[#555] text-xs">{{ greeting }},</p>
+          <p class="text-white/60 text-xs">{{ greeting }},</p>
           <h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1>
-          <p class="text-[#444] text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p>
+          <p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p>
         </div>
         <div class="flex items-center gap-8">
           <div class="text-right">
-            <p class="text-[#555] text-[10px] uppercase tracking-wider">Revenue Total</p>
+            <p class="text-white/50 text-[10px] uppercase tracking-wider">Revenue Total</p>
             <p class="text-white text-2xl font-bold mt-0.5">{{ fmtRp(kpi.revenue_total) }}</p>
           </div>
-          <div class="h-10 w-px bg-[#333]"/>
+          <div class="h-10 w-px bg-white/20"/>
           <div class="text-right">
-            <p class="text-[#555] text-[10px] uppercase tracking-wider">Bulan Ini</p>
-            <p class="text-emerald-400 text-lg font-bold mt-0.5">{{ fmtRp(kpi.revenue_this_month) }}</p>
+            <p class="text-white/50 text-[10px] uppercase tracking-wider">Bulan Ini</p>
+            <p class="text-amber-300 text-lg font-bold mt-0.5">{{ fmtRp(kpi.revenue_this_month) }}</p>
           </div>
-          <div class="h-10 w-px bg-[#333]"/>
+          <div class="h-10 w-px bg-white/20"/>
           <div class="text-right">
-            <p class="text-[#555] text-[10px] uppercase tracking-wider">Gross Margin</p>
+            <p class="text-white/50 text-[10px] uppercase tracking-wider">Gross Margin</p>
             <p :class="['text-lg font-bold mt-0.5', grossMargin >= 8 ? 'text-emerald-400' : 'text-amber-400']">{{ fmtPct(grossMargin) }}</p>
           </div>
         </div>
@@ -383,11 +383,11 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
     <!-- ═══ BANK DASHBOARD ══════════════════════════════════════════════════ -->
     <template v-else-if="isBank && kpi">
       <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
-        <div><p class="text-[#555] text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-[#444] text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
+        <div><p class="text-white/50 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
         <div class="flex items-center gap-6">
-          <div class="text-right"><p class="text-[#555] text-[10px] uppercase">Total Limit</p><p class="text-white text-2xl font-bold">{{ fmtRp(kpi.total_limit) }}</p></div>
-          <div class="h-10 w-px bg-[#333]"/>
-          <div class="text-right"><p class="text-[#555] text-[10px] uppercase">Interest</p><p class="text-emerald-400 text-lg font-bold">{{ fmtRp(kpi.total_interest) }}</p></div>
+          <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Total Limit</p><p class="text-white text-2xl font-bold">{{ fmtRp(kpi.total_limit) }}</p></div>
+          <div class="h-10 w-px bg-white/20"/>
+          <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Interest</p><p class="text-emerald-400 text-lg font-bold">{{ fmtRp(kpi.total_interest) }}</p></div>
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -410,8 +410,8 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
     <!-- ═══ DISTRIBUTOR DASHBOARD ═══════════════════════════════════════════ -->
     <template v-else-if="isDistributor && kpi">
       <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
-        <div><p class="text-[#555] text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-[#444] text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
-        <div class="text-right"><p class="text-[#555] text-[10px] uppercase">Total Diterima Bank</p><p class="text-emerald-400 text-2xl font-bold">{{ fmtRp(kpi.total_value) }}</p></div>
+        <div><p class="text-white/50 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
+        <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Total Diterima Bank</p><p class="text-emerald-400 text-2xl font-bold">{{ fmtRp(kpi.total_value) }}</p></div>
       </div>
       <div class="grid grid-cols-3 gap-3">
         <NuxtLink to="/dashboard/dist/purchase-orders" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Perlu Konfirmasi</p><p class="text-2xl font-bold text-blue-600 mt-1">{{ kpi.need_confirm }}</p></NuxtLink>
@@ -432,8 +432,8 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
     <!-- ═══ RS DASHBOARD ════════════════════════════════════════════════════ -->
     <template v-else-if="isRS && kpi">
       <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
-        <div><p class="text-[#555] text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-[#444] text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
-        <div class="text-right"><p class="text-[#555] text-[10px] uppercase">Outstanding Invoice</p><p class="text-amber-400 text-2xl font-bold">{{ fmtRp(kpi.outstanding_invoice) }}</p></div>
+        <div><p class="text-white/50 text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-white/40 text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
+        <div class="text-right"><p class="text-white/50 text-[10px] uppercase">Outstanding Invoice</p><p class="text-amber-400 text-2xl font-bold">{{ fmtRp(kpi.outstanding_invoice) }}</p></div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <NuxtLink to="/dashboard/rs/confirmations" class="bg-[#faf7f3] rounded-xl border-2 border-amber-300 p-4 hover:border-amber-500"><p class="text-[9px] text-amber-600 uppercase font-bold">Perlu Persetujuan</p><p class="text-2xl font-bold text-amber-700 mt-1">{{ kpi.pending_confirm }}</p></NuxtLink>
