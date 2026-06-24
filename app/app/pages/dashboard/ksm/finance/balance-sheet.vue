@@ -13,23 +13,23 @@ interface BSData {
   fixedAssets: number
   scfOutstanding: number  // Hutang ke Bank (ar_accounts + scf_facilities)
   arBankHutang: number    // ar_accounts outstanding
-  shortfallDebt: number   // Shortfall yang dicover bank
+  interestAccrual: number // Bunga shortfall akrual 50% KSM (bukan pokok — pokok hutang RS ke Bank)
   equity: number
 }
 
 const bs = ref<BSData>({
   cash: 0, arRS: 0, inventoryTransit: 0, fixedAssets: 150_000_000,
-  scfOutstanding: 0, arBankHutang: 0, shortfallDebt: 0, equity: 0,
+  scfOutstanding: 0, arBankHutang: 0, interestAccrual: 0, equity: 0,
 })
 
 async function loadData() {
   if (!tenantId.value) return
   loading.value = true
 
-  const [{ data: inv }, { data: ar }, { data: scf }, { data: pos }] = await Promise.all([
+  const [{ data: inv }, { data: ar }, { data: scf }, { data: pos }, { data: dia }] = await Promise.all([
     // Piutang dari RS = ksm_invoices outstanding
     supabase.from('ksm_invoices')
-      .select('outstanding,total_amount,paid_amount,shortfall_amount,shortfall_covered_by_bank')
+      .select('outstanding,total_amount,paid_amount')
       .eq('ksm_tenant_id', tenantId.value),
     // Hutang ke Bank = ar_accounts outstanding
     supabase.from('ar_accounts')
@@ -45,21 +45,26 @@ async function loadData() {
       .select('total_amount')
       .eq('ksm_tenant_id', tenantId.value)
       .in('status', ['sent_to_supplier', 'partially_received']),
+    // Bunga shortfall akrual — hanya 50% bagian KSM yang belum dibayar
+    supabase.from('daily_interest_accruals')
+      .select('ksm_share')
+      .eq('status', 'accrued'),
   ])
 
   const arRS = (inv ?? []).reduce((s, i) => s + Number(i.outstanding ?? i.total_amount - i.paid_amount), 0)
-  const shortfallDebt = (inv ?? []).filter(i => i.shortfall_covered_by_bank).reduce((s, i) => s + Number(i.shortfall_amount ?? 0), 0)
   const arBankHutang = (ar ?? []).reduce((s, a) => s + Number(a.outstanding_amount ?? a.total_payable - a.paid_amount), 0)
   const scfOut = (scf ?? []).reduce((s, f) => s + Number(f.outstanding), 0)
   const transit = (pos ?? []).reduce((s, p) => s + Number(p.total_amount) * 0.2, 0)
+  // Hanya bunga harian 50% KSM yang menjadi kewajiban KSM — pokok shortfall adalah hutang RS ke Bank
+  const interestAccrual = (dia ?? []).reduce((s, d) => s + Number(d.ksm_share ?? 0), 0)
 
   // Kas = estimasi (piutang terlunasi - hutang terbayar)
   const invPaid = (inv ?? []).reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
   const arPaid = (ar ?? []).reduce((s, a) => s + Number(a.paid_amount ?? 0), 0)
-  const cashEst = Math.max(0, invPaid - arPaid) + 200_000_000 // base cash + net flow
+  const cashEst = Math.max(0, invPaid - arPaid) + 200_000_000
 
   const totalAssets = cashEst + arRS + transit + 150_000_000
-  const totalLiab = arBankHutang + shortfallDebt
+  const totalLiab = arBankHutang + interestAccrual
   const equityCalc = totalAssets - totalLiab
 
   bs.value = {
@@ -69,7 +74,7 @@ async function loadData() {
     fixedAssets: 150_000_000,
     scfOutstanding: scfOut,
     arBankHutang,
-    shortfallDebt,
+    interestAccrual,
     equity: equityCalc,
   }
   loading.value = false
@@ -78,7 +83,7 @@ async function loadData() {
 const totalCurrentAssets = computed(() => bs.value.cash + bs.value.arRS + bs.value.inventoryTransit)
 const totalNonCurrentAssets = computed(() => bs.value.fixedAssets)
 const totalAssets = computed(() => totalCurrentAssets.value + totalNonCurrentAssets.value)
-const totalCurrentLiab = computed(() => bs.value.arBankHutang + bs.value.shortfallDebt)
+const totalCurrentLiab = computed(() => bs.value.arBankHutang + bs.value.interestAccrual)
 const totalNonCurrentLiab = computed(() => 0)
 const totalLiabilities = computed(() => totalCurrentLiab.value + totalNonCurrentLiab.value)
 const totalEquity = computed(() => bs.value.equity)
@@ -184,12 +189,12 @@ onMounted(() => { if (tenantId.value) loadData() })
             </div>
             <span class="font-semibold text-[#1a1a1a]">{{ fmtRp(bs.arBankHutang) }}</span>
           </div>
-          <div v-if="bs.shortfallDebt > 0" class="flex justify-between py-1.5 border-b border-[#ececec]">
+          <div v-if="bs.interestAccrual > 0" class="flex justify-between py-1.5 border-b border-[#ececec]">
             <div>
-              <span class="text-[#555]">Hutang Shortfall (kredit bank)</span>
-              <p class="text-[10px] text-red-400">Bunga harian · 50% KSM / 50% RS</p>
+              <span class="text-[#555]">Bunga Shortfall Akrual (50% KSM)</span>
+              <p class="text-[10px] text-[#777]">Pokok shortfall = hutang RS ke Bank, bukan hutang KSM</p>
             </div>
-            <span class="font-semibold text-red-600">{{ fmtRp(bs.shortfallDebt) }}</span>
+            <span class="font-semibold text-amber-700">{{ fmtRp(bs.interestAccrual) }}</span>
           </div>
           <div class="flex justify-between py-1.5 font-bold border-b-2 border-[#ccc]">
             <span class="text-[#333]">Total Kewajiban Lancar</span>

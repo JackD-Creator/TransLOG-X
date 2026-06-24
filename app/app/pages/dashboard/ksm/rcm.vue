@@ -57,9 +57,14 @@ async function load() {
   const today     = new Date().toISOString().slice(0, 10)
 
   const [{ data: invData }, { data: arData }, { data: poData }, { data: notifData }] = await Promise.all([
-    supabase.from('ksm_invoices').select('total_amount,subtotal,tax_amount,status,paid_amount,due_date,metadata').gte('invoice_date', startDate).lte('invoice_date', endDate),
-    supabase.from('ar_accounts').select('po_number,disbursed_amount,interest_amount,invoice_date,paid_date,status'),
-    supabase.from('ksm_purchase_orders').select('*').gte('po_date', startDate).lte('po_date', endDate),
+    supabase.from('ksm_invoices').select('total_amount,subtotal,tax_amount,status,paid_amount,due_date,metadata')
+      .eq('ksm_tenant_id', tenantId.value)
+      .gte('invoice_date', startDate).lte('invoice_date', endDate),
+    supabase.from('ar_accounts').select('po_number,disbursed_amount,interest_amount,invoice_date,paid_date,status')
+      .eq('ksm_tenant_id', tenantId.value),
+    supabase.from('ksm_purchase_orders').select('id,subtotal,total_amount,metadata')
+      .eq('ksm_tenant_id', tenantId.value)
+      .gte('po_date', startDate).lte('po_date', endDate),
     supabase.from('hospital_notifications').select('*').gte('notif_date', startDate).lte('notif_date', endDate),
   ])
 
@@ -71,7 +76,7 @@ async function load() {
   // Revenue = Invoice KSM ke RS (netto PPN)
   const totalRevenue = inv.reduce((s, i) => s + Number(i.total_amount ?? 0) - Number(i.tax_amount ?? 0), 0)
 
-  // HPP + Interest = matched per PO number dari invoice
+  // HPP + Interest = matched per PO number dari ar_accounts
   const arMap: Record<string, any> = {}
   for (const a of ar) { if (a.po_number) arMap[a.po_number] = a }
   let totalCogs = 0, interestExp = 0
@@ -82,6 +87,10 @@ async function load() {
       totalCogs += Number(matched.disbursed_amount ?? 0)
       interestExp += Number(matched.interest_amount ?? 0)
     }
+  }
+  // Fallback HPP dari PO data jika matching ar_accounts gagal (non-SCF or data lama)
+  if (totalCogs === 0 && po.length > 0) {
+    totalCogs = po.reduce((s: number, p: any) => s + Number(p.subtotal ?? 0) * 0.88, 0)
   }
   const grossProfit    = totalRevenue - totalCogs
   const grossMarginPct = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0

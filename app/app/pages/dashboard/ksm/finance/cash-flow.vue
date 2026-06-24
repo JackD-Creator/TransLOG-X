@@ -19,6 +19,7 @@ const financingIn = ref<CashItem[]>([])
 const financingOut = ref<CashItem[]>([])
 
 const periodOptions = [
+  { value: '2026-01', label: 'Januari 2026' },
   { value: '2026-02', label: 'Februari 2026' },
   { value: '2026-03', label: 'Maret 2026' },
   { value: '2026-04', label: 'April 2026' },
