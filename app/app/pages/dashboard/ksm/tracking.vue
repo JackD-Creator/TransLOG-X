@@ -32,12 +32,12 @@ const orders = computed(() => {
 
 
 const statusConfig: Record<string, { label: string; color: string; icon: string; desc: string }> = {
-  submitted:          { label: 'Menunggu Konfirmasi Dist.', color: 'bg-blue-100 text-blue-700',    icon: 'i-lucide-clock',           desc: 'PO sudah dikirim, menunggu distributor konfirmasi' },
-  approved:           { label: 'Dikonfirmasi Distributor',  color: 'bg-purple-100 text-purple-700', icon: 'i-lucide-check-circle',    desc: 'Distributor sedang menyiapkan pesanan' },
-  sent_to_supplier:   { label: 'Dalam Pengiriman ke RS',   color: 'bg-amber-100 text-amber-700',   icon: 'i-lucide-truck',           desc: 'Distributor sudah kirim langsung ke RS' },
-  partially_received: { label: 'RS Terima Sebagian',       color: 'bg-orange-100 text-orange-700',  icon: 'i-lucide-package-open',    desc: 'RS sudah terima sebagian barang' },
-  fully_received:     { label: 'RS Terima Lengkap',        color: 'bg-emerald-100 text-emerald-700',icon: 'i-lucide-package-check',   desc: 'RS konfirmasi semua barang diterima' },
-  draft:              { label: 'Draft',                     color: 'bg-[#f0f0f0] text-[#999]',      icon: 'i-lucide-file-edit',       desc: 'Belum diajukan' },
+  submitted:          { label: 'Menunggu Konfirmasi Dist.', color: 'bg-blue-100 text-blue-700',     icon: 'i-lucide-clock',         desc: 'PO sudah dikirim, menunggu distributor konfirmasi' },
+  approved:           { label: 'Dikonfirmasi Distributor',  color: 'bg-purple-100 text-purple-700', icon: 'i-lucide-check-circle',  desc: 'Distributor sedang menyiapkan pesanan' },
+  sent_to_supplier:   { label: 'Dalam Pengiriman ke RS',    color: 'bg-amber-100 text-amber-700',   icon: 'i-lucide-truck',         desc: 'Distributor sudah kirim langsung ke RS' },
+  partially_received: { label: 'RS Terima Sebagian',        color: 'bg-orange-100 text-orange-700', icon: 'i-lucide-package-open',  desc: 'RS sudah terima sebagian barang' },
+  fully_received:     { label: 'RS Terima Lengkap',         color: 'bg-emerald-100 text-emerald-700',icon: 'i-lucide-package-check', desc: 'RS konfirmasi semua barang diterima' },
+  draft:              { label: 'Draft',                      color: 'bg-[#f0f0f0] text-[#999]',     icon: 'i-lucide-file-edit',     desc: 'Belum diajukan' },
 }
 
 function itemProgress(po: any) {
