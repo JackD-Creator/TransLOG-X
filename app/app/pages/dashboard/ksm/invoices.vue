@@ -38,6 +38,37 @@ async function reviewAndSend(invoiceId: string) {
   actionLoading.value = null
 }
 
+async function disputeInvoice(invoiceId: string) {
+  const reason = prompt('Alasan dispute / catatan koreksi:')
+  if (!reason) return
+  actionLoading.value = invoiceId
+  actionError.value = null
+  try {
+    const { error } = await supabase.from('ksm_invoices').update({
+      status: 'disputed',
+      notes: reason,
+    }).eq('id', invoiceId)
+    if (error) throw error
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal dispute'
+  }
+  actionLoading.value = null
+}
+
+async function deleteInvoice(invoiceId: string) {
+  if (!confirm('Hapus invoice draft ini? Tindakan tidak bisa dibatalkan.')) return
+  actionLoading.value = invoiceId
+  try {
+    const { error } = await supabase.from('ksm_invoices').delete().eq('id', invoiceId).eq('status', 'draft')
+    if (error) throw error
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal hapus'
+  }
+  actionLoading.value = null
+}
+
 const statusConfig: Record<string, { label: string; color: string }> = {
   draft:           { label: 'Auto-Generated',     color: 'bg-[#f0f0f0] text-[#999]' },
   reviewed:        { label: 'Sudah Direview',      color: 'bg-blue-100 text-blue-700' },
@@ -173,6 +204,18 @@ onMounted(() => { if (tenantId.value) load() })
             class="px-4 py-2 bg-[#6b1525] text-white text-xs font-bold rounded-lg hover:bg-[#5a1120] disabled:opacity-50 transition-colors flex items-center gap-2 flex-shrink-0">
             <UIcon name="i-lucide-send" class="text-sm"/>
             {{ actionLoading === inv.id ? 'Mengirim...' : 'Review & Kirim ke RS' }}
+          </button>
+          <button @click="deleteInvoice(inv.id)" :disabled="actionLoading === inv.id"
+            class="px-3 py-2 text-red-500 text-xs font-semibold border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors flex items-center gap-1">
+            <UIcon name="i-lucide-trash-2" class="text-xs"/> Hapus Draft
+          </button>
+        </div>
+
+        <!-- Dispute button untuk invoice yang sudah terkirim -->
+        <div v-if="['sent_to_rs', 'payment_pending'].includes(inv.status)" class="px-5 pb-4">
+          <button @click="disputeInvoice(inv.id)" :disabled="actionLoading === inv.id"
+            class="px-3 py-2 text-amber-700 text-xs font-semibold border border-amber-300 rounded-lg hover:bg-amber-50 disabled:opacity-50 transition-colors flex items-center gap-1.5">
+            <UIcon name="i-lucide-alert-circle" class="text-xs"/> Ajukan Dispute / Koreksi
           </button>
         </div>
 

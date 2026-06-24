@@ -59,11 +59,53 @@ async function createSI() {
   saving.value = false
 }
 
+function openEditSI(si: any) {
+  form.value = {
+    custodian_bank: si.custodian_bank,
+    rs_account_number: si.rs_account_number,
+    ksm_account_number: si.ksm_account_number,
+    si_type: si.si_type,
+    notes: si.notes ?? '',
+  }
+  editingSI.value = si.id
+  showForm.value = true
+}
+
+const editingSI = ref<string | null>(null)
+
+async function updateSI() {
+  if (!editingSI.value) return
+  saving.value = true
+  actionError.value = null
+  try {
+    const { error } = await supabase.from('standing_instructions').update({
+      custodian_bank: form.value.custodian_bank,
+      rs_account_number: form.value.rs_account_number,
+      ksm_account_number: form.value.ksm_account_number,
+      si_type: form.value.si_type,
+      notes: form.value.notes,
+    }).eq('id', editingSI.value)
+    if (error) throw error
+    showForm.value = false
+    editingSI.value = null
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal update SI'
+  }
+  saving.value = false
+}
+
 async function deactivateSI(id: string) {
   await supabase.from('standing_instructions').update({
     is_active: false,
     deactivated_at: new Date().toISOString(),
   }).eq('id', id)
+  await load()
+}
+
+async function deleteSI(id: string) {
+  if (!confirm('Hapus Standing Instruction ini?')) return
+  await supabase.from('standing_instructions').delete().eq('id', id)
   await load()
 }
 
@@ -139,11 +181,11 @@ onMounted(() => { if (tenantId.value) load() })
           class="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-xs bg-white outline-none focus:border-[#6b1525] resize-none"/>
       </div>
       <div class="flex gap-3">
-        <button @click="createSI" :disabled="saving || !form.custodian_bank || !form.rs_account_number || !form.ksm_account_number"
+        <button @click="editingSI ? updateSI() : createSI()" :disabled="saving || !form.custodian_bank || !form.rs_account_number || !form.ksm_account_number"
           class="px-5 py-2.5 bg-[#6b1525] text-white text-xs font-bold rounded-lg hover:bg-[#5a1120] disabled:opacity-50 transition-colors">
-          {{ saving ? 'Menyimpan...' : 'Aktifkan SI' }}
+          {{ saving ? 'Menyimpan...' : editingSI ? 'Simpan Perubahan' : 'Aktifkan SI' }}
         </button>
-        <button @click="showForm = false" class="px-4 py-2.5 text-[#999] text-xs rounded-lg hover:bg-[#ebebeb] transition-colors">
+        <button @click="showForm = false; editingSI = null" class="px-4 py-2.5 text-[#999] text-xs rounded-lg hover:bg-[#ebebeb] transition-colors">
           Batal
         </button>
       </div>
@@ -177,10 +219,19 @@ onMounted(() => { if (tenantId.value) load() })
             </div>
             <p class="text-xs text-[#999]">Bank: <strong class="text-[#666]">{{ si.custodian_bank }}</strong></p>
           </div>
-          <button v-if="si.is_active" @click="deactivateSI(si.id)"
-            class="px-3 py-1.5 text-red-600 text-xs font-semibold border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-            Nonaktifkan
-          </button>
+          <div class="flex gap-2">
+            <button @click="openEditSI(si)" class="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition-colors">
+              <UIcon name="i-lucide-edit-3" class="text-sm"/>
+            </button>
+            <button v-if="si.is_active" @click="deactivateSI(si.id)"
+              class="px-3 py-1.5 text-amber-600 text-xs font-semibold border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors">
+              Nonaktifkan
+            </button>
+            <button v-if="!si.is_active" @click="deleteSI(si.id)"
+              class="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors">
+              <UIcon name="i-lucide-trash-2" class="text-sm"/>
+            </button>
+          </div>
         </div>
         <div class="px-5 pb-4 grid grid-cols-2 gap-4 text-xs">
           <div>

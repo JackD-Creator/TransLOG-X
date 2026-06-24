@@ -95,11 +95,14 @@ onMounted(load)
             <th class="px-4 py-3 font-semibold text-[#999] uppercase tracking-wide">Total</th>
             <th class="px-4 py-3 font-semibold text-[#999] uppercase tracking-wide">Status</th>
             <th class="px-4 py-3 font-semibold text-[#999] uppercase tracking-wide">Termin</th>
+            <th class="px-4 py-3 font-semibold text-[#999] uppercase tracking-wide text-right">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-[#e5e5e5]">
           <tr v-for="po in orders" :key="po.id" class="hover:bg-[#ebebeb] transition-colors">
-            <td class="px-4 py-3 font-mono text-[#1a1a1a]">{{ po.po_number }}</td>
+            <td class="px-4 py-3 font-mono text-[#1a1a1a]">
+              <NuxtLink :to="`/dashboard/ksm/purchase-orders/${po.id}`" class="hover:text-[#6b1525]">{{ po.po_number }}</NuxtLink>
+            </td>
             <td class="px-4 py-3 text-[#666]">{{ fmtDate(po.po_date) }}</td>
             <td class="px-4 py-3 text-[#666]">{{ po.metadata?.supplier_name ?? '-' }}</td>
             <td class="px-4 py-3 font-semibold text-[#1a1a1a]">{{ po.ksm_po_lines?.length ?? 0 }} item</td>
@@ -110,6 +113,12 @@ onMounted(load)
               </span>
             </td>
             <td class="px-4 py-3 text-[#666]">{{ po.payment_terms?.replace('net_', 'Net ') ?? '-' }}</td>
+            <td class="px-4 py-3 text-right">
+              <NuxtLink :to="`/dashboard/ksm/purchase-orders/${po.id}`"
+                class="px-2.5 py-1 text-[10px] font-bold bg-[#6b1525] text-white rounded-lg hover:bg-[#5a1120] transition-colors">
+                Detail
+              </NuxtLink>
+            </td>
           </tr>
         </tbody>
       </table>
