@@ -24,6 +24,12 @@ export default defineNuxtConfig({
     },
   },
 
+  icon: {
+    serverBundle: {
+      collections: ['lucide']
+    }
+  },
+
   colorMode: {
     preference: 'light',
     fallback: 'light'

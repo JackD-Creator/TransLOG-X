@@ -233,11 +233,9 @@ onMounted(() => { if (tenantId.value) load() })
             <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
               :class="rs.notifs.some(n => n.metadata?.urgency === 'critical') ? 'bg-red-100' :
                        rs.notifs.some(n => n.metadata?.urgency === 'high') ? 'bg-amber-100' : 'bg-blue-100'">
-              <span class="text-sm font-bold select-none"
+              <UIcon name="i-lucide-building-2" class="w-6 h-6"
                 :class="rs.notifs.some(n => n.metadata?.urgency === 'critical') ? 'text-red-600' :
-                         rs.notifs.some(n => n.metadata?.urgency === 'high') ? 'text-amber-700' : 'text-blue-600'">
-                {{ rs.rsName.split(' ').filter((w: string) => w.length > 1).slice(0, 2).map((w: string) => w[0]).join('') }}
-              </span>
+                         rs.notifs.some(n => n.metadata?.urgency === 'high') ? 'text-amber-600' : 'text-blue-600'"/>
             </div>
             <div>
               <div class="flex items-center gap-2">
