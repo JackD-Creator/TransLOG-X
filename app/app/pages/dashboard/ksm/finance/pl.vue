@@ -51,7 +51,7 @@ async function load() {
 
   const allInv = invData ?? []
   const arAccounts = arData ?? []
-  const annualRate = Number(diaData?.[0]?.interest_rate_pa ?? 0.11)
+  const annualRate = Number(scfData?.[0]?.interest_rate_pa ?? 0.11)
 
   // Revenue = invoice yang sudah dibayar RS ke KSM (paid atau partially_paid + shortfall covered = lunas)
   const invoices = allInv.filter((i: any) =>
