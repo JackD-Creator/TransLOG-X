@@ -10,17 +10,32 @@ const allInvoices = ref<any[]>([])
 const filterStatus = ref('all')
 const actionLoading = ref<string | null>(null)
 const actionError = ref<string | null>(null)
+// Bunga shortfall akrual 50% KSM per invoice_id
+const interestByInvoice = ref<Record<string, number>>({})
 
 async function load() {
   if (!tenantId.value) return
   loading.value = true
-  const { data } = await supabase
-    .from('ksm_invoices')
-    .select('id,invoice_number,invoice_date,due_date,subtotal,tax_amount,total_amount,paid_amount,outstanding,status,bpjs_amount,bpjs_received_date,bpjs_expected_date,shortfall_amount,shortfall_covered_by_bank,contract_payment_days,reviewed_at,sent_to_rs_at,metadata,po_id')
-    .eq('ksm_tenant_id', tenantId.value)
-    .order('invoice_date', { ascending: false })
-    .limit(200)
+  const [{ data }, { data: diaData }] = await Promise.all([
+    supabase
+      .from('ksm_invoices')
+      .select('id,invoice_number,invoice_date,due_date,subtotal,tax_amount,total_amount,paid_amount,outstanding,status,bpjs_amount,bpjs_received_date,bpjs_expected_date,shortfall_amount,shortfall_covered_by_bank,contract_payment_days,reviewed_at,sent_to_rs_at,metadata,po_id')
+      .eq('ksm_tenant_id', tenantId.value)
+      .order('invoice_date', { ascending: false })
+      .limit(200),
+    // Bunga shortfall harian — sum ksm_share per invoice
+    supabase
+      .from('daily_interest_accruals')
+      .select('invoice_id,ksm_share')
+      .eq('ksm_invoices.ksm_tenant_id', tenantId.value),
+  ])
   allInvoices.value = data ?? []
+  // Aggregate ksm_share per invoice_id
+  const map: Record<string, number> = {}
+  for (const d of diaData ?? []) {
+    if (d.invoice_id) map[d.invoice_id] = (map[d.invoice_id] ?? 0) + Number(d.ksm_share ?? 0)
+  }
+  interestByInvoice.value = map
   loading.value = false
 }
 
@@ -244,22 +259,29 @@ onMounted(() => { if (tenantId.value) load() })
           </button>
         </div>
 
-        <!-- BPJS & Shortfall info -->
+        <!-- Shortfall info — Bank buka kredit untuk RS, bayar KSM langsung -->
         <div v-if="inv.shortfall_amount > 0 && inv.shortfall_covered_by_bank" class="px-5 pb-4">
-          <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-xs">
-            <p class="font-bold text-red-700 mb-1">Shortfall — Dicover Bank</p>
-            <div class="grid grid-cols-3 gap-3 text-[10px]">
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs">
+            <p class="font-bold text-amber-800 mb-2">Shortfall — Bank Buka Kredit untuk RS</p>
+            <div class="grid grid-cols-4 gap-3 text-[10px]">
               <div>
-                <p class="text-red-400">Kekurangan</p>
-                <p class="font-bold text-red-700">{{ fmtRp(inv.shortfall_amount) }}</p>
+                <p class="text-amber-500">Kredit Bank ke KSM</p>
+                <p class="font-bold text-amber-800">{{ fmtRp(inv.shortfall_amount) }}</p>
               </div>
               <div>
-                <p class="text-red-400">Bunga</p>
-                <p class="font-bold text-red-700">Harian (p.a. dari SCF)</p>
+                <p class="text-amber-500">Bunga Harian Akrual</p>
+                <p class="font-bold text-amber-800">{{ fmtRp((interestByInvoice[inv.id] ?? 0) * 2) }}</p>
+                <p class="text-[9px] text-amber-400">Total (KSM+RS)</p>
               </div>
               <div>
-                <p class="text-red-400">Ditanggung</p>
-                <p class="font-bold text-red-700">50% KSM · 50% RS</p>
+                <p class="text-amber-500">Ditanggung KSM (50%)</p>
+                <p class="font-bold text-[#6b1525]">{{ fmtRp(interestByInvoice[inv.id] ?? 0) }}</p>
+                <p class="text-[9px] text-amber-400">karena hutang SCF</p>
+              </div>
+              <div>
+                <p class="text-amber-500">Ditanggung RS (50%)</p>
+                <p class="font-bold text-amber-800">{{ fmtRp(interestByInvoice[inv.id] ?? 0) }}</p>
+                <p class="text-[9px] text-amber-400">karena BPJS-nya kurang</p>
               </div>
             </div>
           </div>
