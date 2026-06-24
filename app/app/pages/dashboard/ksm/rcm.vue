@@ -47,19 +47,21 @@ async function load() {
   const endDate   = new Date(period.value.year, period.value.month, 0).toISOString().slice(0, 10)
   const today     = new Date().toISOString().slice(0, 10)
 
-  const [{ data: arData }, { data: poData }, { data: notifData }] = await Promise.all([
-    supabase.from('ar_accounts').select('*').gte('invoice_date', startDate).lte('invoice_date', endDate),
+  const [{ data: invData }, { data: arData }, { data: poData }, { data: notifData }] = await Promise.all([
+    supabase.from('ksm_invoices').select('*').gte('invoice_date', startDate).lte('invoice_date', endDate),
+    supabase.from('ar_accounts').select('*').gte('disbursement_date', startDate).lte('disbursement_date', endDate),
     supabase.from('ksm_purchase_orders').select('*').gte('po_date', startDate).lte('po_date', endDate),
     supabase.from('hospital_notifications').select('*').gte('notif_date', startDate).lte('notif_date', endDate),
   ])
 
+  const inv = invData ?? []
   const ar = arData ?? []
   const po = poData ?? []
   const notif = notifData ?? []
 
-  // Revenue
-  const totalRevenue   = ar.reduce((s, a) => s + Number(a.invoice_amount ?? 0), 0)
-  const totalCogs      = po.reduce((s, p) => s + Number(p.total_amount ?? 0), 0)
+  // Revenue = Invoice KSM ke RS, HPP = Bank bayar Distributor (disbursed)
+  const totalRevenue   = inv.reduce((s, i) => s + Number(i.total_amount ?? 0), 0)
+  const totalCogs      = ar.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0)
   const interestExp    = ar.reduce((s, a) => s + Number(a.interest_amount ?? 0), 0)
   const grossProfit    = totalRevenue - totalCogs
   const grossMarginPct = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0
@@ -88,23 +90,24 @@ async function load() {
   const completedNotif = notif.filter(n => n.status === 'completed').length
   const fulfilmentRate = notif.length > 0 ? (completedNotif / notif.length * 100) : 0
 
-  // AR Aging (berdasarkan due_date vs today)
-  const arCurrent = ar.filter(a => {
-    const days = (new Date(today).getTime() - new Date(a.due_date).getTime()) / 86400000
-    return days <= 0 && !['paid','defaulted'].includes(a.status)
-  }).reduce((s, a) => s + Number(a.outstanding_amount ?? 0), 0)
-  const ar30 = ar.filter(a => {
-    const days = (new Date(today).getTime() - new Date(a.due_date).getTime()) / 86400000
-    return days > 0 && days <= 30 && !['paid','defaulted'].includes(a.status)
-  }).reduce((s, a) => s + Number(a.outstanding_amount ?? 0), 0)
-  const ar60 = ar.filter(a => {
-    const days = (new Date(today).getTime() - new Date(a.due_date).getTime()) / 86400000
-    return days > 30 && days <= 60 && !['paid','defaulted'].includes(a.status)
-  }).reduce((s, a) => s + Number(a.outstanding_amount ?? 0), 0)
-  const ar90plus = ar.filter(a => {
-    const days = (new Date(today).getTime() - new Date(a.due_date).getTime()) / 86400000
-    return days > 60 && !['paid','defaulted'].includes(a.status)
-  }).reduce((s, a) => s + Number(a.outstanding_amount ?? 0), 0)
+  // AR Aging dari ksm_invoices (piutang RS, bukan hutang ke Bank)
+  const unpaidInv = inv.filter(i => !['paid'].includes(i.status))
+  const arCurrent = unpaidInv.filter(i => {
+    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
+    return days <= 0
+  }).reduce((s, i) => s + Number(i.outstanding ?? i.total_amount - i.paid_amount), 0)
+  const ar30 = unpaidInv.filter(i => {
+    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
+    return days > 0 && days <= 30
+  }).reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
+  const ar60 = unpaidInv.filter(i => {
+    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
+    return days > 30 && days <= 60
+  }).reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
+  const ar90plus = unpaidInv.filter(i => {
+    const days = (new Date(today).getTime() - new Date(i.due_date).getTime()) / 86400000
+    return days > 60
+  }).reduce((s, i) => s + Number(i.outstanding ?? 0), 0)
 
   metrics.value = {
     totalRevenue, totalCogs, grossProfit, grossMarginPct,

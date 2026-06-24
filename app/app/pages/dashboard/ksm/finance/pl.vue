@@ -22,14 +22,14 @@ async function load() {
   const endDate = new Date(period.value.year, period.value.month, 0).toISOString().slice(0, 10)
 
   const [{ data: invData }, { data: arData }, { data: diaData }] = await Promise.all([
-    // Revenue = Invoice KSM ke RS yang sudah terbit dalam periode
+    // Revenue = Invoice KSM ke RS
     supabase.from('ksm_invoices')
       .select('total_amount,subtotal,tax_amount,status,paid_amount')
       .eq('ksm_tenant_id', tenantId.value)
       .gte('invoice_date', startDate).lte('invoice_date', endDate),
-    // COGS = Disbursement Bank ke Distributor (atas nama KSM) dalam periode
+    // Interest = dari AR accounts
     supabase.from('ar_accounts')
-      .select('disbursed_amount,interest_amount,paid_amount,status')
+      .select('interest_amount')
       .eq('ksm_tenant_id', tenantId.value)
       .gte('disbursement_date', startDate).lte('disbursement_date', endDate),
     // Bunga harian shortfall (bagian KSM 50%)
@@ -47,8 +47,8 @@ async function load() {
   const revenuePPN = invoices.reduce((s, i) => s + Number(i.tax_amount), 0)
   const revenueNetto = revenue - revenuePPN
 
-  // COGS = Bank bayar ke Distributor atas nama KSM
-  const cogs = arAccounts.reduce((s, a) => s + Number(a.disbursed_amount), 0)
+  // COGS = harga beli dari Distributor (~88% dari subtotal invoice, karena margin KSM ~12%)
+  const cogs = invoices.reduce((s, i) => s + Math.round(Number(i.subtotal) * 0.88), 0)
 
   // Gross Profit = Revenue (netto PPN) - COGS
   const grossProfit = revenueNetto - cogs
