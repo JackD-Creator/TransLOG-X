@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard' })
 
 const supabase = useSupabaseClient()
+const { tenantId } = useUserRole()
 
 const features = [
   {
@@ -50,17 +51,33 @@ const chatHistory = ref<{ role: string; text: string }[]>([])
 async function runForecast() {
   loading.value = 'forecast'
   result.value = null
-  const { data: summaries } = await supabase
-    .from('stock_summary')
-    .select('qty_on_hand, avg_cost, product_id, products(name, category, min_stock)')
-    .limit(20)
 
-  const items = (summaries ?? []).map(s => ({
-    name: (s.products as any)?.name ?? '-',
-    stock: Number(s.qty_on_hand),
-    avg_daily: Math.max(1, Math.round(Number(s.qty_on_hand) / 30)),
-    category: (s.products as any)?.category ?? 'obat'
-  }))
+  // Ambil po_lines 90 hari terakhir dari KSM PO
+  const since = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10)
+  const { data: lines } = await supabase
+    .from('ksm_po_lines')
+    .select('item_name, catalog_type, ordered_qty, ksm_purchase_orders!inner(po_date, ksm_tenant_id)')
+    .eq('ksm_purchase_orders.ksm_tenant_id', tenantId.value)
+    .gte('ksm_purchase_orders.po_date', since)
+    .limit(500)
+
+  // Agregasi per item
+  const agg: Record<string, { qty: number; category: string }> = {}
+  for (const l of lines ?? []) {
+    const key = l.item_name ?? '-'
+    if (!agg[key]) agg[key] = { qty: 0, category: l.catalog_type ?? 'obat' }
+    agg[key].qty += Number(l.ordered_qty ?? 0)
+  }
+
+  const items = Object.entries(agg)
+    .sort((a, b) => b[1].qty - a[1].qty)
+    .slice(0, 20)
+    .map(([name, v]) => ({
+      name,
+      stock: v.qty,
+      avg_daily: Math.max(1, Math.round(v.qty / 90)),
+      category: v.category
+    }))
 
   try {
     const res = await $fetch('/api/forecast', { method: 'POST', body: { items } })
