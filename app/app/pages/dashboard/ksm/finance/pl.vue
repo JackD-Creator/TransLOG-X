@@ -185,7 +185,7 @@ onMounted(() => { if (tenantId.value) load() })
               { label:'Laba Sebelum Pajak (EBT)', val: pl.ebt, color: pl.ebt >= 0 ? 'text-emerald-700' : 'text-red-600', bold: true },
               { label:'Pajak PPh Badan (22%)', val: -pl.tax, color:'text-red-400', indent: true, line: true },
             ]" :key="row.label"
-              :class="['flex justify-between py-2', row.line ? 'border-b border-[#e5e5e5]', row.bold ? 'bg-[#fafafa] px-2 rounded my-0.5' : '']">
+              :class="['flex justify-between py-2', row.line ? 'border-b border-[#e5e5e5]' : '', row.bold ? 'bg-[#fafafa] px-2 rounded my-0.5' : '']">
               <span :class="['text-xs', row.indent ? 'pl-5 text-[#666]' : 'font-semibold text-[#1a1a1a]']">{{ row.label }}</span>
               <div class="text-right">
                 <span :class="['text-xs font-semibold', row.color]">
