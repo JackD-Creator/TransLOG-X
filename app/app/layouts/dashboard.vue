@@ -12,20 +12,19 @@ const navRS = [
   {
     label: 'MAIN MENU',
     items: [
-      { label: 'Dashboard',    icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
-      { label: 'Inventory',    icon: 'i-lucide-package',          to: '/dashboard/inventory' },
-      { label: 'Pengadaan',    icon: 'i-lucide-shopping-cart',    to: '/dashboard/procurement' },
-      { label: 'Order',        icon: 'i-lucide-clipboard-list',   to: '/dashboard/orders' },
-      { label: 'Gudang',       icon: 'i-lucide-warehouse',        to: '/dashboard/warehouse' }
+      { label: 'Dashboard',       icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
+      { label: 'Alert Min Stok',  icon: 'i-lucide-bell-ring',        to: '/dashboard/rs/alerts' },
+      { label: 'Konfirmasi KSM',  icon: 'i-lucide-check-square',     to: '/dashboard/rs/confirmations' },
+      { label: 'Penerimaan',      icon: 'i-lucide-package-check',    to: '/dashboard/rs/receiving' },
+      { label: 'Invoice & Bayar', icon: 'i-lucide-file-text',        to: '/dashboard/rs/invoices' },
     ]
   },
   {
     label: 'KEUANGAN',
     items: [
       { label: 'Finansial & SCF', icon: 'i-lucide-banknote',      to: '/dashboard/financial' },
-      { label: 'Kredit & Risiko', icon: 'i-lucide-shield-alert',  to: '/dashboard/credit' },
       { label: 'BPJS & RCM',     icon: 'i-lucide-stethoscope',   to: '/dashboard/bpjs' },
-      { label: 'Treasury',        icon: 'i-lucide-landmark',      to: '/dashboard/treasury' }
+      { label: 'Standing Instr.', icon: 'i-lucide-landmark',      to: '/dashboard/rs/standing-instruction' },
     ]
   },
   {

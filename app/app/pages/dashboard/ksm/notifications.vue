@@ -20,7 +20,7 @@ async function load() {
   loading.value = true
   const { data } = await supabase
     .from('hospital_notifications')
-    .select('id,notif_number,notif_date,rs_tenant_id,status,notes,metadata,acknowledged_at,hospital_notification_lines(id,kfa_code,item_name,catalog_type,uom,current_stock,min_stock,requested_qty,approved_qty,notes)')
+    .select('id,notif_number,notif_date,rs_tenant_id,status,source,notes,metadata,acknowledged_at,ksm_confirmation_status,ksm_confirmed_at,rs_approved_at,hospital_notification_lines(id,kfa_code,item_name,catalog_type,uom,current_stock,min_stock,requested_qty,approved_qty,notes)')
     .eq('ksm_tenant_id', tenantId.value)
     .order('notif_date', { ascending: false })
     .limit(100)
@@ -80,11 +80,27 @@ function urgencyBadge(u: string) {
 }
 
 const statusConfig: Record<string, { label: string; color: string; step: number }> = {
-  pending:       { label: 'Menunggu Review KSM', color: 'bg-amber-100 text-amber-700', step: 0 },
-  acknowledged:  { label: 'Sedang Proses',       color: 'bg-blue-100 text-blue-700',   step: 1 },
-  po_created:    { label: 'PO Dibuat',           color: 'bg-purple-100 text-purple-700', step: 2 },
-  completed:     { label: 'Selesai',             color: 'bg-emerald-100 text-emerald-700', step: 3 },
-  cancelled:     { label: 'Dibatalkan',          color: 'bg-[#f0f0f0] text-[#999]', step: -1 },
+  pending:       { label: 'SIMRS Alert — Review KSM', color: 'bg-amber-100 text-amber-700', step: 0 },
+  acknowledged:  { label: 'Cek Supplier',              color: 'bg-blue-100 text-blue-700',   step: 1 },
+  po_created:    { label: 'PO Dibuat',                 color: 'bg-purple-100 text-purple-700', step: 3 },
+  completed:     { label: 'Selesai',                   color: 'bg-emerald-100 text-emerald-700', step: 4 },
+  cancelled:     { label: 'Dibatalkan',                color: 'bg-[#f0f0f0] text-[#999]', step: -1 },
+}
+
+function ksmConfStatus(notif: any) {
+  const s = notif.ksm_confirmation_status
+  if (s === 'pending_rs_approval') return { label: 'Menunggu Persetujuan RS', color: 'text-amber-600', step: 2 }
+  if (s === 'rs_approved') return { label: 'RS Setuju — Siap Buat PO', color: 'text-emerald-600', step: 2 }
+  return null
+}
+
+function currentStep(notif: any): number {
+  if (notif.status === 'completed') return 5
+  if (notif.status === 'po_created') return 4
+  if (notif.ksm_confirmation_status === 'rs_approved') return 3
+  if (notif.ksm_confirmation_status === 'pending_rs_approval') return 2
+  if (notif.status === 'acknowledged') return 1
+  return 0
 }
 
 function supplierCheckLabel(meta: any) {
@@ -120,6 +136,19 @@ async function simulateSupplierConfirm(notifId: string) {
     await load()
   } catch (e: any) {
     actionError.value = e.message ?? 'Gagal konfirmasi supplier'
+  }
+  actionLoading.value = null
+}
+
+async function sendConfirmationToRS(notifId: string) {
+  actionLoading.value = notifId
+  actionError.value = null
+  try {
+    const { data, error } = await supabase.rpc('ksm_send_delivery_confirmation', { p_notif_id: notifId })
+    if (error) throw error
+    await load()
+  } catch (e: any) {
+    actionError.value = e.message ?? 'Gagal kirim konfirmasi ke RS'
   }
   actionLoading.value = null
 }
@@ -263,15 +292,25 @@ onMounted(() => { if (tenantId.value) load() })
             <div v-if="expandedNotif === notif.id" class="px-5 pb-4">
 
               <!-- Workflow Progress -->
-              <div class="mb-4 flex items-center gap-1">
-                <template v-for="(step, i) in ['RS Kirim', 'KSM Review', 'Cek Supplier', 'PO Dibuat']" :key="step">
+              <div class="mb-4 flex items-center gap-1 flex-wrap">
+                <template v-for="(step, i) in ['SIMRS Alert', 'KSM Review', 'Konfirmasi RS', 'PO ke Dist.', 'Selesai']" :key="step">
                   <div :class="['flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold',
-                    (statusConfig[notif.status]?.step ?? 0) >= i ? 'bg-[#6b1525] text-white' : 'bg-[#ebebeb] text-[#aaa]']">
-                    <UIcon v-if="(statusConfig[notif.status]?.step ?? 0) > i" name="i-lucide-check" class="text-[10px]"/>
+                    currentStep(notif) >= i ? 'bg-[#6b1525] text-white' : 'bg-[#ebebeb] text-[#aaa]']">
+                    <UIcon v-if="currentStep(notif) > i" name="i-lucide-check" class="text-[10px]"/>
                     <span>{{ step }}</span>
                   </div>
-                  <UIcon v-if="i < 3" name="i-lucide-chevron-right" class="text-[10px] text-[#ddd]"/>
+                  <UIcon v-if="i < 4" name="i-lucide-chevron-right" class="text-[10px] text-[#ddd]"/>
                 </template>
+              </div>
+
+              <!-- Source badge -->
+              <div class="mb-3 flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">
+                  Sumber: {{ notif.source === 'simrs' ? 'SIMRS Otomatis' : 'Manual' }}
+                </span>
+                <span v-if="ksmConfStatus(notif)" :class="['text-[10px] font-semibold', ksmConfStatus(notif)!.color]">
+                  · {{ ksmConfStatus(notif)!.label }}
+                </span>
               </div>
 
               <p v-if="notif.notes" class="text-xs text-[#666] mb-3 italic">{{ notif.notes }}</p>
@@ -369,17 +408,39 @@ onMounted(() => { if (tenantId.value) load() })
                   </button>
                 </template>
 
-                <!-- Step 3: Supplier confirmed — Create PO -->
-                <template v-if="notif.status === 'acknowledged' && notif.metadata?.supplier_check === 'confirmed'">
+                <!-- Step 3: Supplier confirmed — Kirim Konfirmasi ke RS -->
+                <template v-if="notif.status === 'acknowledged' && notif.metadata?.supplier_check === 'confirmed' && !notif.ksm_confirmation_status">
                   <div class="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700">
                     <UIcon name="i-lucide-check-circle" class="text-sm"/>
                     Supplier konfirmasi semua item tersedia
+                  </div>
+                  <button @click="sendConfirmationToRS(notif.id)"
+                    :disabled="actionLoading === notif.id"
+                    class="px-4 py-2 bg-[#6b1525] text-white text-xs font-bold rounded-lg hover:bg-[#5a1120] disabled:opacity-50 transition-colors flex items-center gap-2">
+                    <UIcon name="i-lucide-send" class="text-sm"/>
+                    {{ actionLoading === notif.id ? 'Mengirim...' : 'Kirim Konfirmasi Pengiriman ke RS' }}
+                  </button>
+                </template>
+
+                <!-- Step 3b: Menunggu persetujuan RS -->
+                <template v-if="notif.ksm_confirmation_status === 'pending_rs_approval'">
+                  <div class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+                    <UIcon name="i-lucide-clock" class="text-sm animate-pulse"/>
+                    Konfirmasi terkirim — menunggu persetujuan RS...
+                  </div>
+                </template>
+
+                <!-- Step 4: RS approved — Buat PO -->
+                <template v-if="notif.ksm_confirmation_status === 'rs_approved' && notif.status === 'acknowledged'">
+                  <div class="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700">
+                    <UIcon name="i-lucide-check-circle-2" class="text-sm"/>
+                    RS menyetujui pengiriman — siap buat PO ke Distributor
                   </div>
                   <button @click="createAutoPO(notif.id)"
                     :disabled="actionLoading === notif.id"
                     class="px-4 py-2 bg-[#6b1525] text-white text-xs font-bold rounded-lg hover:bg-[#5a1120] disabled:opacity-50 transition-colors flex items-center gap-2">
                     <UIcon name="i-lucide-file-plus" class="text-sm"/>
-                    {{ actionLoading === notif.id ? 'Membuat PO...' : 'Buat PO Otomatis' }}
+                    {{ actionLoading === notif.id ? 'Membuat PO...' : 'Buat PO Otomatis ke Distributor' }}
                   </button>
                 </template>
 
