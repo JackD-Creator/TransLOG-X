@@ -364,36 +364,37 @@ watch(portalType, (type) => {
               Ecosystem Value
             </NuxtLink>
           </div>
-          <!-- Mini KPIs in hero -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-white/10 rounded-xl p-3 border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-              <p class="text-[10px] text-white/50 uppercase mb-1">PO Aktif</p>
-              <p class="text-xl font-bold text-white">{{ ksmStats.pos }}</p>
-              <p class="text-[10px] text-white/40">Purchase Orders</p>
-            </NuxtLink>
-            <NuxtLink to="/dashboard/ksm/ar" class="bg-white/10 rounded-xl p-3 border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-              <p class="text-[10px] text-white/50 uppercase mb-1">AR Outstanding</p>
-              <p class="text-lg font-bold text-amber-300">{{ fmtRpDash(ksmStats.arOutstanding) }}</p>
-              <p class="text-[10px] text-white/40">Piutang ke Bank</p>
-            </NuxtLink>
-            <NuxtLink to="/dashboard/ksm/scf" class="bg-white/10 rounded-xl p-3 border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-              <p class="text-[10px] text-white/50 uppercase mb-1">SCF Terpakai</p>
-              <p class="text-lg font-bold text-sky-300">{{ fmtRpDash(ksmStats.scfUsed) }}</p>
-              <p class="text-[10px] text-white/40">dari {{ fmtRpDash(ksmStats.scfLimit) }}</p>
-              <div class="mt-1.5 h-1 rounded-full bg-white/10">
-                <div class="h-full rounded-full bg-sky-400 transition-all"
-                  :style="{ width: ksmStats.scfLimit > 0 ? Math.min(100, ksmStats.scfUsed/ksmStats.scfLimit*100).toFixed(1)+'%' : '0%' }"/>
-              </div>
-            </NuxtLink>
-            <NuxtLink to="/dashboard/ksm/notifications" class="bg-white/10 rounded-xl p-3 border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-              <p class="text-[10px] text-white/50 uppercase mb-1">Notif RS</p>
-              <p class="text-xl font-bold" :class="ksmStats.pendingNotif > 0 ? 'text-amber-300' : 'text-emerald-300'">
-                {{ ksmStats.pendingNotif }}
-              </p>
-              <p class="text-[10px] text-white/40">Permintaan pending</p>
-            </NuxtLink>
-          </div>
         </div>
+      </div>
+
+      <!-- Mini KPIs — below hero -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-3 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">PO Aktif</p>
+          <p class="text-xl font-bold text-[#1a1a1a]">{{ ksmStats.pos }}</p>
+          <p class="text-[10px] text-[#aaa]">Purchase Orders</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/ar" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-3 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">AR Outstanding</p>
+          <p class="text-lg font-bold text-[#6b1525]">{{ fmtRpDash(ksmStats.arOutstanding) }}</p>
+          <p class="text-[10px] text-[#aaa]">Piutang ke Bank</p>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/scf" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-3 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">SCF Terpakai</p>
+          <p class="text-lg font-bold text-[#1a1a1a]">{{ fmtRpDash(ksmStats.scfUsed) }}</p>
+          <p class="text-[10px] text-[#aaa]">dari {{ fmtRpDash(ksmStats.scfLimit) }}</p>
+          <div class="mt-1.5 h-1 rounded-full bg-[#e0e0e0]">
+            <div class="h-full rounded-full bg-[#6b1525] transition-all"
+              :style="{ width: ksmStats.scfLimit > 0 ? Math.min(100, ksmStats.scfUsed/ksmStats.scfLimit*100).toFixed(1)+'%' : '0%' }"/>
+          </div>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/ksm/notifications" class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-3 hover:border-[#6b1525]/30 transition-colors">
+          <p class="text-[10px] text-[#999] uppercase mb-1">Notif RS</p>
+          <p class="text-xl font-bold" :class="ksmStats.pendingNotif > 0 ? 'text-[#6b1525]' : 'text-emerald-700'">
+            {{ ksmStats.pendingNotif }}
+          </p>
+          <p class="text-[10px] text-[#aaa]">Permintaan pending</p>
+        </NuxtLink>
       </div>
 
       <!-- Quick Actions -->
