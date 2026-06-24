@@ -79,7 +79,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   sent_to_rs:      { label: 'Terkirim ke RS',     color: 'bg-purple-100 text-purple-700' },
   acknowledged_rs: { label: 'RS Acknowledge',      color: 'bg-blue-100 text-blue-700' },
   payment_pending: { label: 'Tunggu Pembayaran',  color: 'bg-amber-100 text-amber-700' },
-  partially_paid:  { label: 'Dibayar Sebagian',   color: 'bg-orange-100 text-orange-700' },
+  partially_paid:  { label: 'Dibayar Sebagian',   color: 'bg-orange-100 text-orange-700' }, // override ke Lunas jika shortfall_covered_by_bank
   paid:            { label: 'Lunas',              color: 'bg-emerald-100 text-emerald-700' },
   overdue:         { label: 'Jatuh Tempo',        color: 'bg-red-100 text-red-700' },
   disputed:        { label: 'Dispute',            color: 'bg-red-200 text-red-800' },
@@ -176,11 +176,15 @@ onMounted(() => { if (tenantId.value) load() })
           <div>
             <div class="flex items-center gap-2 mb-1">
               <p class="font-mono text-sm font-bold text-[#1a1a1a]">{{ inv.invoice_number }}</p>
-              <span :class="['px-2 py-0.5 rounded-full text-[10px] font-semibold', statusConfig[inv.status]?.color ?? 'bg-[#f0f0f0] text-[#999]']">
-                {{ statusConfig[inv.status]?.label ?? inv.status }}
+              <!-- partially_paid + shortfall_covered_by_bank = Lunas untuk KSM (Bank bayar langsung) -->
+              <span :class="['px-2 py-0.5 rounded-full text-[10px] font-semibold',
+                (inv.status === 'partially_paid' && inv.shortfall_covered_by_bank)
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : (statusConfig[inv.status]?.color ?? 'bg-[#f0f0f0] text-[#999]')]">
+                {{ (inv.status === 'partially_paid' && inv.shortfall_covered_by_bank) ? 'Lunas' : (statusConfig[inv.status]?.label ?? inv.status) }}
               </span>
               <span v-if="inv.metadata?.auto_generated" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700">Auto H+1</span>
-              <span v-if="inv.shortfall_covered_by_bank" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700">Shortfall</span>
+              <span v-if="inv.shortfall_covered_by_bank" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-700">Shortfall Bank</span>
             </div>
             <p class="text-xs text-[#999]">
               RS: <strong class="text-[#666]">{{ inv.metadata?.rs_name ?? '-' }}</strong>
@@ -189,17 +193,26 @@ onMounted(() => { if (tenantId.value) load() })
             </p>
             <div class="flex items-center gap-4 mt-1.5 text-[10px] text-[#777]">
               <span>Terbit: {{ fmtDate(inv.invoice_date) }}</span>
-              <span :class="inv.due_date < today && inv.status !== 'paid' ? 'text-red-600 font-bold' : ''">
+              <span :class="inv.due_date < today && inv.status !== 'paid' && !(inv.shortfall_covered_by_bank && inv.status === 'partially_paid') ? 'text-red-600 font-bold' : ''">
                 JT: {{ fmtDate(inv.due_date) }}
               </span>
-              <span v-if="inv.bpjs_received_date" class="text-blue-600">
-                BPJS: {{ fmtDate(inv.bpjs_received_date) }} · {{ fmtRp(inv.bpjs_amount) }}
+            </div>
+            <!-- Breakdown pembayaran ke KSM -->
+            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+              <span v-if="inv.bpjs_received_date" class="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-700">
+                RS (BPJS): {{ fmtDate(inv.bpjs_received_date) }} · {{ fmtRp(inv.bpjs_amount) }}
+              </span>
+              <span v-if="inv.shortfall_covered_by_bank && Number(inv.shortfall_amount) > 0"
+                class="text-[10px] px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-semibold">
+                Bank Langsung: {{ fmtRp(inv.shortfall_amount) }}
               </span>
             </div>
           </div>
           <div class="text-right flex-shrink-0">
             <p class="text-lg font-bold text-[#1a1a1a]">{{ fmtRp(inv.total_amount) }}</p>
-            <p v-if="Number(inv.outstanding ?? 0) > 0" class="text-xs text-amber-700 font-semibold">
+            <!-- shortfall_covered_by_bank = Bank sudah bayar KSM langsung → KSM terima penuh, Sisa = 0 -->
+            <p v-if="inv.shortfall_covered_by_bank && inv.status === 'partially_paid'" class="text-xs text-emerald-600 font-semibold">Lunas</p>
+            <p v-else-if="Number(inv.outstanding ?? 0) > 0" class="text-xs text-amber-700 font-semibold">
               Sisa: {{ fmtRp(inv.outstanding) }}
             </p>
             <p v-else-if="inv.status === 'paid'" class="text-xs text-emerald-600 font-semibold">Lunas</p>
