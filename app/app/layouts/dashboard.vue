@@ -72,6 +72,7 @@ const navKSM = [
   {
     label: 'KEUANGAN',
     items: [
+      { label: 'Invoice ke RS',   icon: 'i-lucide-file-check',       to: '/dashboard/ksm/invoices' },
       { label: 'AR & Tagihan',   icon: 'i-lucide-file-text',        to: '/dashboard/ksm/ar' },
       { label: 'Fasilitas SCF',  icon: 'i-lucide-landmark',         to: '/dashboard/ksm/scf' },
       { label: 'Pembayaran',     icon: 'i-lucide-banknote',         to: '/dashboard/ksm/payments' },
