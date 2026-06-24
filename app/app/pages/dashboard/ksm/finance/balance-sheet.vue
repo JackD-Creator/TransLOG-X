@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'dashboard', title: 'Neraca Keuangan' })
 
 const supabase = useSupabaseClient()
+const { tenantId } = useUserRole()
 
 const loading = ref(true)
 
@@ -27,11 +28,12 @@ const bs = ref<BSData>({
 })
 
 async function loadData() {
+  if (!tenantId.value) return
   loading.value = true
   const [{ data: ar }, { data: scf }, { data: pos }] = await Promise.all([
-    supabase.from('ar_accounts').select('outstanding_amount, invoice_amount'),
-    supabase.from('scf_facilities').select('outstanding, facility_limit').eq('status','approved'),
-    supabase.from('ksm_purchase_orders').select('total_amount, status'),
+    supabase.from('ar_accounts').select('outstanding_amount, invoice_amount').eq('ksm_tenant_id', tenantId.value),
+    supabase.from('scf_facilities').select('outstanding, facility_limit').eq('borrower_tenant_id', tenantId.value).eq('status','approved'),
+    supabase.from('ksm_purchase_orders').select('total_amount, status').eq('ksm_tenant_id', tenantId.value),
   ])
 
   const arTotal = (ar ?? []).reduce((s,a) => s + Number(a.outstanding_amount ?? a.invoice_amount ?? 0), 0)
@@ -78,7 +80,8 @@ function fmtRp(n: number) {
 
 const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
 
-onMounted(loadData)
+watch(tenantId, (id) => { if (id) loadData() })
+onMounted(() => { if (tenantId.value) loadData() })
 </script>
 
 <template>
