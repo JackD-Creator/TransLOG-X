@@ -52,39 +52,56 @@ async function runForecast() {
   loading.value = 'forecast'
   result.value = null
 
-  // Ambil po_lines 90 hari terakhir dari KSM PO
-  const since = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10)
+  // 3 bulan terakhir (M-3, M-2, M-1)
+  const now = new Date()
+  const months = [2, 1, 0].reverse().map(offset => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset - 1, 1)
+    return {
+      label: d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }),
+      from: new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10),
+      to:   new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10),
+    }
+  })
+
   const { data: lines } = await supabase
     .from('ksm_po_lines')
     .select('item_name, catalog_type, ordered_qty, ksm_purchase_orders!inner(po_date, ksm_tenant_id)')
     .eq('ksm_purchase_orders.ksm_tenant_id', tenantId.value)
-    .gte('ksm_purchase_orders.po_date', since)
-    .limit(500)
+    .gte('ksm_purchase_orders.po_date', months[0].from)
+    .limit(1000)
 
-  // Agregasi per item
-  const agg: Record<string, { qty: number; category: string }> = {}
+  // Agregasi per item per bulan
+  const agg: Record<string, { category: string; monthly: number[] }> = {}
   for (const l of lines ?? []) {
+    const poDate = (l.ksm_purchase_orders as any)?.po_date ?? ''
+    const mIdx = months.findIndex(m => poDate >= m.from && poDate <= m.to)
+    if (mIdx === -1) continue
     const key = l.item_name ?? '-'
-    if (!agg[key]) agg[key] = { qty: 0, category: l.catalog_type ?? 'obat' }
-    agg[key].qty += Number(l.ordered_qty ?? 0)
+    if (!agg[key]) agg[key] = { category: l.catalog_type ?? 'obat', monthly: [0, 0, 0] }
+    agg[key].monthly[mIdx] += Number(l.ordered_qty ?? 0)
   }
 
-  const items = Object.entries(agg)
-    .sort((a, b) => b[1].qty - a[1].qty)
+  const LEAD_TIME = 7 // hari — asumsi lead time distributor
+  const predictions = Object.entries(agg)
+    .filter(([, v]) => v.monthly.some(m => m > 0))
+    .map(([name, v]) => {
+      const [m1, m2, m3] = v.monthly
+      const ma = (m1 + m2 + m3) / 3           // Moving Average 3 bulan
+      const predicted30d = Math.round(ma)
+      const avgDaily = ma / 30
+      const safetyStock = Math.round(avgDaily * LEAD_TIME * 0.5)
+      const rop = Math.round(avgDaily * LEAD_TIME + safetyStock) // ROP = avg×LT + SS
+      // Trend: bandingkan bulan terbaru vs tertua
+      const trend = m3 > m1 * 1.1 ? 'up' : m3 < m1 * 0.9 ? 'down' : 'stable'
+      // Risk: koefisien variasi antar bulan
+      const cv = ma > 0 ? Math.sqrt(((m1-ma)**2 + (m2-ma)**2 + (m3-ma)**2) / 3) / ma : 0
+      const risk: 'high'|'medium'|'low' = cv > 0.3 || trend === 'up' ? 'high' : cv > 0.15 ? 'medium' : 'low'
+      return { name, category: v.category, monthly: [m1, m2, m3], predicted30d, avgDaily: Math.round(avgDaily * 10) / 10, rop, safetyStock, reorderQty: predicted30d, trend, risk }
+    })
+    .sort((a, b) => b.predicted30d - a.predicted30d)
     .slice(0, 20)
-    .map(([name, v]) => ({
-      name,
-      stock: v.qty,
-      avg_daily: Math.max(1, Math.round(v.qty / 90)),
-      category: v.category
-    }))
 
-  try {
-    const res = await $fetch('/api/forecast', { method: 'POST', body: { items } })
-    result.value = { type: 'forecast', data: res }
-  } catch (e: any) {
-    result.value = { type: 'error', data: { message: e.data?.message ?? e.message ?? 'Gagal menghubungi AI' } }
-  }
+  result.value = { type: 'forecast', data: { predictions, monthLabels: months.map(m => m.label) } }
   loading.value = ''
 }
 
@@ -191,26 +208,60 @@ function runAction(action: string | null) {
 
       <!-- Forecast Result -->
       <div v-if="result.type === 'forecast'">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-bold text-[#1a1a1a]">Hasil Demand Forecast (30 Hari)</h2>
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-sm font-bold text-[#1a1a1a]">Demand Forecast — 30 Hari ke Depan</h2>
           <button class="text-xs text-[#999] hover:text-[#666]" @click="result = null">Tutup</button>
         </div>
-        <p v-if="result.data.summary" class="text-xs text-[#666] mb-4">{{ result.data.summary }}</p>
-        <div v-if="result.data.predictions" class="space-y-2">
-          <div v-for="p in result.data.predictions" :key="p.name"
-            class="flex items-center justify-between p-3 rounded-lg border border-[#e5e5e5] bg-[#f0f0f0]">
-            <div>
-              <p class="text-sm font-medium text-[#1a1a1a]">{{ p.name }}</p>
-              <p class="text-xs text-[#999]">{{ p.note }}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-sm font-bold text-[#1a1a1a]">{{ p.predicted_demand_30d?.toLocaleString('id-ID') ?? '-' }}</p>
-              <p class="text-xs" :class="p.risk === 'high' ? 'text-red-600' : p.risk === 'medium' ? 'text-amber-600' : 'text-emerald-600'">
-                Risiko: {{ p.risk }} · Confidence: {{ Math.round((p.confidence ?? 0) * 100) }}%
-              </p>
-            </div>
-          </div>
+        <p class="text-[10px] text-[#999] mb-4">Moving Average 3 bulan · ROP = avg_daily × lead_time + safety_stock · Lead time: 7 hari</p>
+
+        <div v-if="!result.data.predictions?.length" class="text-sm text-[#999] py-8 text-center">Tidak ada data PO dalam 3 bulan terakhir.</div>
+
+        <div v-else class="overflow-x-auto rounded-xl border border-[#e5e5e5]">
+          <table class="w-full text-xs">
+            <thead class="bg-[#ebebeb] border-b border-[#e5e5e5]">
+              <tr>
+                <th class="px-3 py-2.5 text-left text-[#666] font-semibold">Item</th>
+                <th v-for="lbl in result.data.monthLabels" :key="lbl" class="px-3 py-2.5 text-right text-[#666] font-semibold">{{ lbl }}</th>
+                <th class="px-3 py-2.5 text-right text-[#666] font-semibold">Forecast 30d</th>
+                <th class="px-3 py-2.5 text-right text-[#666] font-semibold">Avg/Hari</th>
+                <th class="px-3 py-2.5 text-right text-[#666] font-semibold">ROP</th>
+                <th class="px-3 py-2.5 text-right text-[#666] font-semibold">Order Qty</th>
+                <th class="px-3 py-2.5 text-center text-[#666] font-semibold">Trend</th>
+                <th class="px-3 py-2.5 text-center text-[#666] font-semibold">Risiko</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#e5e5e5]">
+              <tr v-for="p in result.data.predictions" :key="p.name" class="hover:bg-[#ebebeb] transition-colors">
+                <td class="px-3 py-2.5">
+                  <p class="font-medium text-[#1a1a1a] max-w-[180px] truncate" :title="p.name">{{ p.name }}</p>
+                  <p class="text-[10px] text-[#999]">{{ p.category }}</p>
+                </td>
+                <td v-for="(qty, i) in p.monthly" :key="i" class="px-3 py-2.5 text-right text-[#555]">
+                  {{ qty.toLocaleString('id-ID') }}
+                </td>
+                <td class="px-3 py-2.5 text-right font-bold text-[#1a1a1a]">{{ p.predicted30d.toLocaleString('id-ID') }}</td>
+                <td class="px-3 py-2.5 text-right text-[#555]">{{ p.avgDaily }}</td>
+                <td class="px-3 py-2.5 text-right font-semibold text-amber-700">{{ p.rop.toLocaleString('id-ID') }}</td>
+                <td class="px-3 py-2.5 text-right text-[#555]">{{ p.reorderQty.toLocaleString('id-ID') }}</td>
+                <td class="px-3 py-2.5 text-center">
+                  <span v-if="p.trend === 'up'" class="text-red-500 font-bold">↑</span>
+                  <span v-else-if="p.trend === 'down'" class="text-emerald-500 font-bold">↓</span>
+                  <span v-else class="text-[#999]">→</span>
+                </td>
+                <td class="px-3 py-2.5 text-center">
+                  <span :class="['px-1.5 py-0.5 rounded text-[9px] font-bold',
+                    p.risk==='high'?'bg-red-100 text-red-700':p.risk==='medium'?'bg-amber-100 text-amber-700':'bg-emerald-100 text-emerald-700']">
+                    {{ p.risk.toUpperCase() }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <p class="text-[10px] text-[#999] mt-2">
+          ROP = titik stok minimum sebelum harus reorder · Safety Stock = 50% × avg_daily × lead_time
+        </p>
       </div>
 
       <!-- Anomaly Result -->
