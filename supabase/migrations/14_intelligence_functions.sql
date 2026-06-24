@@ -263,7 +263,7 @@ CREATE OR REPLACE FUNCTION get_demand_analysis(p_ksm_tenant_id UUID)
 RETURNS JSONB AS $$
 BEGIN
   RETURN (
-    SELECT COALESCE(jsonb_agg(item ORDER BY total_requested DESC), '[]'::JSONB)
+    SELECT COALESCE(jsonb_agg(item), '[]'::JSONB)
     FROM (
       SELECT jsonb_build_object(
         'kfa_code', l.kfa_code,

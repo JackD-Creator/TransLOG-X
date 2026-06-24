@@ -18,6 +18,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     groqApiKey: process.env.GROQ_API_KEY ?? '',
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY ?? '',
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL ?? 'https://eccermneumcskamtitqh.supabase.co',
+    },
   },
 
   colorMode: {
