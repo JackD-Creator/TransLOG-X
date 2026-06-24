@@ -73,7 +73,7 @@ const parties = computed(() => [
       { label:'Data-Driven Advantage', value:'Real-time demand forecast → zero overstock, zero stockout', icon:'i-lucide-bar-chart-2' },
       { label:'Leverage Network Effect', value:'Setiap RS baru tambah → COGS makin rendah (volume discount)', icon:'i-lucide-users' },
     ],
-    insight: `Blended margin ${eco.ksm_margin_pct}% dari volume ${fmtRp(eco.totalAnnual)}/tahun menghasilkan gross profit ${fmtRp(calc.value.ksmGP)}/tahun. Ditambah service fee dan rebate, effective margin KSM bisa mencapai 15–20%.`,
+    insight: `Blended margin ${eco.ksm_margin_pct}% dari volume ${fmtRp(calc.value.totalAnnual)}/tahun menghasilkan gross profit ${fmtRp(calc.value.ksmGP)}/tahun. Ditambah service fee dan rebate, effective margin KSM bisa mencapai 15–20%.`,
   },
   {
     id: 'distributor',

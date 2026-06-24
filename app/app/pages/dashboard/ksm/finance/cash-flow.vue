@@ -116,10 +116,10 @@ onMounted(loadData)
         <p class="text-xl font-bold" :class="netFin >= 0 ? 'text-blue-700' : 'text-amber-600'">{{ fmtRp(netFin) }}</p>
         <p class="text-[10px] text-[#999] mt-0.5">Pembiayaan SCF</p>
       </div>
-      <div class="rounded-xl p-4 text-center" style="background: linear-gradient(135deg, #6b1525 0%, #8a1e33 100%)">
-        <p class="text-[10px] text-white/60 uppercase mb-1">NET CASH FLOW</p>
-        <p class="text-xl font-bold" :class="netCash >= 0 ? 'text-amber-300' : 'text-red-300'">{{ fmtRp(netCash) }}</p>
-        <p class="text-[10px] text-white/50 mt-0.5">{{ netCash >= 0 ? 'Positif ✓' : 'Negatif ⚠' }}</p>
+      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4 text-center">
+        <p class="text-[10px] text-[#999] uppercase mb-1">Net Cash Flow</p>
+        <p class="text-xl font-bold" :class="netCash >= 0 ? 'text-emerald-700' : 'text-red-600'">{{ fmtRp(netCash) }}</p>
+        <p class="text-[10px] text-[#aaa] mt-0.5">{{ netCash >= 0 ? 'Positif ✓' : 'Negatif ⚠' }}</p>
       </div>
     </div>
 

@@ -80,7 +80,7 @@ const navKSM = [
       { label: 'Lap. Keuangan',  icon: 'i-lucide-trending-up',      to: '/dashboard/ksm/finance' },
       { label: 'P&L',            icon: 'i-lucide-bar-chart-2',      to: '/dashboard/ksm/finance/pl' },
       { label: 'Neraca',         icon: 'i-lucide-scale',            to: '/dashboard/ksm/finance/balance-sheet' },
-      { label: 'Arus Kas',       icon: 'i-lucide-waves',            to: '/dashboard/ksm/finance/cash-flow' },
+      { label: 'Cash Flow',      icon: 'i-lucide-waves',            to: '/dashboard/ksm/finance/cash-flow' },
       { label: 'Revenue Cycle',  icon: 'i-lucide-refresh-cw',       to: '/dashboard/ksm/rcm' }
     ]
   },

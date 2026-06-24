@@ -23,27 +23,32 @@ async function load() {
   const startDate = `${period.value.year}-${String(period.value.month).padStart(2,'0')}-01`
   const endDate   = new Date(period.value.year, period.value.month, 0).toISOString().slice(0, 10)
 
+  // Ambil semua PO selesai (fully_received) dalam periode
   const { data: pos } = await supabase
     .from('ksm_purchase_orders')
-    .select('total_amount, ksm_po_lines(unit_price, ordered_qty, tax_rate, line_total)')
+    .select('total_amount, subtotal, tax_amount')
     .eq('status', 'fully_received')
     .gte('po_date', startDate)
     .lte('po_date', endDate)
 
+  // AR hanya untuk biaya bunga SCF — filter sesuai periode
   const { data: arData } = await supabase
     .from('ar_accounts')
-    .select('invoice_amount, interest_amount, total_payable, paid_amount')
+    .select('interest_amount')
     .gte('invoice_date', startDate)
     .lte('invoice_date', endDate)
 
-  // COGS = total pembelian dari distributor
-  const cogs = (pos ?? []).reduce((s: number, po: any) => s + Number(po.total_amount), 0)
+  // COGS = total pembelian dari distributor (harga beli KSM)
+  const cogsBase = (pos ?? []).reduce((s: number, po: any) => s + Number(po.subtotal ?? po.total_amount), 0)
+  const cogs = cogsBase
 
-  // Revenue = invoice amount (harga jual ke RS) — dalam SCF = AR to bank = nilai invoice ke RS
-  const revenue = (arData ?? []).reduce((s: number, a: any) => s + Number(a.invoice_amount), 0)
+  // Revenue = harga jual KSM ke RS = COGS + margin 12% (blended margin KSM)
+  // Ini adalah estimasi berdasarkan model bisnis KSM — sell price = buy price × (1 + margin)
+  const MARGIN = 0.12
+  const revenue = cogs * (1 + MARGIN)
 
-  // Biaya bunga (beban keuangan)
-  const interestExpense = (arData ?? []).reduce((s: number, a: any) => s + Number(a.interest_amount), 0)
+  // Biaya bunga SCF — beban keuangan ke Bank
+  const interestExpense = (arData ?? []).reduce((s: number, a: any) => s + Number(a.interest_amount ?? 0), 0)
 
   const grossProfit = revenue - cogs
   const grossMargin = revenue > 0 ? (grossProfit / revenue * 100) : 0
