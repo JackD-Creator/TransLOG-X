@@ -23,6 +23,7 @@ async function load() {
     let query = supabase
       .from('kfa_drugs')
       .select('kfa_code, name, nama_dagang, dosage_form, strength, farmalkes_type, uom, fix_price, het_price, is_fornas, manufacturer, distributor', { count: 'exact' })
+      .or('manufacturer.not.is.null,distributor.not.is.null')
       .order('name', { ascending: true })
       .range(from, to)
 
@@ -46,6 +47,7 @@ async function load() {
     let query = supabase
       .from('kfa_alkes')
       .select('kfa_code, name, farmalkes_type, med_dev_kelas_risiko, uom, fix_price, manufacturer, distributor', { count: 'exact' })
+      .or('manufacturer.not.is.null,distributor.not.is.null')
       .order('name', { ascending: true })
       .range(from, to)
 
