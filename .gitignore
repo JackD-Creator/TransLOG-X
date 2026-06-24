@@ -15,6 +15,10 @@ dist/
 supabase/.temp/
 supabase/config.toml.bak
 
+# Docs assets (large images, PRD) — jangan masuk repo
+docs/assets/
+docs/prd/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -25,3 +29,5 @@ npm-debug.log*
 
 # Build
 .vercel/
+
+.vercel
