@@ -16,6 +16,10 @@ export default defineNuxtConfig({
     }
   },
 
+  runtimeConfig: {
+    groqApiKey: process.env.GROQ_API_KEY ?? '',
+  },
+
   colorMode: {
     preference: 'light',
     fallback: 'light'
