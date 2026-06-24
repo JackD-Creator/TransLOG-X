@@ -112,13 +112,12 @@ const navKSM = [
 
 const navDistributor = [
   {
-    label: 'MAIN MENU',
+    label: 'ALUR ORDER',
     items: [
       { label: 'Dashboard',      icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
-      { label: 'Purchase Order', icon: 'i-lucide-clipboard-list',   to: '/dashboard/dist/purchase-orders' },
-      { label: 'Pemenuhan',      icon: 'i-lucide-package-check',    to: '/dashboard/dist/fulfillment' },
+      { label: 'PO Masuk',       icon: 'i-lucide-clipboard-list',   to: '/dashboard/dist/purchase-orders' },
+      { label: 'Fulfillment',    icon: 'i-lucide-package-check',    to: '/dashboard/dist/fulfillment' },
       { label: 'Pengiriman',     icon: 'i-lucide-truck',            to: '/dashboard/dist/delivery' },
-      { label: 'Retur',          icon: 'i-lucide-package-x',        to: '/dashboard/dist/returns' }
     ]
   },
   {
@@ -131,24 +130,14 @@ const navDistributor = [
   {
     label: 'KEUANGAN',
     items: [
-      { label: 'Invoice',        icon: 'i-lucide-file-text',        to: '/dashboard/dist/invoices' },
-      { label: 'Pembayaran',     icon: 'i-lucide-banknote',         to: '/dashboard/dist/payments' },
-      { label: 'Fasilitas SCF',  icon: 'i-lucide-landmark',         to: '/dashboard/dist/scf' }
-    ]
-  },
-  {
-    label: 'INTELIJEN',
-    items: [
-      { label: 'Analytics',      icon: 'i-lucide-bar-chart-2',      to: '/dashboard/dist/analytics' },
-      { label: 'AI Assistant',   icon: 'i-lucide-brain',            to: '/dashboard/ai' }
+      { label: 'Pembayaran Bank',icon: 'i-lucide-banknote',         to: '/dashboard/dist/payments' },
     ]
   },
   {
     label: 'PLATFORM',
     items: [
-      { label: 'User Management', icon: 'i-lucide-users',           to: '/dashboard/users' },
-      { label: 'Komunikasi',      icon: 'i-lucide-message-square',  to: '/dashboard/communication' },
-      { label: 'Pengaturan',      icon: 'i-lucide-settings',        to: '/dashboard/settings' }
+      { label: 'Analytics',      icon: 'i-lucide-bar-chart-2',      to: '/dashboard/dist/analytics' },
+      { label: 'Pengaturan',     icon: 'i-lucide-settings',         to: '/dashboard/settings' }
     ]
   }
 ]
