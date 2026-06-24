@@ -365,7 +365,7 @@ onMounted(loadRealData)
           <strong class="text-[#1a1a1a]">RS sebagai Co-Guarantor:</strong> RS ikut menjamin fasilitas SCF. Ini mengurangi risiko Bank karena ada 2 pihak yang bertanggung jawab (KSM + RS). Memungkinkan bunga lebih rendah.
         </div>
         <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
-          <strong class="text-[#1a1a1a]">Shortfall Mechanism:</strong> Jika BPJS tidak cover 100% invoice → Bank cover kekurangan sebagai kredit tambahan. Bunga dihitung harian, ditanggung 50% KSM + 50% RS.
+          <strong class="text-[#1a1a1a]">Shortfall Mechanism:</strong> Jika BPJS tidak cover 100% invoice → RS kekurangan bayar KSM → Bank buka kredit untuk RS agar KSM tetap terbayar lunas. KSM tanggung 50% bunga harian karena sudah berhutang SCF ke Bank; RS tanggung 50% karena BPJS-nya yang kurang.
         </div>
         <div class="p-2.5 bg-white rounded border border-[#ebebeb] text-[#666]">
           <strong class="text-[#1a1a1a]">Yield on Deployed Capital:</strong> Total return Bank dari fasilitas SCF: bunga pokok + admin fee + bunga shortfall. Dibandingkan dengan risk profile = risk-adjusted return yang attractive.

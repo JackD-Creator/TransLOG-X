@@ -43,7 +43,7 @@ onMounted(() => { if (tenantId.value) load() })
   <div class="space-y-5">
     <div>
       <h1 class="text-xl font-bold text-[#1a1a1a]">Pembayaran & BPJS Tracking</h1>
-      <p class="text-sm text-[#999] mt-0.5">Tracking pembayaran BPJS → SI auto-transfer → shortfall bank → bunga harian 50/50</p>
+      <p class="text-sm text-[#999] mt-0.5">Tracking BPJS → SI auto-transfer → jika BPJS kurang, Bank buka kredit untuk RS bayar KSM → bunga harian 50% KSM + 50% RS</p>
     </div>
 
     <!-- KPI -->
@@ -60,12 +60,12 @@ onMounted(() => { if (tenantId.value) load() })
       <div :class="['rounded-xl border p-4', totalShortfall > 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200']">
         <p :class="['text-[10px] uppercase mb-1', totalShortfall > 0 ? 'text-red-400' : 'text-emerald-500']">Shortfall Bank</p>
         <p :class="['text-xl font-bold', totalShortfall > 0 ? 'text-red-600' : 'text-emerald-700']">{{ fmtRp(totalShortfall) }}</p>
-        <p v-if="totalShortfall > 0" class="text-[10px] text-red-400 mt-1">Fasilitas kredit bank</p>
+        <p v-if="totalShortfall > 0" class="text-[10px] text-red-400 mt-1">Kredit Bank untuk RS → bayar KSM</p>
       </div>
       <div v-if="totalKSMInterest > 0" class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] p-4">
         <p class="text-[10px] text-[#999] uppercase mb-1">Bunga KSM (50%)</p>
         <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(totalKSMInterest) }}</p>
-        <p class="text-[10px] text-[#777] mt-1">Harian dari shortfall</p>
+        <p class="text-[10px] text-[#777] mt-1">50% dari bunga kredit shortfall RS</p>
       </div>
     </div>
 
@@ -151,7 +151,7 @@ onMounted(() => { if (tenantId.value) load() })
           </div>
           <div class="text-right">
             <p class="text-lg font-bold text-red-700">{{ fmtRp(inv.shortfall_amount) }}</p>
-            <p class="text-[10px] text-red-500">Kekurangan dicover Bank</p>
+            <p class="text-[10px] text-red-500">Bank buka kredit untuk RS, bayar KSM</p>
           </div>
         </div>
         <div class="grid grid-cols-4 gap-3 text-xs">
@@ -169,7 +169,7 @@ onMounted(() => { if (tenantId.value) load() })
           </div>
           <div>
             <p class="text-red-400 text-[10px]">Bunga</p>
-            <p class="font-bold text-red-700">Harian · 50% KSM</p>
+            <p class="font-bold text-red-700">Harian · 50% KSM + 50% RS</p>
           </div>
         </div>
       </div>
@@ -179,7 +179,7 @@ onMounted(() => { if (tenantId.value) load() })
     <div v-else-if="activeTab === 'interest'" class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
       <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5]">
         <p class="text-xs font-bold text-[#666] uppercase tracking-wide">Accrued Daily Interest (Bunga Harian Shortfall)</p>
-        <p class="text-[10px] text-[#777] mt-0.5">Ditanggung 50% KSM + 50% RS · Dihitung dari saldo shortfall × rate harian</p>
+        <p class="text-[10px] text-[#777] mt-0.5">KSM tanggung 50% karena sudah berhutang SCF ke Bank · RS tanggung 50% karena BPJS-nya yang kurang</p>
       </div>
       <div v-if="interestData.length === 0" class="flex flex-col items-center justify-center py-12 gap-2">
         <UIcon name="i-lucide-check-circle" class="text-3xl text-emerald-400"/>
