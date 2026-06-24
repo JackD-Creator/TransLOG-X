@@ -17,13 +17,7 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
-function fmtDate(d: string | null) {
-  if (!d) return '-'
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-}
+
 
 const today = new Date().toISOString().slice(0, 10)
 function daysDiff(d: string) {

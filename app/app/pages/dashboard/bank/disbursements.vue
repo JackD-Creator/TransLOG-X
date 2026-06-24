@@ -17,13 +17,7 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
-function fmtDate(d: string | null) {
-  if (!d) return '-'
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-}
+
 
 const totalDisbursed = computed(() => arList.value.reduce((s, a) => s + Number(a.disbursed_amount ?? 0), 0))
 

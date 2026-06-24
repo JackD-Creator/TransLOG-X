@@ -14,12 +14,7 @@ const mvTypeMap: Record<string, { label: string; icon: string; color: string; bg
   disposal:   { label: 'Disposal',      icon: 'i-lucide-trash-2',           color: 'text-rose-600',    bg: 'bg-rose-50 border-rose-200' },
 }
 
-function rp(n: number) {
-  if (!n) return 'Rp 0'
-  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(1)}M`
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(1)}Jt`
-  return 'Rp ' + Math.round(n).toLocaleString('id-ID')
-}
+
 
 function fDate(d: string | null, withTime = false) {
   if (!d) return '—'
@@ -174,7 +169,7 @@ const mvTotalPages = computed(() => Math.max(1, Math.ceil(mvTotal.value / mvPerP
         <div class="w-9 h-9 rounded-lg border flex items-center justify-center mb-3 bg-blue-50 border-blue-100">
           <UIcon name="i-lucide-package" class="text-blue-600"/>
         </div>
-        <p class="text-2xl font-bold text-[#1a1a1a]">{{ rp(kpis.totalValue) }}</p>
+        <p class="text-2xl font-bold text-[#1a1a1a]">{{ fmtRp(kpis.totalValue) }}</p>
         <p class="text-xs mt-0.5 text-[#999]">Nilai Stok Total</p>
       </div>
 
@@ -225,7 +220,7 @@ const mvTotalPages = computed(() => Math.max(1, Math.ceil(mvTotal.value / mvPerP
               </div>
               <div class="flex items-center gap-3 text-xs">
                 <span class="text-[#999]">{{ cat.qty.toLocaleString('id-ID') }} unit</span>
-                <span class="font-bold w-20 text-right text-[#1a1a1a]">{{ rp(cat.value) }}</span>
+                <span class="font-bold w-20 text-right text-[#1a1a1a]">{{ fmtRp(cat.value) }}</span>
                 <span class="font-bold w-7 text-right" :style="{ color: cat.color }">{{ cat.pct }}%</span>
               </div>
             </div>
@@ -350,7 +345,7 @@ const mvTotalPages = computed(() => Math.max(1, Math.ceil(mvTotal.value / mvPerP
                 </span>
                 <span class="ml-0.5 text-[#999]">{{ mv.uom }}</span>
               </td>
-              <td class="px-4 py-3 text-right font-medium whitespace-nowrap text-[#1a1a1a]">{{ rp(mv.value) }}</td>
+              <td class="px-4 py-3 text-right font-medium whitespace-nowrap text-[#1a1a1a]">{{ fmtRp(mv.value) }}</td>
               <td class="px-4 py-3 font-mono whitespace-nowrap text-[#999]">
                 {{ Number(mv.qty_before).toLocaleString('id-ID') }}
                 <span class="mx-1 text-[#ccc]">&rarr;</span>

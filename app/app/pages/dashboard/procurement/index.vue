@@ -215,7 +215,7 @@ function isOverdue(d: string | null) {
             <UIcon name="i-lucide-banknote" class="text-violet-600 text-base"/>
           </div>
         </div>
-        <p class="text-2xl font-bold" style="color:#1a1a1a">{{ rp(kpis.poValue) }}</p>
+        <p class="text-2xl font-bold" style="color:#1a1a1a">{{ fmtRp(kpis.poValue) }}</p>
         <p class="text-xs mt-0.5" style="color:#999">Nilai PO Aktif</p>
       </div>
 
@@ -316,7 +316,7 @@ function isOverdue(d: string | null) {
                   <span class="font-bold" style="color:#1a1a1a">{{ pr.line_count }}</span>
                   <span style="color:#999"> item</span>
                 </td>
-                <td class="px-4 py-3 text-right font-bold" style="color:#1a1a1a">{{ rp(pr.total_est_value) }}</td>
+                <td class="px-4 py-3 text-right font-bold" style="color:#1a1a1a">{{ fmtRp(pr.total_est_value) }}</td>
                 <td class="px-4 py-3">
                   <span class="font-semibold" :class="priorityMap[pr.priority]?.color ?? 'text-[#999]'">
                     {{ priorityMap[pr.priority]?.label ?? pr.priority }}
@@ -412,7 +412,7 @@ function isOverdue(d: string | null) {
                   <span class="font-bold" style="color:#1a1a1a">{{ po.line_count }}</span>
                   <span style="color:#999"> item</span>
                 </td>
-                <td class="px-4 py-3 text-right font-bold" style="color:#1a1a1a">{{ rp(po.total_amount) }}</td>
+                <td class="px-4 py-3 text-right font-bold" style="color:#1a1a1a">{{ fmtRp(po.total_amount) }}</td>
                 <td class="px-4 py-3">
                   <span :class="isOverdue(po.expected_delivery) && !['fully_received','closed'].includes(po.status) ? 'text-rose-600 font-semibold' : ''" :style="!(isOverdue(po.expected_delivery) && !['fully_received','closed'].includes(po.status)) ? 'color:#666' : ''">
                     {{ formatDate(po.expected_delivery) }}

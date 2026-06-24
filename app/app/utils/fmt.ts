@@ -1,23 +1,27 @@
-/** Format Rupiah — standar seluruh dashboard
- *  >= 1 T  → "Rp 1,50 T"
- *  >= 1 M  → "Rp 3,00 M"   (Miliar)
- *  >= 1 jt → "Rp 455 jt"   (Juta)
- *  < 1 jt  → "Rp 5.000"    (id-ID locale)
+/**
+ * Format Rupiah — STANDAR SELURUH APLIKASI
+ * Selalu tampilkan angka penuh, TIDAK disingkat (jt/M/T)
+ * Contoh: Rp 5.400.000 — bukan "Rp 5,4 jt"
  */
-export function fmtRp(n: number): string {
-  if (!isFinite(n) || isNaN(n)) return 'Rp 0'
-  const a = Math.abs(n)
-  const s = n < 0 ? '-' : ''
-  if (a >= 1e12) return `${s}Rp ${(a / 1e12).toFixed(2)} T`
-  if (a >= 1e9)  return `${s}Rp ${(a / 1e9).toFixed(2)} M`
-  if (a >= 1e6)  return `${s}Rp ${Math.round(a / 1e6)} jt`
-  return `${s}Rp ${Math.round(a).toLocaleString('id-ID')}`
+export function fmtRp(n: number | null | undefined): string {
+  if (n == null || !isFinite(n) || isNaN(n)) return 'Rp 0'
+  const abs = Math.abs(Math.round(n))
+  const formatted = abs.toLocaleString('id-ID')
+  return n < 0 ? `-Rp ${formatted}` : `Rp ${formatted}`
 }
 
-export function fmtNum(n: number): string {
+/**
+ * Format angka biasa (tanpa Rp)
+ */
+export function fmtNum(n: number | null | undefined): string {
+  if (n == null || !isFinite(n)) return '0'
   return Math.round(n).toLocaleString('id-ID')
 }
 
-export function fmtPct(n: number, dec = 1): string {
+/**
+ * Format persentase
+ */
+export function fmtPct(n: number | null | undefined, dec = 1): string {
+  if (n == null || !isFinite(n)) return '0%'
   return `${n.toFixed(dec)}%`
 }

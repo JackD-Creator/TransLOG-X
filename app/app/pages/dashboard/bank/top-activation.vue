@@ -23,10 +23,7 @@ async function activateToP(id: string) {
   await load()
 }
 
-function fmtDate(d: string | null) {
-  if (!d) return '-'
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-}
+
 
 onMounted(load)
 </script>

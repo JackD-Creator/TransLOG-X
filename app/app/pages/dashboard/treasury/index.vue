@@ -85,7 +85,7 @@ const rp = fmtRp
                 <p class="text-xs text-[#999] font-mono">{{ a.no_rek }} · {{ a.jenis }}</p>
               </div>
             </div>
-            <p class="text-sm font-bold text-[#1a1a1a]">{{ rp(a.saldo) }}</p>
+            <p class="text-sm font-bold text-[#1a1a1a]">{{ fmtRp(a.saldo) }}</p>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ const rp = fmtRp
               </div>
             </div>
             <p :class="['text-sm font-bold', c.jenis==='in'?'text-emerald-600':'text-red-600']">
-              {{ c.jenis==='in'?'+':'-' }}{{ rp(c.nominal) }}
+              {{ c.jenis==='in'?'+':'-' }}{{ fmtRp(c.nominal) }}
             </p>
           </div>
         </div>

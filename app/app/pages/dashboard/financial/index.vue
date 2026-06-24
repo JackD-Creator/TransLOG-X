@@ -86,7 +86,6 @@ function bl(s: string) {
   const m: Record<string, string> = { sent: 'Terkirim', overdue: 'Jatuh Tempo', paid: 'Lunas', draft: 'Draft', active: 'Aktif', settled: 'Selesai', unpaid: 'Belum Bayar' }
   return m[s] ?? s
 }
-function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
 </script>
 
 <template>
@@ -137,7 +136,7 @@ function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
               <td class="px-4 py-3 font-mono text-xs text-[#6b1525] font-semibold">{{ inv.id }}</td>
               <td class="px-4 py-3 text-xs text-[#999]">{{ inv.tanggal }}</td>
               <td class="px-4 py-3 text-sm text-[#1a1a1a]">{{ inv.kepada }}</td>
-              <td class="px-4 py-3 text-right text-sm font-semibold text-[#1a1a1a]">{{ rp(inv.nominal) }}</td>
+              <td class="px-4 py-3 text-right text-sm font-semibold text-[#1a1a1a]">{{ fmtRp(inv.nominal) }}</td>
               <td class="px-4 py-3 text-xs text-[#999]">{{ inv.jatuh_tempo }}</td>
               <td class="px-4 py-3"><span :class="['px-2 py-0.5 rounded-full text-xs font-medium', badge(inv.status)]">{{ bl(inv.status) }}</span></td>
               <td class="px-4 py-3 text-right"><UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs" /></td>
@@ -163,7 +162,7 @@ function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
               <td class="px-4 py-3 font-mono text-xs text-[#6b1525] font-semibold">{{ s.id }}</td>
               <td class="px-4 py-3 font-mono text-xs text-[#999]">{{ s.invoice_ref }}</td>
               <td class="px-4 py-3 text-sm text-[#1a1a1a]">{{ s.bank }}</td>
-              <td class="px-4 py-3 text-right text-sm font-semibold text-[#1a1a1a]">{{ rp(s.nominal) }}</td>
+              <td class="px-4 py-3 text-right text-sm font-semibold text-[#1a1a1a]">{{ fmtRp(s.nominal) }}</td>
               <td class="px-4 py-3 text-right text-sm text-[#666]">{{ s.bunga }}%</td>
               <td class="px-4 py-3 text-right text-sm text-[#666]">{{ s.tenor }}h</td>
               <td class="px-4 py-3 text-xs text-[#999]">{{ s.cair }}</td>
@@ -189,7 +188,7 @@ function rp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
               <td class="px-4 py-3 font-mono text-xs text-[#6b1525] font-semibold">{{ ap.id }}</td>
               <td class="px-4 py-3 text-sm text-[#1a1a1a]">{{ ap.supplier }}</td>
               <td class="px-4 py-3 font-mono text-xs text-[#999]">{{ ap.po_ref }}</td>
-              <td class="px-4 py-3 text-right text-sm font-semibold text-[#1a1a1a]">{{ rp(ap.nominal) }}</td>
+              <td class="px-4 py-3 text-right text-sm font-semibold text-[#1a1a1a]">{{ fmtRp(ap.nominal) }}</td>
               <td class="px-4 py-3 text-xs text-[#999]">{{ ap.jatuh_tempo }}</td>
               <td class="px-4 py-3"><span :class="['px-2 py-0.5 rounded-full text-xs font-medium', badge(ap.status)]">{{ bl(ap.status) }}</span></td>
               <td class="px-4 py-3 text-right"><UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs" /></td>

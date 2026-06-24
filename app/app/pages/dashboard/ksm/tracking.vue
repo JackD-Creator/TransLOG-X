@@ -29,23 +29,6 @@ async function load() {
   loading.value = false
 }
 
-const today = new Date().toISOString().slice(0, 10)
-
-function isOverdue(d: string | null) { return d && d < today }
-function daysDiff(d: string) {
-  return Math.round((new Date(d).getTime() - new Date(today).getTime()) / 86400000)
-}
-
-function fmtDate(d: string | null) {
-  if (!d) return '-'
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(2)}M`
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  return 'Rp ' + Math.round(n).toLocaleString('id-ID')
-}
 
 const statusConfig: Record<string, { label: string; color: string; icon: string; desc: string }> = {
   submitted:          { label: 'Menunggu Konfirmasi Dist.', color: 'bg-blue-100 text-blue-700',    icon: 'i-lucide-clock',           desc: 'PO sudah dikirim, menunggu distributor konfirmasi' },

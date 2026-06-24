@@ -38,10 +38,7 @@ async function doSearch() {
 // HET = batas atas jual ke apotek/RS
 function hna(hap: number | null) { return hap ? hap * 1.10 : null }
 
-function fmtRp(n: number | null) {
-  if (!n) return '-'
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
+
 
 onMounted(doSearch)
 </script>

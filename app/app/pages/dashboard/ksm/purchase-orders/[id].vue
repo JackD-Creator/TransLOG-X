@@ -134,10 +134,7 @@ const statusLabel: Record<string, string> = {
   fully_received: 'RS Terima Lengkap', cancelled: 'Dibatalkan',
 }
 
-function fmtDate(d: string | null) {
-  if (!d) return '-'
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
-}
+
 
 onMounted(load)
 </script>

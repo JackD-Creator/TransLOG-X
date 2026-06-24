@@ -134,13 +134,6 @@ const terminAnalysis = computed(() => {
   }))
 })
 
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(2)} M`
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  if (n >= 1e3) return `Rp ${(n/1e3).toFixed(0)}rb`
-  return `Rp ${n.toFixed(0)}`
-}
-function fmtPct(n: number) { return `${n.toFixed(2)}%` }
 
 onMounted(loadKfa)
 </script>

@@ -94,8 +94,8 @@ const rp = fmtRp
             />
           </div>
           <div class="flex justify-between text-xs text-[#999] mt-1">
-            <span>Terpakai: {{ rp(s.terpakai) }}</span>
-            <span>Limit: {{ rp(s.limit) }}</span>
+            <span>Terpakai: {{ fmtRp(s.terpakai) }}</span>
+            <span>Limit: {{ fmtRp(s.limit) }}</span>
           </div>
         </div>
       </div>

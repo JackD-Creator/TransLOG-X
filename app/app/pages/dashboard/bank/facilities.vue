@@ -73,12 +73,7 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-}
+
 
 const ftypeLabel: Record<string, string> = {
   reverse_factoring: 'Reverse Factoring',

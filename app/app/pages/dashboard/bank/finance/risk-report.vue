@@ -40,11 +40,7 @@ const nplRatio    = computed(() => totalAging.value > 0 ? (nplAmount.value / tot
 const totalLimit  = computed(() => facData.value.reduce((s,f) => s + Number(f.facility_limit ?? 0), 0))
 const totalOut    = computed(() => facData.value.reduce((s,f) => s + Number(f.outstanding ?? 0), 0))
 
-function fmtRp(n: number) {
-  if (Math.abs(n) >= 1e9) return `Rp ${(n/1e9).toFixed(2)} M`
-  if (Math.abs(n) >= 1e6) return `Rp ${(n/1e6).toFixed(1)} jt`
-  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n)
-}
+
 
 onMounted(loadData)
 </script>

@@ -28,9 +28,7 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
+
 
 function riskLevel(f: any) {
   const util = f.facility_limit > 0 ? f.outstanding / f.facility_limit : 0

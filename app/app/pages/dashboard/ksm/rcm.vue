@@ -121,11 +121,7 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  if (Math.abs(n) >= 1e9)  return `Rp ${(n / 1e9).toFixed(1)} M`
-  if (Math.abs(n) >= 1e6)  return `Rp ${(n / 1e6).toFixed(1)} jt`
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
+
 
 onMounted(load)
 </script>

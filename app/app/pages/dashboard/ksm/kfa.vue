@@ -40,10 +40,7 @@ async function doSearch() {
   loading.value = false
 }
 
-function fmtRp(n: number | null) {
-  if (!n) return '-'
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
+
 
 onMounted(() => doSearch())
 </script>

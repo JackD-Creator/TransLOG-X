@@ -16,13 +16,7 @@ async function load() {
   loading.value = false
 }
 
-function fmtRp(n: number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n)
-}
-function fmtDate(d: string | null) {
-  if (!d) return '-'
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-}
+
 
 const totalPaid = computed(() => invoices.value.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.invoice_amount), 0))
 const totalPending = computed(() => invoices.value.filter(i => i.status !== 'paid').reduce((s, i) => s + Number(i.invoice_amount), 0))

@@ -47,13 +47,6 @@ const calc = computed(() => {
   return { totalMonthly, totalAnnual, ksmGP, distGP, bankRevenue, rsSavings, totalEcoValue }
 })
 
-function fmtM(n: number) { return `Rp ${(n/1e9).toFixed(2)} M/thn` }
-function fmtPct(n: number) { return `${n.toFixed(1)}%` }
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n/1e9).toFixed(1)} M`
-  if (n >= 1e6) return `Rp ${(n/1e6).toFixed(0)} jt`
-  return `Rp ${n.toLocaleString('id-ID')}`
-}
 
 const parties = computed(() => [
   {
@@ -62,7 +55,7 @@ const parties = computed(() => [
     icon: 'i-lucide-hospital',
     color: 'text-emerald-600', bg: 'bg-emerald-50', bar: 'bg-emerald-500',
     tagColor: 'bg-emerald-100 text-emerald-700',
-    headline: fmtM(calc.value.rsSavings),
+    headline: fmtRp(calc.value.rsSavings) + '/thn',
     headlineLabel: 'Penghematan Operasional/Thn',
     value: calc.value.rsSavings,
     roi_pct: (calc.value.rsSavings / calc.value.totalAnnual) * 100,
@@ -82,7 +75,7 @@ const parties = computed(() => [
     icon: 'i-lucide-network',
     color: 'text-[#6b1525]', bg: 'bg-red-50', bar: 'bg-[#6b1525]',
     tagColor: 'bg-red-100 text-[#6b1525]',
-    headline: fmtM(calc.value.ksmGP),
+    headline: fmtRp(calc.value.ksmGP) + '/thn',
     headlineLabel: 'Gross Profit KSM/Thn',
     value: calc.value.ksmGP,
     roi_pct: eco.ksm_margin_pct,
@@ -102,7 +95,7 @@ const parties = computed(() => [
     icon: 'i-lucide-truck',
     color: 'text-blue-700', bg: 'bg-blue-50', bar: 'bg-blue-600',
     tagColor: 'bg-blue-100 text-blue-700',
-    headline: fmtM(calc.value.distGP),
+    headline: fmtRp(calc.value.distGP) + '/thn',
     headlineLabel: 'Gross Profit Distributor/Thn',
     value: calc.value.distGP,
     roi_pct: eco.dist_margin_pct,
@@ -122,7 +115,7 @@ const parties = computed(() => [
     icon: 'i-lucide-landmark',
     color: 'text-amber-700', bg: 'bg-amber-50', bar: 'bg-amber-600',
     tagColor: 'bg-amber-100 text-amber-700',
-    headline: fmtM(calc.value.bankRevenue),
+    headline: fmtRp(calc.value.bankRevenue) + '/thn',
     headlineLabel: 'Total Bank Revenue/Thn',
     value: calc.value.bankRevenue,
     roi_pct: (calc.value.bankRevenue / eco.facility_limit) * 100,
@@ -165,7 +158,7 @@ const totalEcoBar = computed(() => {
     <div class="bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-6">
       <p class="text-[10px] uppercase tracking-[0.2em] text-[#999] mb-2">Total Ecosystem Value Created — Annual</p>
       <div class="flex items-end gap-4 mb-5">
-        <p class="text-3xl font-bold text-[#1a1a1a]">{{ fmtM(calc.totalEcoValue) }}</p>
+        <p class="text-3xl font-bold text-[#1a1a1a]">{{ fmtRp(calc.totalEcoValue) + '/thn' }}</p>
         <p class="text-sm text-[#999] mb-1">dibagi ke semua pihak — tidak ada zero-sum game</p>
       </div>
       <div class="space-y-2">

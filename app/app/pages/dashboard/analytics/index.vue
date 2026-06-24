@@ -112,7 +112,7 @@ const rp = fmtRp
                   <p class="text-xs text-[#999]">{{ item.kategori }} · {{ item.qty_keluar.toLocaleString('id-ID') }} unit</p>
                 </div>
               </div>
-              <p class="text-xs font-semibold text-[#666]">{{ rp(item.nilai) }}</p>
+              <p class="text-xs font-semibold text-[#666]">{{ fmtRp(item.nilai) }}</p>
             </div>
             <div class="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
               <div class="h-full bg-red-500 rounded-full" :style="`width:${item.pct}%`" />

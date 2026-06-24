@@ -35,9 +35,7 @@ async function load() {
   loading.value = false
 }
 
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-}
+
 
 onMounted(load)
 </script>

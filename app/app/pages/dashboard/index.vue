@@ -987,7 +987,7 @@ watch(portalType, (type) => {
                   <p class="text-[10px] text-[#999]">{{ item.kat }} · {{ item.qty.toLocaleString('id-ID') }} unit</p>
                 </div>
               </div>
-              <p class="text-xs font-bold text-[#1a1a1a] flex-shrink-0 ml-2">{{ rp(item.val) }}</p>
+              <p class="text-xs font-bold text-[#1a1a1a] flex-shrink-0 ml-2">{{ fmtRp(item.val) }}</p>
             </div>
             <div class="h-1.5 rounded-full overflow-hidden" style="background:#e5e5e5">
               <div

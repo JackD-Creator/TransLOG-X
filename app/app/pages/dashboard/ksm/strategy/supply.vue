@@ -126,15 +126,7 @@ function sensGP(numRS: number, volJt: number) {
 }
 
 // ─── Format ──────────────────────────────────────────────────────────────────
-function fmtM(n: number) { return `Rp ${(n / 1e9).toFixed(2)} M` }
 function fmtJt(n: number) { return `Rp ${(n / 1e6).toFixed(1)} jt` }
-function fmtPct(n: number) { return `${n.toFixed(1)}%` }
-function fmtRp(n: number) {
-  if (n >= 1e9) return `Rp ${(n / 1e9).toFixed(1)} M`
-  if (n >= 1e6) return `Rp ${(n / 1e6).toFixed(2)} jt`
-  if (n >= 1e3) return `Rp ${(n / 1e3).toFixed(0)}rb`
-  return `Rp ${n.toFixed(0)}`
-}
 
 onMounted(loadBenchmarks)
 </script>
@@ -162,22 +154,22 @@ onMounted(loadBenchmarks)
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
           <p class="text-[10px] text-[#999] mb-1">Gross Revenue (Annual)</p>
-          <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtM(rev.totalAnnual) }}</p>
+          <p class="text-xl font-bold text-[#1a1a1a]">{{ fmtRp(rev.totalAnnual) }}</p>
           <p class="text-[10px] text-[#aaa] mt-0.5">{{ model.num_rs }} RS × {{ fmtJt(model.avg_monthly_vol_per_rs) }}/bln</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Gross Profit (Annual)</p>
-          <p class="text-xl font-bold text-emerald-700">{{ fmtM(rev.totalGPAnnual) }}</p>
+          <p class="text-xl font-bold text-emerald-700">{{ fmtRp(rev.totalGPAnnual) }}</p>
           <p class="text-[10px] text-[#aaa] mt-0.5">Blended margin {{ fmtPct(rev.blendedMargin) }}</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Service Revenue (Annual)</p>
-          <p class="text-xl font-bold text-blue-700">{{ fmtM(rev.serviceRev * 12) }}</p>
+          <p class="text-xl font-bold text-blue-700">{{ fmtRp(rev.serviceRev * 12) }}</p>
           <p class="text-[10px] text-[#aaa] mt-0.5">{{ fmtJt(model.service_fee_per_rs) }}/RS/bln</p>
         </div>
         <div>
           <p class="text-[10px] text-[#999] mb-1">Volume Rebate (Annual)</p>
-          <p class="text-xl font-bold text-amber-700">{{ fmtM(rev.rebate * 12) }}</p>
+          <p class="text-xl font-bold text-amber-700">{{ fmtRp(rev.rebate * 12) }}</p>
           <p class="text-[10px] text-[#aaa] mt-0.5">{{ fmtPct(model.volume_rebate_pct) }} dari total PO</p>
         </div>
       </div>
@@ -202,7 +194,7 @@ onMounted(loadBenchmarks)
           <div>
             <div class="flex justify-between mb-1">
               <label class="text-[11px] text-[#666]">Vol. per RS / Bulan</label>
-              <span class="text-[11px] font-bold text-[#6b1525]">{{ fmtM(model.avg_monthly_vol_per_rs) }}</span>
+              <span class="text-[11px] font-bold text-[#6b1525]">{{ fmtRp(model.avg_monthly_vol_per_rs) }}</span>
             </div>
             <input type="range" v-model.number="model.avg_monthly_vol_per_rs" :min="100_000_000" :max="50_000_000_000" :step="500_000_000" class="w-full accent-[#6b1525]"/>
           </div>
@@ -265,11 +257,11 @@ onMounted(loadBenchmarks)
           <p class="text-xs font-bold text-[#1a1a1a] mb-4">Gross Profit Decomposition — Monthly</p>
           <div class="space-y-2">
             <div v-for="row in [
-              { label: 'Supply Obat FORNAS', val: rev.obatGP, sub: `${fmtM(rev.obatRev)} rev × ${MARGIN.obat}%`, color: 'bg-blue-500' },
-              { label: 'Supply BMHP', val: rev.bmhpGP, sub: `${fmtM(rev.bmhpRev)} rev × ${MARGIN.bmhp}%`, color: 'bg-emerald-500' },
-              { label: 'Supply Alkes', val: rev.alkesGP, sub: `${fmtM(rev.alkesRev)} rev × ${MARGIN.alkes}%`, color: 'bg-amber-500' },
+              { label: 'Supply Obat FORNAS', val: rev.obatGP, sub: `${fmtRp(rev.obatRev)} rev × ${MARGIN.obat}%`, color: 'bg-blue-500' },
+              { label: 'Supply BMHP', val: rev.bmhpGP, sub: `${fmtRp(rev.bmhpRev)} rev × ${MARGIN.bmhp}%`, color: 'bg-emerald-500' },
+              { label: 'Supply Alkes', val: rev.alkesGP, sub: `${fmtRp(rev.alkesRev)} rev × ${MARGIN.alkes}%`, color: 'bg-amber-500' },
               { label: 'Managed Service Fee', val: rev.serviceRev, sub: `${model.num_rs} RS × ${fmtJt(model.service_fee_per_rs)}`, color: 'bg-purple-500' },
-              { label: 'Volume Rebate Dist.', val: rev.rebate, sub: `${fmtPct(model.volume_rebate_pct)} × ${fmtM(rev.totalMonthly)} PO`, color: 'bg-rose-500' },
+              { label: 'Volume Rebate Dist.', val: rev.rebate, sub: `${fmtPct(model.volume_rebate_pct)} × ${fmtRp(rev.totalMonthly)} PO`, color: 'bg-rose-500' },
             ]" :key="row.label" class="flex items-center gap-3">
               <div class="w-32 flex-shrink-0">
                 <p class="text-[11px] font-semibold text-[#1a1a1a] leading-tight">{{ row.label }}</p>

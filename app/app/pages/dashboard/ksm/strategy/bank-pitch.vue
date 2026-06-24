@@ -77,13 +77,6 @@ const scorecard = computed(() => [
 
 const passCount = computed(() => scorecard.value.filter(s => s.pass).length)
 
-function fmtRp(n: number) {
-  if (Math.abs(n) >= 1e12) return `Rp ${(n/1e12).toFixed(1)} T`
-  if (Math.abs(n) >= 1e9)  return `Rp ${(n/1e9).toFixed(2)} M`
-  if (Math.abs(n) >= 1e6)  return `Rp ${(n/1e6).toFixed(1)} jt`
-  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n)
-}
-function fmtPct(n: number) { return `${n.toFixed(1)}%` }
 
 onMounted(loadRealData)
 </script>

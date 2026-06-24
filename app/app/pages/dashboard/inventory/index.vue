@@ -113,10 +113,7 @@ function stockBadge(p: Product) {
   return                           { label: 'Normal',        cls: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' }
 }
 
-function rp(n: number | null) {
-  if (!n) return '—'
-  return 'Rp ' + n.toLocaleString('id-ID')
-}
+
 
 const searchDebounce = ref<ReturnType<typeof setTimeout>>()
 watch(search, () => {
@@ -317,7 +314,7 @@ onMounted(fetchProducts)
                 <span v-else style="color:#e5e5e5">—</span>
               </td>
               <td class="px-4 py-3 text-right text-sm" style="color:#333">
-                {{ rp(item.standard_price) }}
+                {{ fmtRp(item.standard_price) }}
               </td>
               <td class="px-4 py-3 text-right">
                 <UIcon name="i-lucide-chevron-right" class="text-sm" style="color:#e5e5e5"/>
