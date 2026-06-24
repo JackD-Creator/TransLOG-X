@@ -1,4 +1,4 @@
-// Deteksi role portal user berdasarkan tenant_type di Supabase
+// Deteksi role portal user dari app_metadata JWT (tidak perlu DB query)
 // Portal groups: rumah_sakit | mitra_ksm | distributor | bank
 
 export type PortalType = 'rumah_sakit' | 'mitra_ksm' | 'distributor' | 'bank' | null
@@ -21,7 +21,7 @@ function toPortalType(tenantType: string | null): PortalType {
   if (tenantType === 'mitra_ksm') return 'mitra_ksm'
   if (DIST_TYPES.includes(tenantType)) return 'distributor'
   if (BANK_TYPES.includes(tenantType)) return 'bank'
-  return 'rumah_sakit'  // default fallback
+  return 'rumah_sakit'
 }
 
 export function useUserRole() {
@@ -38,23 +38,34 @@ export function useUserRole() {
 
   async function loadRole() {
     if (!user.value) return
-    if (state.value.tenantId) return  // already loaded
 
     state.value.loading = true
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id, tenants(type, name)')
-        .eq('id', user.value.id)
-        .single()
+      // Read tenant info from app_metadata (set server-side, no RLS issue)
+      const meta = (user.value as any).app_metadata ?? {}
+      let tenantType: string | null = meta.tenant_type ?? null
+      let tenantName: string | null = meta.tenant_name ?? null
+      let tenantId: string | null   = meta.tenant_id   ?? null
 
-      if (profile) {
-        const tenant = (profile.tenants as any)
-        state.value.tenantId   = profile.tenant_id
-        state.value.tenantType = tenant?.type ?? null
-        state.value.tenantName = tenant?.name ?? null
-        state.value.portalType = toPortalType(tenant?.type ?? null)
+      // Fallback: query DB if app_metadata not populated yet
+      if (!tenantType) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('tenant_id, tenants(type, name)')
+          .eq('id', user.value.id)
+          .single()
+        if (profile) {
+          const tenant = (profile.tenants as any)
+          tenantId   = profile.tenant_id
+          tenantType = tenant?.type ?? null
+          tenantName = tenant?.name ?? null
+        }
       }
+
+      state.value.tenantId   = tenantId
+      state.value.tenantType = tenantType
+      state.value.tenantName = tenantName
+      state.value.portalType = toPortalType(tenantType)
     } finally {
       state.value.loading = false
     }
@@ -68,15 +79,15 @@ export function useUserRole() {
   }, { immediate: true })
 
   return {
-    portalType:  computed(() => state.value.portalType),
-    tenantType:  computed(() => state.value.tenantType),
-    tenantName:  computed(() => state.value.tenantName),
-    tenantId:    computed(() => state.value.tenantId),
-    isRS:        computed(() => state.value.portalType === 'rumah_sakit'),
-    isKSM:       computed(() => state.value.portalType === 'mitra_ksm'),
+    portalType:    computed(() => state.value.portalType),
+    tenantType:    computed(() => state.value.tenantType),
+    tenantName:    computed(() => state.value.tenantName),
+    tenantId:      computed(() => state.value.tenantId),
+    isRS:          computed(() => state.value.portalType === 'rumah_sakit'),
+    isKSM:         computed(() => state.value.portalType === 'mitra_ksm'),
     isDistributor: computed(() => state.value.portalType === 'distributor'),
-    isBank:      computed(() => state.value.portalType === 'bank'),
-    loading:     computed(() => state.value.loading),
+    isBank:        computed(() => state.value.portalType === 'bank'),
+    loading:       computed(() => state.value.loading),
     loadRole,
   }
 }
