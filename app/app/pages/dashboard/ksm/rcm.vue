@@ -4,7 +4,7 @@ definePageMeta({ layout: 'dashboard', title: 'Revenue Cycle Management KSM' })
 const supabase = useSupabaseClient()
 
 const loading = ref(true)
-const period = ref({ year: 2026, month: 5 })
+const period = ref({ year: 2026, month: 2 })
 
 const metrics = ref({
   // Revenue & Margin

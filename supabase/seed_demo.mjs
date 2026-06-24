@@ -276,8 +276,9 @@ async function seed() {
           if (isSCF) {
             const disbDate = new Date(new Date(poDate).getTime() + 2*86400000)
             const arDueDate = new Date(disbDate.getTime() + 30*86400000)
-            const interest = Math.round(total * 0.11 / 12)
-            const totalPayable = total + interest
+            const disbAmt = Math.round(subtotal * 0.88)
+            const interest = Math.round(disbAmt * 0.11 / 12)
+            const totalPayable = disbAmt + interest
             let arStatus = 'disbursed', arPaid = 0
             if (monthNum <= 2) { arStatus = 'paid'; arPaid = totalPayable }
             else if (monthNum === 3 && Math.random() < 0.6) { arStatus = 'paid'; arPaid = totalPayable }
@@ -286,7 +287,7 @@ async function seed() {
               bank_tenant_id: BANK_ID, ksm_tenant_id: KSM_ID,
               ar_number: `AR-${poNumber.slice(-5)}`, po_number: poNumber,
               invoice_ref: invNumber,
-              invoice_amount: total, disbursed_amount: total,
+              invoice_amount: total, disbursed_amount: Math.round(subtotal * 0.88),
               interest_amount: interest, total_payable: totalPayable, paid_amount: arPaid,
               invoice_date: disbDate.toISOString().slice(0,10),
               disbursement_date: disbDate.toISOString().slice(0,10),

@@ -79,7 +79,7 @@ const totalCurrentAssets = computed(() => bs.value.cash + bs.value.arRS + bs.val
 const totalNonCurrentAssets = computed(() => bs.value.fixedAssets)
 const totalAssets = computed(() => totalCurrentAssets.value + totalNonCurrentAssets.value)
 const totalCurrentLiab = computed(() => bs.value.arBankHutang + bs.value.shortfallDebt)
-const totalNonCurrentLiab = computed(() => bs.value.scfOutstanding > bs.value.arBankHutang ? bs.value.scfOutstanding - bs.value.arBankHutang : 0)
+const totalNonCurrentLiab = computed(() => 0)
 const totalLiabilities = computed(() => totalCurrentLiab.value + totalNonCurrentLiab.value)
 const totalEquity = computed(() => bs.value.equity)
 const totalLiabEquity = computed(() => totalLiabilities.value + totalEquity.value)

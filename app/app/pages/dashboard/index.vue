@@ -30,8 +30,11 @@ async function loadDashboard() {
   loading.value = true
 
   if (isKSM.value) {
-    const [dashData, { data: pos }, { data: ar }, { data: notifs }, { data: inv }] = await Promise.all([
-      apiGet<{ kpi: any; trends: any[]; forecast: any[]; risk_scores: any[]; demand_data: any[] }>('/api/ksm/dashboard'),
+    let dashData: any = {}
+    try {
+      dashData = await apiGet('/api/ksm/dashboard')
+    } catch { dashData = { kpi: null, trends: [], forecast: [], risk_scores: [], demand_data: [] } }
+    const [{ data: pos }, { data: ar }, { data: notifs }, { data: inv }] = await Promise.all([
       supabase.from('ksm_purchase_orders').select('id,po_number,po_date,status,total_amount,metadata')
         .eq('ksm_tenant_id', tenantId.value).order('po_date', { ascending: false }).limit(5),
       supabase.from('ar_accounts').select('id,ar_number,disbursed_amount,outstanding_amount,due_date,status')
@@ -139,7 +142,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
     <!-- ═══ KSM DASHBOARD ═══════════════════════════════════════════════════ -->
     <template v-if="isKSM && kpi">
       <!-- Hero -->
-      <div class="bg-[#1a1a1a] rounded-2xl p-6 flex items-end justify-between">
+      <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
         <div>
           <p class="text-[#555] text-xs">{{ greeting }},</p>
           <h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1>
@@ -172,19 +175,19 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
           { to: '/dashboard/ksm/notifications', label: 'Tunggu RS', value: kpi.pending_rs_approval, color: 'purple' },
           { to: '/dashboard/ksm/ar', label: 'Overdue', value: kpi.overdue_invoices, color: 'red' },
         ]" :key="m.label" :to="m.to"
-          class="bg-white rounded-xl border border-[#ebebeb] p-3 hover:shadow-sm transition-all group">
+          class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-3 hover:shadow-sm transition-all group">
           <p class="text-[8px] text-[#999] uppercase tracking-wider">{{ m.label }}</p>
           <p class="text-lg font-bold text-[#1a1a1a] mt-1 group-hover:text-[#6b1525] transition-colors">{{ m.value }}</p>
         </NuxtLink>
-        <div class="bg-white rounded-xl border border-[#ebebeb] p-3">
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-3">
           <p class="text-[8px] text-[#999] uppercase tracking-wider">Collection</p>
           <p :class="['text-lg font-bold mt-1', collectionRate >= 70 ? 'text-emerald-600' : 'text-red-600']">{{ fmtPct(collectionRate) }}</p>
         </div>
-        <NuxtLink to="/dashboard/ksm/ar" class="bg-white rounded-xl border border-[#ebebeb] p-3 hover:shadow-sm group">
+        <NuxtLink to="/dashboard/ksm/ar" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-3 hover:shadow-sm group">
           <p class="text-[8px] text-[#999] uppercase tracking-wider">Piutang RS</p>
           <p class="text-sm font-bold text-amber-600 mt-1">{{ fmtRp(kpi.outstanding_from_rs) }}</p>
         </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/payments" class="bg-white rounded-xl border border-[#ebebeb] p-3 hover:shadow-sm group">
+        <NuxtLink to="/dashboard/ksm/payments" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-3 hover:shadow-sm group">
           <p class="text-[8px] text-[#999] uppercase tracking-wider">Shortfall</p>
           <p class="text-sm font-bold mt-1" :class="Number(kpi.total_shortfall) > 0 ? 'text-red-600' : 'text-emerald-600'">{{ fmtRp(kpi.total_shortfall) }}</p>
         </NuxtLink>
@@ -193,7 +196,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
       <!-- Charts Row -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <!-- Revenue Area Chart -->
-        <div class="lg:col-span-2 bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        <div class="lg:col-span-2 bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0] flex items-center justify-between">
             <div>
               <p class="text-xs font-bold text-[#1a1a1a]">Revenue vs COGS — 6 Bulan</p>
@@ -210,7 +213,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
         </div>
 
         <!-- SCF Donut -->
-        <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0]">
             <p class="text-xs font-bold text-[#1a1a1a]">Utilisasi SCF</p>
             <p class="text-[10px] text-[#999]">Fasilitas Bank — Reverse Factoring</p>
@@ -235,7 +238,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
 
       <!-- Financial Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <NuxtLink to="/dashboard/ksm/scf" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
+        <NuxtLink to="/dashboard/ksm/scf" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
             <p class="text-[9px] text-[#999] uppercase">Hutang SCF Bank</p>
             <div class="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center"><UIcon name="i-lucide-landmark" class="text-blue-600 text-[10px]"/></div>
@@ -243,7 +246,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
           <p class="text-[#1a1a1a] text-lg font-bold">{{ fmtRp(kpi.hutang_bank) }}</p>
           <p class="text-[9px] text-[#bbb] mt-1">Bank→Dist: {{ fmtRp(kpi.bank_to_dist_total) }}</p>
         </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/ar" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
+        <NuxtLink to="/dashboard/ksm/ar" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
             <p class="text-[9px] text-[#999] uppercase">Overdue</p>
             <div class="w-5 h-5 rounded-full bg-red-500/10 flex items-center justify-center"><UIcon name="i-lucide-alert-circle" class="text-red-600 text-[10px]"/></div>
@@ -251,14 +254,14 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
           <p :class="['text-lg font-bold', Number(kpi.overdue_amount) > 0 ? 'text-red-600' : 'text-emerald-600']">{{ fmtRp(kpi.overdue_amount) }}</p>
           <p class="text-[9px] text-[#bbb] mt-1">{{ kpi.overdue_invoices }} invoice</p>
         </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
+        <NuxtLink to="/dashboard/ksm/purchase-orders" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
             <p class="text-[9px] text-[#999] uppercase">Total PO Value</p>
             <div class="w-5 h-5 rounded-full bg-purple-500/10 flex items-center justify-center"><UIcon name="i-lucide-shopping-cart" class="text-purple-600 text-[10px]"/></div>
           </div>
           <p class="text-[#1a1a1a] text-lg font-bold">{{ fmtRp(kpi.po_total_value) }}</p>
         </NuxtLink>
-        <NuxtLink to="/dashboard/ksm/payments" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
+        <NuxtLink to="/dashboard/ksm/payments" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
             <p class="text-[9px] text-[#999] uppercase">Bunga KSM 50%</p>
             <div class="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center"><UIcon name="i-lucide-percent" class="text-amber-600 text-[10px]"/></div>
@@ -270,7 +273,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
       <!-- Risk + Demand + Forecast -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <!-- RS Risk -->
-        <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0] flex items-center justify-between">
             <p class="text-xs font-bold text-[#1a1a1a]">RS Risk Score</p>
             <NuxtLink to="/dashboard/ksm/analytics" class="text-[10px] text-[#6b1525] font-semibold hover:underline">Detail</NuxtLink>
@@ -289,7 +292,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
         </div>
 
         <!-- Top Demand Bar Chart -->
-        <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0]">
             <p class="text-xs font-bold text-[#1a1a1a]">Top Demand Items</p>
             <p class="text-[10px] text-[#999]">Paling banyak diminta RS</p>
@@ -303,7 +306,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
         </div>
 
         <!-- Forecast -->
-        <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0]">
             <p class="text-xs font-bold text-[#1a1a1a]">Prediksi Revenue</p>
             <p class="text-[10px] text-[#999]">WMA + Growth Trend</p>
@@ -330,7 +333,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
           { title: 'PO Terbaru', link: '/dashboard/ksm/purchase-orders', items: recentPOs, type: 'po' },
           { title: 'Invoice Terbaru', link: '/dashboard/ksm/invoices', items: recentInvoices, type: 'inv' },
           { title: 'Hutang SCF Bank', link: '/dashboard/ksm/scf', items: recentAR, type: 'ar' },
-        ]" :key="section.title" class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        ]" :key="section.title" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0] flex items-center justify-between">
             <p class="text-xs font-bold text-[#1a1a1a]">{{ section.title }}</p>
             <NuxtLink :to="section.link" class="text-[10px] text-[#6b1525] font-semibold hover:underline">Semua</NuxtLink>
@@ -379,7 +382,7 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
 
     <!-- ═══ BANK DASHBOARD ══════════════════════════════════════════════════ -->
     <template v-else-if="isBank && kpi">
-      <div class="bg-[#1a1a1a] rounded-2xl p-6 flex items-end justify-between">
+      <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
         <div><p class="text-[#555] text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-[#444] text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
         <div class="flex items-center gap-6">
           <div class="text-right"><p class="text-[#555] text-[10px] uppercase">Total Limit</p><p class="text-white text-2xl font-bold">{{ fmtRp(kpi.total_limit) }}</p></div>
@@ -388,12 +391,12 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="bg-white rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Outstanding</p><p class="text-xl font-bold text-amber-600 mt-1">{{ fmtRp(kpi.total_outstanding) }}</p><p class="text-[9px] text-[#bbb]">{{ kpi.total_limit > 0 ? ((kpi.total_outstanding/kpi.total_limit)*100).toFixed(1) : 0 }}% utilisasi</p></div>
-        <div class="bg-white rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Disbursed→Dist</p><p class="text-xl font-bold text-blue-600 mt-1">{{ fmtRp(kpi.total_disbursed) }}</p></div>
-        <NuxtLink to="/dashboard/bank/ar-monitoring" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">AR Overdue</p><p class="text-xl font-bold text-red-600 mt-1">{{ kpi.overdue_count }}</p></NuxtLink>
-        <NuxtLink to="/dashboard/bank/daily-interest" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Shortfall</p><p class="text-xl font-bold mt-1" :class="Number(kpi.shortfall_total) > 0 ? 'text-red-600' : 'text-[#1a1a1a]'">{{ fmtRp(kpi.shortfall_total) }}</p></NuxtLink>
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Outstanding</p><p class="text-xl font-bold text-amber-600 mt-1">{{ fmtRp(kpi.total_outstanding) }}</p><p class="text-[9px] text-[#bbb]">{{ kpi.total_limit > 0 ? ((kpi.total_outstanding/kpi.total_limit)*100).toFixed(1) : 0 }}% utilisasi</p></div>
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Disbursed→Dist</p><p class="text-xl font-bold text-blue-600 mt-1">{{ fmtRp(kpi.total_disbursed) }}</p></div>
+        <NuxtLink to="/dashboard/bank/ar-monitoring" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">AR Overdue</p><p class="text-xl font-bold text-red-600 mt-1">{{ kpi.overdue_count }}</p></NuxtLink>
+        <NuxtLink to="/dashboard/bank/daily-interest" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Shortfall</p><p class="text-xl font-bold mt-1" :class="Number(kpi.shortfall_total) > 0 ? 'text-red-600' : 'text-[#1a1a1a]'">{{ fmtRp(kpi.shortfall_total) }}</p></NuxtLink>
       </div>
-      <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+      <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
         <div class="px-5 py-3 border-b border-[#f0f0f0]"><p class="text-xs font-bold text-[#1a1a1a]">AR Monitoring</p></div>
         <div class="divide-y divide-[#f5f5f5]">
           <div v-for="ar in recentAR" :key="ar.id" class="px-5 py-2.5 flex items-center justify-between">
@@ -406,16 +409,16 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
 
     <!-- ═══ DISTRIBUTOR DASHBOARD ═══════════════════════════════════════════ -->
     <template v-else-if="isDistributor && kpi">
-      <div class="bg-[#1a1a1a] rounded-2xl p-6 flex items-end justify-between">
+      <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
         <div><p class="text-[#555] text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-[#444] text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
         <div class="text-right"><p class="text-[#555] text-[10px] uppercase">Total Diterima Bank</p><p class="text-emerald-400 text-2xl font-bold">{{ fmtRp(kpi.total_value) }}</p></div>
       </div>
       <div class="grid grid-cols-3 gap-3">
-        <NuxtLink to="/dashboard/dist/purchase-orders" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Perlu Konfirmasi</p><p class="text-2xl font-bold text-blue-600 mt-1">{{ kpi.need_confirm }}</p></NuxtLink>
-        <NuxtLink to="/dashboard/dist/delivery" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Pengiriman</p><p class="text-2xl font-bold text-amber-600 mt-1">{{ kpi.shipping }}</p></NuxtLink>
-        <div class="bg-white rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Diterima RS</p><p class="text-2xl font-bold text-emerald-600 mt-1">{{ kpi.completed }}</p></div>
+        <NuxtLink to="/dashboard/dist/purchase-orders" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Perlu Konfirmasi</p><p class="text-2xl font-bold text-blue-600 mt-1">{{ kpi.need_confirm }}</p></NuxtLink>
+        <NuxtLink to="/dashboard/dist/delivery" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Pengiriman</p><p class="text-2xl font-bold text-amber-600 mt-1">{{ kpi.shipping }}</p></NuxtLink>
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4"><p class="text-[9px] text-[#999] uppercase">Diterima RS</p><p class="text-2xl font-bold text-emerald-600 mt-1">{{ kpi.completed }}</p></div>
       </div>
-      <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+      <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
         <div class="px-5 py-3 border-b border-[#f0f0f0] flex items-center justify-between"><p class="text-xs font-bold text-[#1a1a1a]">PO dari KSM</p><NuxtLink to="/dashboard/dist/purchase-orders" class="text-[10px] text-[#6b1525] font-semibold hover:underline">Semua</NuxtLink></div>
         <div class="divide-y divide-[#f5f5f5]">
           <NuxtLink v-for="po in recentPOs" :key="po.id" to="/dashboard/dist/purchase-orders" class="px-5 py-2.5 flex items-center justify-between hover:bg-[#fafafa] block">
@@ -428,23 +431,23 @@ onMounted(() => { if (tenantId.value) loadDashboard() })
 
     <!-- ═══ RS DASHBOARD ════════════════════════════════════════════════════ -->
     <template v-else-if="isRS && kpi">
-      <div class="bg-[#1a1a1a] rounded-2xl p-6 flex items-end justify-between">
+      <div class="bg-[#6b1525] rounded-2xl p-6 flex items-end justify-between">
         <div><p class="text-[#555] text-xs">{{ greeting }},</p><h1 class="text-white text-xl font-bold mt-0.5">{{ displayName }}</h1><p class="text-[#444] text-[10px] mt-1">{{ todayStr }} · {{ tenantName }}</p></div>
         <div class="text-right"><p class="text-[#555] text-[10px] uppercase">Outstanding Invoice</p><p class="text-amber-400 text-2xl font-bold">{{ fmtRp(kpi.outstanding_invoice) }}</p></div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <NuxtLink to="/dashboard/rs/confirmations" class="bg-white rounded-xl border-2 border-amber-300 p-4 hover:border-amber-500"><p class="text-[9px] text-amber-600 uppercase font-bold">Perlu Persetujuan</p><p class="text-2xl font-bold text-amber-700 mt-1">{{ kpi.pending_confirm }}</p></NuxtLink>
-        <NuxtLink to="/dashboard/rs/alerts" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Alert SIMRS</p><p class="text-2xl font-bold text-red-600 mt-1">{{ kpi.active_alerts }}</p></NuxtLink>
-        <NuxtLink to="/dashboard/rs/receiving" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Pengiriman</p><p class="text-2xl font-bold text-blue-600 mt-1">{{ kpi.pending_delivery }}</p></NuxtLink>
-        <NuxtLink to="/dashboard/rs/invoices" class="bg-white rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Invoice</p><p class="text-xl font-bold text-[#1a1a1a] mt-1">{{ fmtRp(kpi.outstanding_invoice) }}</p></NuxtLink>
+        <NuxtLink to="/dashboard/rs/confirmations" class="bg-[#faf7f3] rounded-xl border-2 border-amber-300 p-4 hover:border-amber-500"><p class="text-[9px] text-amber-600 uppercase font-bold">Perlu Persetujuan</p><p class="text-2xl font-bold text-amber-700 mt-1">{{ kpi.pending_confirm }}</p></NuxtLink>
+        <NuxtLink to="/dashboard/rs/alerts" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Alert SIMRS</p><p class="text-2xl font-bold text-red-600 mt-1">{{ kpi.active_alerts }}</p></NuxtLink>
+        <NuxtLink to="/dashboard/rs/receiving" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Pengiriman</p><p class="text-2xl font-bold text-blue-600 mt-1">{{ kpi.pending_delivery }}</p></NuxtLink>
+        <NuxtLink to="/dashboard/rs/invoices" class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] p-4 hover:shadow-sm"><p class="text-[9px] text-[#999] uppercase">Invoice</p><p class="text-xl font-bold text-[#1a1a1a] mt-1">{{ fmtRp(kpi.outstanding_invoice) }}</p></NuxtLink>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0]"><p class="text-xs font-bold text-[#1a1a1a]">Alert SIMRS</p></div>
           <div v-if="recentNotifs.length===0" class="p-5 text-center text-xs text-[#ccc]">Stok aman</div>
           <div v-else class="divide-y divide-[#f5f5f5]"><NuxtLink v-for="n in recentNotifs" :key="n.id" to="/dashboard/rs/alerts" class="px-5 py-3 flex items-center gap-3 hover:bg-[#fafafa] block"><div :class="['w-2 h-2 rounded-full', n.ksm_confirmation_status==='pending_rs_approval'?'bg-amber-500 animate-pulse':'bg-blue-400']"/><div class="flex-1"><p class="text-xs font-semibold text-[#1a1a1a]">{{ n.notif_number }}</p><p class="text-[9px] text-[#999]">{{ n.status }}</p></div></NuxtLink></div>
         </div>
-        <div class="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+        <div class="bg-[#faf7f3] rounded-xl border border-[#ebebeb] overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0f0f0]"><p class="text-xs font-bold text-[#1a1a1a]">Pengiriman Aktif</p></div>
           <div v-if="recentPOs.length===0" class="p-5 text-center text-xs text-[#ccc]">Tidak ada</div>
           <div v-else class="divide-y divide-[#f5f5f5]"><div v-for="po in recentPOs" :key="po.id" class="px-5 py-2.5 flex items-center justify-between"><div><p class="text-[11px] font-mono font-semibold text-[#1a1a1a]">{{ po.po_number }}</p><p class="text-[9px] text-[#999]">{{ po.metadata?.supplier_name }}</p></div><p class="text-[11px] font-bold text-[#1a1a1a]">{{ fmtRp(po.total_amount) }}</p></div></div>

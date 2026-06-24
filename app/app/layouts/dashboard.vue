@@ -213,10 +213,10 @@ async function logout() {
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden bg-[#f0f0f0]">
+  <div class="flex h-screen overflow-hidden bg-[#f5f0eb]">
 
     <!-- ── Sidebar ─────────────────────────────────────────── -->
-    <aside class="w-56 flex-shrink-0 flex flex-col bg-[#f5f5f5] border-r border-[#e5e5e5]">
+    <aside class="w-56 flex-shrink-0 flex flex-col bg-[#f5f0eb] border-r border-[#e5e5e5]">
 
       <!-- Logo -->
       <div class="flex items-center px-5 py-5">
@@ -239,7 +239,7 @@ async function logout() {
                 class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150"
                 :class="isActive(item.to)
                   ? 'bg-[#6b1525] text-white shadow-sm'
-                  : 'text-[#555] hover:bg-[#f5f5f5] hover:text-[#1a1a1a]'"
+                  : 'text-[#555] hover:bg-[#f5f0eb] hover:text-[#1a1a1a]'"
               >
                 <UIcon
                   :name="item.icon"
@@ -264,7 +264,7 @@ async function logout() {
             <p class="text-[10px] text-[#999] truncate">{{ tenantName ?? 'TransLOG-X' }}</p>
           </div>
           <UTooltip text="Logout">
-            <button class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[#f5f5f5]" @click="logout">
+            <button class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[#f5f0eb]" @click="logout">
               <UIcon name="i-lucide-log-out" class="text-xs text-[#999]"/>
             </button>
           </UTooltip>
@@ -276,16 +276,16 @@ async function logout() {
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
       <!-- Topbar -->
-      <header class="flex-shrink-0 h-14 flex items-center justify-between px-6 bg-[#f5f5f5] border-b border-[#e5e5e5]">
+      <header class="flex-shrink-0 h-14 flex items-center justify-between px-6 bg-[#f5f0eb] border-b border-[#e5e5e5]">
         <p class="text-base font-bold text-[#1a1a1a]">{{ route.meta?.title ?? 'Dashboard' }}</p>
 
         <div class="flex items-center gap-3">
-          <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-[#e5e5e5] bg-[#f5f5f5] text-xs text-[#999] w-64">
+          <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-[#e5e5e5] bg-[#f5f0eb] text-xs text-[#999] w-64">
             <UIcon name="i-lucide-search" class="text-sm"/>
             <span>Cari item, order, transaksi...</span>
           </div>
           <div class="relative">
-            <button class="w-9 h-9 rounded-full flex items-center justify-center border border-[#e5e5e5] hover:bg-[#f5f5f5] transition-colors">
+            <button class="w-9 h-9 rounded-full flex items-center justify-center border border-[#e5e5e5] hover:bg-[#f5f0eb] transition-colors">
               <UIcon name="i-lucide-bell" class="text-sm text-[#666]"/>
             </button>
             <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#6b1525] border-2 border-[#f5f5f5]"/>
@@ -303,7 +303,7 @@ async function logout() {
       </header>
 
       <!-- Page -->
-      <main class="flex-1 overflow-y-auto bg-[#f0f0f0]">
+      <main class="flex-1 overflow-y-auto bg-[#f5f0eb]">
         <div class="p-6">
           <slot />
         </div>

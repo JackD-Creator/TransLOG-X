@@ -5,7 +5,7 @@ const supabase = useSupabaseClient()
 const { tenantId } = useUserRole()
 
 const loading = ref(true)
-const period = ref('this_year')
+const period = ref('2026-03')
 
 interface CashItem { label: string; amount: number; sub?: string }
 
@@ -14,45 +14,35 @@ const operatingOut = ref<CashItem[]>([])
 const financingIn = ref<CashItem[]>([])
 const financingOut = ref<CashItem[]>([])
 
+const periodOptions = [
+  { value: '2026-01', label: 'Januari 2026' },
+  { value: '2026-02', label: 'Februari 2026' },
+  { value: '2026-03', label: 'Maret 2026' },
+  { value: '2026-04', label: 'April 2026' },
+  { value: '2026-05', label: 'Mei 2026' },
+  { value: 'this_year', label: 'Tahun Ini (Kumulatif)' },
+]
+
 async function loadData() {
   if (!tenantId.value) return
   loading.value = true
 
-  const now = new Date()
-  let dateFrom: string
-  if (period.value === 'this_month') {
-    dateFrom = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
-  } else if (period.value === 'last_month') {
-    dateFrom = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10)
+  let dateFrom: string, dateTo: string | null = null
+  if (period.value === 'this_year') {
+    dateFrom = '2026-01-01'
   } else {
-    dateFrom = new Date(now.getFullYear(), 0, 1).toISOString().slice(0, 10)
+    const [y, m] = period.value.split('-').map(Number)
+    dateFrom = `${y}-${String(m).padStart(2,'0')}-01`
+    dateTo = new Date(y, m, 0).toISOString().slice(0, 10)
   }
 
-  const [{ data: invPaid }, { data: arPaid }, { data: arDisb }, { data: diaData }] = await Promise.all([
-    // Kas masuk: RS bayar KSM (invoice yang sudah dibayar via BPJS+SI)
-    supabase.from('ksm_invoices')
-      .select('paid_amount,bpjs_amount,total_amount')
-      .eq('ksm_tenant_id', tenantId.value)
-      .in('status', ['paid', 'partially_paid'])
-      .gte('invoice_date', dateFrom),
-    // Kas keluar: KSM lunasi hutang SCF ke Bank
-    supabase.from('ar_accounts')
-      .select('paid_amount,interest_amount,total_payable')
-      .eq('ksm_tenant_id', tenantId.value)
-      .eq('status', 'paid')
-      .gte('paid_date', dateFrom),
-    // Financing masuk: Bank cair ke Distributor (atas nama KSM) — bukan kas masuk KSM langsung
-    // tapi represent nilai barang yang "dibayarkan" untuk KSM
-    supabase.from('ar_accounts')
-      .select('disbursed_amount')
-      .eq('ksm_tenant_id', tenantId.value)
-      .not('disbursement_date', 'is', null)
-      .gte('disbursement_date', dateFrom),
-    // Bunga harian shortfall (bagian KSM)
-    supabase.from('daily_interest_accruals')
-      .select('ksm_share')
-      .gte('accrual_date', dateFrom),
-  ])
+  let q1 = supabase.from('ksm_invoices').select('paid_amount,bpjs_amount,total_amount').eq('ksm_tenant_id', tenantId.value).in('status', ['paid', 'partially_paid']).gte('invoice_date', dateFrom)
+  let q2 = supabase.from('ar_accounts').select('paid_amount,interest_amount,total_payable').eq('ksm_tenant_id', tenantId.value).eq('status', 'paid').gte('paid_date', dateFrom)
+  let q3 = supabase.from('ar_accounts').select('disbursed_amount').eq('ksm_tenant_id', tenantId.value).not('disbursement_date', 'is', null).gte('disbursement_date', dateFrom)
+  let q4 = supabase.from('daily_interest_accruals').select('ksm_share').gte('accrual_date', dateFrom)
+  if (dateTo) { q1 = q1.lte('invoice_date', dateTo); q2 = q2.lte('paid_date', dateTo); q3 = q3.lte('disbursement_date', dateTo); q4 = q4.lte('accrual_date', dateTo) }
+
+  const [{ data: invPaid }, { data: arPaid }, { data: arDisb }, { data: diaData }] = await Promise.all([q1, q2, q3, q4])
 
   const rsPayments = (invPaid ?? []).reduce((s, i) => s + Number(i.paid_amount ?? 0), 0)
   const bpjsTotal = (invPaid ?? []).reduce((s, i) => s + Number(i.bpjs_amount ?? 0), 0)
@@ -103,10 +93,8 @@ onMounted(() => { if (tenantId.value) loadData() })
           <p class="text-sm text-[#999] mt-0.5">Kas masuk: RS→KSM (BPJS+SI) · Kas keluar: KSM→Bank (pelunasan SCF)</p>
         </div>
       </div>
-      <select v-model="period" class="text-xs border border-[#e5e5e5] rounded-lg px-3 py-2 bg-[#f5f5f5] text-[#1a1a1a] outline-none">
-        <option value="this_month">Bulan Ini</option>
-        <option value="last_month">Bulan Lalu</option>
-        <option value="this_year">Tahun Ini</option>
+      <select v-model="period" class="text-xs border border-[#e5e5e5] rounded-lg px-3 py-2 bg-[#faf7f3] text-[#1a1a1a] outline-none">
+        <option v-for="o in periodOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
     </div>
 
