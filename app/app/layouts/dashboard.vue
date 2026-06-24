@@ -155,53 +155,38 @@ const navDistributor = [
 
 const navBank = [
   {
-    label: 'MAIN MENU',
+    label: 'ALUR TRANSAKSI',
     items: [
-      { label: 'Dashboard',        icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
-      { label: 'Notif Invoice',    icon: 'i-lucide-bell-ring',        to: '/dashboard/bank/notifications' },
-      { label: 'Aktivasi ToP',     icon: 'i-lucide-zap',              to: '/dashboard/bank/top-activation' },
-      { label: 'Pencairan Dana',   icon: 'i-lucide-banknote',         to: '/dashboard/bank/disbursements' },
-      { label: 'Monitoring AR',    icon: 'i-lucide-file-text',        to: '/dashboard/bank/ar-monitoring' }
+      { label: 'Dashboard',         icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
+      { label: 'Invoice Masuk',     icon: 'i-lucide-bell-ring',        to: '/dashboard/bank/notifications' },
+      { label: 'Pencairan → Dist',  icon: 'i-lucide-banknote',         to: '/dashboard/bank/disbursements' },
+      { label: 'Monitoring AR',     icon: 'i-lucide-file-text',        to: '/dashboard/bank/ar-monitoring' },
+      { label: 'BPJS & SI Tracker', icon: 'i-lucide-activity',         to: '/dashboard/bank/bpjs-monitoring' },
+      { label: 'Bunga Harian',      icon: 'i-lucide-clock',            to: '/dashboard/bank/daily-interest' },
     ]
   },
   {
     label: 'FASILITAS SCF',
     items: [
-      { label: 'Fasilitas Aktif',   icon: 'i-lucide-landmark',         to: '/dashboard/bank/facilities' },
-      { label: 'Reverse Factoring', icon: 'i-lucide-arrow-left-right', to: '/dashboard/bank/reverse-factoring' },
-      { label: 'BPJS Bridging',     icon: 'i-lucide-stethoscope',      to: '/dashboard/bank/bpjs-bridging' }
+      { label: 'Fasilitas Aktif',  icon: 'i-lucide-landmark',          to: '/dashboard/bank/facilities' },
+      { label: 'KSM Risk Score',   icon: 'i-lucide-shield-alert',      to: '/dashboard/bank/credit-risk' },
+      { label: 'RS Co-Guarantor',  icon: 'i-lucide-building-2',        to: '/dashboard/bank/rs-guarantor' },
     ]
   },
   {
-    label: 'RISIKO & KEPATUHAN',
+    label: 'LAPORAN',
     items: [
-      { label: 'Monitoring BPJS',  icon: 'i-lucide-bar-chart-2',      to: '/dashboard/bank/bpjs-monitoring' },
-      { label: 'Risiko Kredit',    icon: 'i-lucide-shield-alert',      to: '/dashboard/bank/credit-risk' },
-      { label: 'KYC Mitra',        icon: 'i-lucide-fingerprint',       to: '/dashboard/bank/kyc' },
-      { label: 'Kepatuhan',        icon: 'i-lucide-scale',             to: '/dashboard/compliance' }
-    ]
-  },
-  {
-    label: 'LAPORAN KEUANGAN',
-    items: [
-      { label: 'P&L Bank',         icon: 'i-lucide-trending-up',      to: '/dashboard/bank/finance/pl' },
-      { label: 'Portfolio SCF',    icon: 'i-lucide-pie-chart',        to: '/dashboard/bank/finance/portfolio' },
-      { label: 'Risk Report',      icon: 'i-lucide-shield-alert',     to: '/dashboard/bank/finance/risk-report' },
-    ]
-  },
-  {
-    label: 'INTELIJEN',
-    items: [
-      { label: 'Analytics',        icon: 'i-lucide-bar-chart-2',      to: '/dashboard/bank/analytics' },
-      { label: 'AI Assistant',     icon: 'i-lucide-brain',            to: '/dashboard/ai' }
+      { label: 'P&L Bank SCF',    icon: 'i-lucide-trending-up',       to: '/dashboard/bank/finance/pl' },
+      { label: 'Portfolio SCF',    icon: 'i-lucide-pie-chart',         to: '/dashboard/bank/finance/portfolio' },
+      { label: 'Risk Report',     icon: 'i-lucide-shield-alert',       to: '/dashboard/bank/finance/risk-report' },
     ]
   },
   {
     label: 'PLATFORM',
     items: [
-      { label: 'User Management',  icon: 'i-lucide-users',            to: '/dashboard/users' },
-      { label: 'Komunikasi',       icon: 'i-lucide-message-square',   to: '/dashboard/communication' },
-      { label: 'Pengaturan',       icon: 'i-lucide-settings',         to: '/dashboard/settings' }
+      { label: 'Analytics',       icon: 'i-lucide-bar-chart-2',        to: '/dashboard/bank/analytics' },
+      { label: 'KYC Mitra',       icon: 'i-lucide-fingerprint',        to: '/dashboard/bank/kyc' },
+      { label: 'Pengaturan',      icon: 'i-lucide-settings',           to: '/dashboard/settings' }
     ]
   }
 ]
