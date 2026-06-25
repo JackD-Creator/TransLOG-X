@@ -76,8 +76,9 @@ export function useUserRole() {
   }
 
   watch(user, (u) => {
-    if (u) loadRole()
-    else {
+    if (u) {
+      if (!state.value.tenantId) loadRole()
+    } else {
       state.value = { portalType: null, tenantType: null, tenantName: null, tenantId: null, loading: false }
     }
   }, { immediate: true })
