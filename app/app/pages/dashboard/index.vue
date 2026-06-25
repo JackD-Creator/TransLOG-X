@@ -1,21 +1,21 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard', keepalive: true })
+definePageMeta({ layout: 'dashboard' })
 
 const supabase = useSupabaseClient()
 const { apiGet } = useApi()
 const user = useSupabaseUser()
 const { portalType, tenantName, tenantId, isKSM, isDistributor, isBank, isRS, loading: roleLoading } = useUserRole()
 
-const loading = ref(true)
-const kpi = ref<any>(null)
-const trends = ref<any[]>([])
-const forecast = ref<any[]>([])
-const riskScores = ref<any[]>([])
-const demandData = ref<any[]>([])
-const recentPOs = ref<any[]>([])
-const recentAR = ref<any[]>([])
-const recentNotifs = ref<any[]>([])
-const recentInvoices = ref<any[]>([])
+const loading = ref(false)
+const kpi = useState<any>('dash-kpi', () => null)
+const trends = useState<any[]>('dash-trends', () => [])
+const forecast = useState<any[]>('dash-forecast', () => [])
+const riskScores = useState<any[]>('dash-risk', () => [])
+const demandData = useState<any[]>('dash-demand', () => [])
+const recentPOs = useState<any[]>('dash-pos', () => [])
+const recentAR = useState<any[]>('dash-ar', () => [])
+const recentNotifs = useState<any[]>('dash-notifs', () => [])
+const recentInvoices = useState<any[]>('dash-invoices', () => [])
 
 const now = new Date()
 const greeting = now.getHours() < 12 ? 'Selamat Pagi' : now.getHours() < 15 ? 'Selamat Siang' : now.getHours() < 19 ? 'Selamat Sore' : 'Selamat Malam'
