@@ -128,12 +128,11 @@ const scfUtil = computed(() => Number(kpi.value?.scf_limit) > 0 ? (Number(kpi.va
 
 const poStatusColor: Record<string, string> = { draft: 'bg-[#e5e5e5] text-[#999]', submitted: 'bg-blue-500/10 text-blue-700', approved: 'bg-purple-500/10 text-purple-700', sent_to_supplier: 'bg-amber-500/10 text-amber-700', partially_received: 'bg-orange-500/10 text-orange-700', fully_received: 'bg-emerald-500/10 text-emerald-700' }
 
-watch(tenantId, (id) => { if (id) loadDashboard() })
-onMounted(() => { if (tenantId.value) loadDashboard() })
+watch(tenantId, (id) => { if (id) loadDashboard() }, { immediate: true })
 </script>
 
 <template>
-  <div v-if="roleLoading || loading" class="flex items-center justify-center py-20">
+  <div v-if="roleLoading || (loading && !kpi)" class="flex items-center justify-center py-20">
     <UIcon name="i-lucide-loader-2" class="text-2xl text-[#999] animate-spin"/>
   </div>
 

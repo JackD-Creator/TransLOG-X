@@ -61,7 +61,7 @@ watchEffect(() => { if (user.value) router.push('/dashboard') })
         </h1>
         <div class="w-12 h-0.5 bg-[#6b1525] mb-5" />
         <p class="text-sm text-[#999]">
-          Medical &amp; Consumables Supply Platform
+          Medical &amp; Consumables Supply Chain Management Platform
         </p>
       </div>
 

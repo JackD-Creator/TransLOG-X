@@ -78,6 +78,21 @@ BEGIN
   WHERE ksm_tenant_id = p_ksm_tenant_id
     AND invoice_date >= v_data_start AND invoice_date < p_date_from;
 
+  -- Fallback: ar_accounts kosong → estimasi COGS + bunga SCF dari invoice data
+  IF v_prev_out = 0 AND v_prev_in > 0 THEN
+    v_prev_out := ROUND((v_prev_in / 1.11) * 0.88 * (1.0 + v_rate / 12.0), 0);
+  END IF;
+
+  -- Tambah bunga shortfall periode sebelumnya ke prev_out
+  SELECT v_prev_out + COALESCE(SUM(
+    ROUND(shortfall_amount * (v_rate / 365.0) *
+      GREATEST(0, p_date_from - invoice_date) * 0.5, 0)
+  ), 0) INTO v_prev_out
+  FROM ksm_invoices
+  WHERE ksm_tenant_id = p_ksm_tenant_id
+    AND shortfall_covered_by_bank = TRUE AND shortfall_amount > 0
+    AND invoice_date >= v_data_start AND invoice_date < p_date_from;
+
   v_saldo_awal := GREATEST(0, v_prev_in - v_prev_out - (v_prev_in * 0.04));
 
   RETURN jsonb_build_object(
@@ -369,11 +384,11 @@ BEGIN
     AND shortfall_covered_by_bank = TRUE AND shortfall_amount > 0
     AND invoice_date BETWEEN p_date_from AND p_date_to;
 
-  -- DSO: avg days dari invoice_date ke paid_date untuk invoice paid dalam periode
-  SELECT COALESCE(AVG(paid_date - invoice_date), 0) INTO v_dso
+  -- DSO: avg days dari invoice_date ke bpjs_received_date untuk invoice paid dalam periode
+  SELECT COALESCE(AVG(bpjs_received_date - invoice_date), 0) INTO v_dso
   FROM ksm_invoices
   WHERE ksm_tenant_id = p_ksm_tenant_id AND status = 'paid'
-    AND invoice_date BETWEEN p_date_from AND p_date_to AND paid_date IS NOT NULL;
+    AND invoice_date BETWEEN p_date_from AND p_date_to AND bpjs_received_date IS NOT NULL;
 
   -- Fulfilment rate
   SELECT CASE WHEN COUNT(*) > 0 THEN
