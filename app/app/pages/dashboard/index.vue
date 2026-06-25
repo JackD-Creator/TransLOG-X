@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({ layout: 'dashboard', keepalive: true })
 
 const supabase = useSupabaseClient()
 const { apiGet } = useApi()

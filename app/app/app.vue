@@ -8,7 +8,7 @@ useSeoMeta({
 <template>
   <UApp>
     <NuxtLayout>
-      <NuxtPage />
+      <NuxtPage :keepalive="{ max: 5 }" />
     </NuxtLayout>
   </UApp>
 </template>
