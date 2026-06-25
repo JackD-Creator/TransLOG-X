@@ -66,11 +66,6 @@ onMounted(() => { if (tenantId.value) loadAll() })
         <h1 class="text-xl font-bold text-[#1a1a1a]">Intelijen & Analytics</h1>
         <p class="text-sm text-[#999] mt-0.5">Prediksi statistik + AI insight — data real-time dari semua transaksi KSM</p>
       </div>
-      <button @click="generateAIInsight" :disabled="aiLoading || loading"
-        class="px-4 py-2 bg-[#6b1525] text-white text-xs font-bold rounded-lg hover:bg-[#5a1120] disabled:opacity-50 transition-colors flex items-center gap-2">
-        <UIcon :name="aiLoading ? 'i-lucide-loader-2' : 'i-lucide-brain'" :class="aiLoading ? 'animate-spin' : ''" class="text-sm"/>
-        {{ aiLoading ? 'Menganalisis...' : 'Generate AI Insight' }}
-      </button>
     </div>
 
     <div v-if="loading" class="flex items-center justify-center py-20">
@@ -228,30 +223,6 @@ onMounted(() => { if (tenantId.value) loadAll() })
         </div>
       </div>
 
-      <!-- AI Insight -->
-      <div class="bg-[#f5f5f5] rounded-xl border border-[#e5e5e5] overflow-hidden">
-        <div class="px-5 py-3 bg-[#ebebeb] border-b border-[#e5e5e5] flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <UIcon name="i-lucide-brain" class="text-[#6b1525]"/>
-            <p class="text-xs font-bold text-[#666] uppercase tracking-wide">AI Business Intelligence</p>
-          </div>
-          <span class="text-[10px] text-[#777]">Groq · Llama 3.3 70B</span>
-        </div>
-        <div class="p-5">
-          <div v-if="!aiInsight && !aiLoading" class="flex flex-col items-center justify-center py-8 gap-3">
-            <UIcon name="i-lucide-sparkles" class="text-3xl text-[#999]"/>
-            <p class="text-sm text-[#999]">Klik "Generate AI Insight" untuk analisis mendalam</p>
-            <p class="text-xs text-[#888]">AI menganalisis KPI, trend, forecast, risk scoring, dan demand — memberikan rekomendasi aksi</p>
-          </div>
-          <div v-else-if="aiLoading" class="flex items-center justify-center py-12 gap-3">
-            <UIcon name="i-lucide-loader-2" class="text-xl text-[#6b1525] animate-spin"/>
-            <p class="text-sm text-[#999]">AI sedang menganalisis semua data bisnis KSM...</p>
-          </div>
-          <div v-else :class="['text-xs leading-relaxed whitespace-pre-wrap', aiError ? 'text-red-600' : 'text-[#333]']">
-            {{ aiInsight }}
-          </div>
-        </div>
-      </div>
     </template>
   </div>
 </template>
